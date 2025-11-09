@@ -64,7 +64,7 @@ pub fn get_available_tools() -> Vec<Tool> {
             tool_type: "function".to_string(),
             function: ToolFunction {
                 name: "file_list".to_string(),
-                description: "列出指定目录下的所有文件和子目录".to_string(),
+                description: "List all files and subdirectories in the specified directory".to_string(),
                 parameters: json!({
                     "type": "object",
                     "properties": {
@@ -115,6 +115,46 @@ pub fn get_available_tools() -> Vec<Tool> {
                 }),
             },
         },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
+                name: "file_replace".to_string(),
+                description: "替换文件中的字符串，支持批量编辑。优先使用此工具而非 file_write 来修改现有文件。".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "type": "string",
+                            "description": "要编辑的文件路径"
+                        },
+                        "edits": {
+                            "type": "array",
+                            "description": "编辑操作列表，按顺序应用",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "old": {
+                                        "type": "string",
+                                        "description": "要替换的旧字符串（支持多行）"
+                                    },
+                                    "new": {
+                                        "type": "string",
+                                        "description": "新字符串（支持多行）"
+                                    },
+                                    "replace_all": {
+                                        "type": "boolean",
+                                        "description": "是否替换所有匹配项（默认 false，只替换第一个）",
+                                        "default": false
+                                    }
+                                },
+                                "required": ["old", "new"]
+                            }
+                        }
+                    },
+                    "required": ["path", "edits"]
+                }),
+            },
+        },
     ]
 }
 
@@ -132,6 +172,20 @@ struct FileReadArgs {
 struct FileWriteArgs {
     path: String,
     content: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct Edit {
+    old: String,
+    new: String,
+    #[serde(default)]
+    replace_all: bool,
+}
+
+#[derive(Debug, Deserialize)]
+struct FileReplaceArgs {
+    path: String,
+    edits: Vec<Edit>,
 }
 
 pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path, require_approval: bool) -> Result<ToolResult> {
@@ -265,6 +319,114 @@ pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path, require_app
                 "成功写入文件: {}\n大小: {} 字节",
                 target_path.display(),
                 args.content.len()
+            );
+            
+            Ok(ToolResult::ok(brief, output))
+        }
+        "file_replace" => {
+            let args: FileReplaceArgs = serde_json::from_str(arguments)?;
+            
+            let target_path = {
+                let p = Path::new(&args.path);
+                if p.is_absolute() {
+                    p.to_path_buf()
+                } else {
+                    working_dir.join(p)
+                }
+            };
+            
+            // 验证文件存在
+            if !target_path.exists() {
+                return Ok(ToolResult::error(format!("文件不存在: {}", target_path.display())));
+            }
+            
+            if !target_path.is_file() {
+                return Ok(ToolResult::error(format!("不是文件: {}", target_path.display())));
+            }
+            
+            // 需要审批（file_replace 也是危险操作）
+            if require_approval && !is_action_approved("file_replace") {
+                use crate::ui::prompt_approval;
+                
+                // 生成预览内容
+                let preview = args.edits.iter()
+                    .take(3)  // 最多显示 3 个编辑
+                    .map(|e| {
+                        let old_preview = if e.old.chars().count() > 40 {
+                            let truncated: String = e.old.chars().take(40).collect();
+                            format!("{}...", truncated)
+                        } else {
+                            e.old.clone()
+                        };
+                        let new_preview = if e.new.chars().count() > 40 {
+                            let truncated: String = e.new.chars().take(40).collect();
+                            format!("{}...", truncated)
+                        } else {
+                            e.new.clone()
+                        };
+                        format!("- Replace: {}\n  With: {}", old_preview, new_preview)
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+                
+                let full_preview = if args.edits.len() > 3 {
+                    format!("{}\n... and {} more edits", preview, args.edits.len() - 3)
+                } else {
+                    preview
+                };
+                
+                let (approved, always) = prompt_approval(
+                    "ReplaceFile",
+                    &target_path.display().to_string(),
+                    Some(&full_preview)
+                )?;
+                
+                if !approved {
+                    return Ok(ToolResult::error("用户拒绝了该操作".to_string()));
+                }
+                
+                if always {
+                    approve_action_for_session("file_replace");
+                }
+            }
+            
+            // 读取文件
+            let mut content = fs::read_to_string(&target_path)?;
+            let original_content = content.clone();
+            
+            // 应用所有编辑
+            let mut replacements_made = 0;
+            for edit in &args.edits {
+                content = if edit.replace_all {
+                    let count = content.matches(&edit.old).count();
+                    replacements_made += count;
+                    content.replace(&edit.old, &edit.new)
+                } else {
+                    if content.contains(&edit.old) {
+                        replacements_made += 1;
+                        content.replacen(&edit.old, &edit.new, 1)
+                    } else {
+                        content
+                    }
+                };
+            }
+            
+            // 检查是否有修改
+            if content == original_content {
+                return Ok(ToolResult::error(
+                    format!("未找到要替换的字符串。请确认 'old' 字符串与文件内容完全匹配。")
+                ));
+            }
+            
+            // 写回文件
+            fs::write(&target_path, &content)?;
+            
+            let brief = format!("应用了 {} 个编辑，{} 个替换", args.edits.len(), replacements_made);
+            let output = format!(
+                "文件已更新: {}\n应用了 {} 个编辑\n共进行了 {} 个替换",
+                target_path.display(),
+                args.edits.len(),
+                replacements_made
             );
             
             Ok(ToolResult::ok(brief, output))
