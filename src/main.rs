@@ -3,6 +3,7 @@ mod config;
 mod history;
 mod i18n;
 mod tools;
+mod ui;
 
 use anyhow::Result;
 use futures::StreamExt;
@@ -99,12 +100,17 @@ async fn main() -> Result<()> {
                 
                 loop {
                     match send_and_receive(&api_client, messages.clone(), &session).await {
-                        Ok((response_msg, tool_calls)) => {
+                        Ok((response_msg, tool_calls, mut displays)) => {
                             session.add_message(response_msg);
                             
                             if let Some(calls) = tool_calls {
-                                // 执行工具调用
-                                let tool_results = api::execute_tool_calls(&calls, &session.working_directory).await;
+                                // 执行工具调用（启用审批）
+                                let tool_results = api::execute_tool_calls(
+                                    &calls, 
+                                    &session.working_directory,
+                                    &mut displays,
+                                    true  // 需要用户审批
+                                ).await;
                                 
                                 for result in tool_results {
                                     session.add_message(result);
@@ -161,7 +167,7 @@ async fn send_and_receive(
     client: &ApiClient,
     messages: Vec<Message>,
     _session: &ChatSession,
-) -> Result<(Message, Option<Vec<history::ToolCall>>)> {
+) -> Result<(Message, Option<Vec<history::ToolCall>>, std::collections::HashMap<String, ui::ToolCallDisplay>)> {
     let mut stream = client.chat_stream(messages).await?;
     
     let mut content = String::new();
@@ -170,7 +176,7 @@ async fn send_and_receive(
     
     let mut is_first_reasoning = true;
     let mut has_reasoning = false;
-
+    
     print!("\n\x1b[36m[AI]\x1b[0m ");
     io::stdout().flush()?;
 
@@ -196,16 +202,16 @@ async fn send_and_receive(
                 has_reasoning = true;
             }
             StreamChunk::ToolCall { id, name, arguments } => {
-                // 如果之前有思考内容，先恢复颜色
+                // 如果之前有思考内容，先恢复颜色并换行
                 if has_reasoning {
-                    print!("\x1b[0m\n");
+                    print!("\x1b[0m\n\n");
                     has_reasoning = false;
                 }
                 if !has_tool_calls {
-                    println!("\n\x1b[33m╭─ [TOOL CALLS] ─────────────────────────────────────────╮\x1b[0m");
+                    println!();  // 简单换行
                     has_tool_calls = true;
                 }
-                // 累积工具调用数据
+                // 累积工具调用数据（会实时显示）
                 tool_accumulator.add_chunk(id, name, arguments);
             }
             StreamChunk::Done => break,
@@ -220,33 +226,13 @@ async fn send_and_receive(
         println!();
     }
 
+    // 获取工具调用和 UI 显示组件
+    let displays = tool_accumulator.get_displays().clone();
     let tool_calls = if has_tool_calls {
         let calls = tool_accumulator.into_tool_calls();
-        // 只有当 tool_calls 非空时才返回
         if calls.is_empty() {
-            // 如果没有有效的工具调用，关闭边框
-            println!("\x1b[33m╰────────────────────────────────────────────────────────╯\x1b[0m\n");
             None
         } else {
-            // 格式化显示工具调用
-            for (idx, call) in calls.iter().enumerate() {
-                // 解析并格式化 JSON
-                let formatted_args = match serde_json::from_str::<serde_json::Value>(&call.function.arguments) {
-                    Ok(json) => serde_json::to_string_pretty(&json).unwrap_or_else(|_| call.function.arguments.clone()),
-                    Err(_) => call.function.arguments.clone(),
-                };
-                
-                println!("\x1b[33m│\x1b[0m");
-                println!("\x1b[33m│\x1b[0m \x1b[36m[{}]\x1b[0m \x1b[1;35m{}\x1b[0m", idx + 1, call.function.name);
-                println!("\x1b[33m│\x1b[0m");
-                
-                // 缩进显示 JSON 参数
-                for line in formatted_args.lines() {
-                    println!("\x1b[33m│\x1b[0m   \x1b[90m{}\x1b[0m", line);
-                }
-            }
-            
-            println!("\x1b[33m╰────────────────────────────────────────────────────────╯\x1b[0m\n");
             Some(calls)
         }
     } else {
@@ -261,7 +247,7 @@ async fn send_and_receive(
         name: None,
     };
 
-    Ok((message, tool_calls))
+    Ok((message, tool_calls, displays))
 }
 
 async fn handle_command(
@@ -448,49 +434,72 @@ async fn handle_command(
 }
 
 fn print_help(i18n: &I18n) {
-    println!("\n\x1b[1;36m{}\x1b[0m\n", i18n.get("help_title"));
+    use colored::Colorize;
     
-    println!("\x1b[33m[?] {}:\x1b[0m", i18n.get("help_model"));
-    println!("    \x1b[36m/model\x1b[0m list              {}", i18n.get("cmd_model_list"));
-    println!("    \x1b[36m/model\x1b[0m switch <name>    {}\n", i18n.get("cmd_model_switch"));
+    println!("\n{}", i18n.get("help_title").bright_cyan().bold());
+    println!("{}", "═".repeat(60).bright_black());
     
-    println!("\x1b[33m[?] {}:\x1b[0m", i18n.get("help_history"));
-    println!("    \x1b[36m/history\x1b[0m list            {}", i18n.get("cmd_history_list"));
-    println!("    \x1b[36m/history\x1b[0m new             {}", i18n.get("cmd_history_new"));
-    println!("    \x1b[36m/history\x1b[0m switch <id>     {}", i18n.get("cmd_history_switch"));
-    println!("    \x1b[36m/history\x1b[0m del <id>        {}\n", i18n.get("cmd_history_del"));
+    // 模型命令
+    println!("\n{}", i18n.get("help_model").yellow().bold());
+    println!("  {} {:25} {}", "·".bright_black(), "/model list".cyan(), i18n.get("cmd_model_list").dimmed());
+    println!("  {} {:25} {}", "·".bright_black(), "/model switch <name>".cyan(), i18n.get("cmd_model_switch").dimmed());
     
-    println!("\x1b[33m[?] {}:\x1b[0m", i18n.get("help_language"));
-    println!("    \x1b[36m/language\x1b[0m ui <lang>      {}", i18n.get("cmd_language_ui"));
-    println!("    \x1b[36m/language\x1b[0m ai <lang>      {}\n", i18n.get("cmd_language_ai"));
+    // 历史命令
+    println!("\n{}", i18n.get("help_history").yellow().bold());
+    println!("  {} {:25} {}", "·".bright_black(), "/history list".cyan(), i18n.get("cmd_history_list").dimmed());
+    println!("  {} {:25} {}", "·".bright_black(), "/history new".cyan(), i18n.get("cmd_history_new").dimmed());
+    println!("  {} {:25} {}", "·".bright_black(), "/history switch <id>".cyan(), i18n.get("cmd_history_switch").dimmed());
+    println!("  {} {:25} {}", "·".bright_black(), "/history del <id>".cyan(), i18n.get("cmd_history_del").dimmed());
     
-    println!("\x1b[33m[?] {}:\x1b[0m", i18n.get("help_other"));
-    println!("    \x1b[36m/help\x1b[0m                    {}", i18n.get("cmd_help"));
-    println!("    \x1b[36m/exit\x1b[0m                    {}\n", i18n.get("cmd_exit"));
+    // 语言命令
+    println!("\n{}", i18n.get("help_language").yellow().bold());
+    println!("  {} {:25} {}", "·".bright_black(), "/language ui <lang>".cyan(), i18n.get("cmd_language_ui").dimmed());
+    println!("  {} {:25} {}", "·".bright_black(), "/language ai <lang>".cyan(), i18n.get("cmd_language_ai").dimmed());
+    
+    // 其他命令
+    println!("\n{}", i18n.get("help_other").yellow().bold());
+    println!("  {} {:25} {}", "·".bright_black(), "/help".cyan(), i18n.get("cmd_help").dimmed());
+    println!("  {} {:25} {}", "·".bright_black(), "/exit".cyan(), i18n.get("cmd_exit").dimmed());
+    
+    println!("\n{}", "═".repeat(60).bright_black());
+    println!();
 }
 
 fn print_welcome(config: &Config, i18n: &I18n) {
-    println!("\x1b[1;36m");
-    println!("  ███████╗██████╗ ██╗███████╗███╗   ██╗██████╗ ███████╗██╗   ██╗");
-    println!("  ██╔════╝██╔══██╗██║██╔════╝████╗  ██║██╔══██╗██╔════╝██║   ██║");
-    println!("  █████╗  ██████╔╝██║█████╗  ██╔██╗ ██║██║  ██║█████╗  ██║   ██║");
-    println!("  ██╔══╝  ██╔══██╗██║██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ╚██╗ ██╔╝");
-    println!("  ██║     ██║  ██║██║███████╗██║ ╚████║██████╔╝███████╗ ╚████╔╝ ");
-    println!("  ╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝  ╚═══╝  ");
-    println!("\x1b[0m");
-    println!("  \x1b[2m{}\x1b[0m\n", i18n.get("welcome_subtitle"));
+    use colored::Colorize;
     
-    println!("\x1b[36m[>]\x1b[0m {}: \x1b[1m{}\x1b[0m", i18n.get("current_model"), config.current_model);
+    // ASCII Art Logo - 修正版
+    println!("\n{}", "███████╗██████╗ ██╗███████╗███╗   ██╗██████╗ ███████╗██╗   ██╗".bright_cyan().bold());
+    println!("{}", "██╔════╝██╔══██╗██║██╔════╝████╗  ██║██╔══██╗██╔════╝██║   ██║".bright_cyan().bold());
+    println!("{}", "█████╗  ██████╔╝██║█████╗  ██╔██╗ ██║██║  ██║█████╗  ██║   ██║".bright_cyan().bold());
+    println!("{}", "██╔══╝  ██╔══██╗██║██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ╚██╗ ██╔╝".bright_cyan());
+    println!("{}", "██║     ██║  ██║██║███████╗██║ ╚████║██████╔╝███████╗ ╚████╔╝".bright_cyan());
+    println!("{}", "╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝  ╚═══╝".bright_cyan());
+    println!("{}\n", i18n.get("welcome_subtitle").dimmed());
+    
+    // 系统信息 - 紧凑布局
+    println!("{}", "─".repeat(60).bright_black());
+    println!("  {} {} {}", 
+        i18n.get("current_model").cyan().bold(), 
+        ":".dimmed(), 
+        config.current_model.green()
+    );
+    println!("  {} {} {}  |  {} {} {}", 
+        i18n.get("current_ui_lang").cyan().bold(),
+        ":".dimmed(),
+        config.ui_language.yellow(),
+        i18n.get("current_ai_lang").cyan().bold(),
+        ":".dimmed(),
+        config.ai_language.yellow()
+    );
+    println!("{}", "─".repeat(60).bright_black());
+    
+    // 快速入门
+    println!("  {} {:20} {}", ">".bright_black(), "/help".cyan(), i18n.get("cmd_help").dimmed());
+    println!("  {} {:20} {}", ">".bright_black(), "/model list".cyan(), i18n.get("cmd_model_list").dimmed());
+    println!("  {} {:20} {}", ">".bright_black(), "/exit".cyan(), i18n.get("cmd_exit").dimmed());
+    println!("{}", "═".repeat(60).bright_black());
     println!();
-    println!("\x1b[33m[?]\x1b[0m {}:", i18n.get("available_commands"));
-    println!("    \x1b[36m/model\x1b[0m list              {}", i18n.get("cmd_model_list"));
-    println!("    \x1b[36m/model\x1b[0m switch <name>    {}", i18n.get("cmd_model_switch"));
-    println!("    \x1b[36m/language\x1b[0m ui/ai <lang>    {}", i18n.get("cmd_language_ui"));
-    println!("    \x1b[36m/help\x1b[0m                    {}", i18n.get("cmd_help"));
-    println!("    \x1b[36m/exit\x1b[0m                    {}", i18n.get("cmd_exit"));
-    println!();
-    println!("\x1b[2m{}\x1b[0m", i18n.get("type_message"));
-    println!("\x1b[90m════════════════════════════════════════════════════════════\x1b[0m\n");
 }
 
 /// 检查用户输入是否包含可疑的控制标记
@@ -519,11 +528,12 @@ fn is_input_suspicious(input: &str) -> bool {
     false
 }
 
+
 fn get_system_prompt(language: &str, model: &str) -> String {
     let tools_description = tools::get_tools_description();
     
     format!(r#"# 身份与环境
-你是 Friendev AI Assistant，一个由 {} 驱动的智能编程助手。
+你是 Friendev，一个由 {} 驱动的智能编程助手。
 
 # 可用工具
 {}

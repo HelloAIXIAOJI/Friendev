@@ -43,8 +43,7 @@ struct Choice {
     delta: Option<Delta>,
     #[allow(dead_code)]
     message: Option<StreamMessage>,
-    #[allow(dead_code)]
-    finish_reason: Option<String>,
+    pub finish_reason: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -182,6 +181,13 @@ fn parse_sse_chunk(text: &str) -> Option<Result<StreamChunk>> {
             match serde_json::from_str::<ChatResponse>(data) {
                 Ok(response) => {
                     if let Some(choice) = response.choices.first() {
+                        // 检查 finish_reason
+                        if let Some(reason) = &choice.finish_reason {
+                            if reason == "stop" || reason == "length" || reason == "tool_calls" {
+                                return Some(Ok(StreamChunk::Done));
+                            }
+                        }
+                        
                         if let Some(delta) = &choice.delta {
                             // 处理 tool_calls（最高优先级，因为最重要）
                             if let Some(tool_calls) = &delta.tool_calls {
@@ -230,9 +236,12 @@ fn parse_sse_chunk(text: &str) -> Option<Result<StreamChunk>> {
     None
 }
 
+use crate::ui::{ToolCallDisplay, extract_key_argument};
+
 pub struct ToolCallAccumulator {
     calls: std::collections::HashMap<String, (String, String)>,
     last_id: Option<String>,  // 记录上一个有效的 ID
+    displays: std::collections::HashMap<String, ToolCallDisplay>,  // UI 显示组件
 }
 
 impl ToolCallAccumulator {
@@ -240,6 +249,7 @@ impl ToolCallAccumulator {
         Self {
             calls: std::collections::HashMap::new(),
             last_id: None,
+            displays: std::collections::HashMap::new(),
         }
     }
 
@@ -257,12 +267,30 @@ impl ToolCallAccumulator {
         // 只在 name 非空时更新
         if !name.is_empty() {
             entry.0 = name.clone();
+            // 创建 UI 显示组件
+            if !self.displays.contains_key(&key) {
+                self.displays.insert(key.clone(), ToolCallDisplay::new(name.clone()));
+            }
         }
         
         // 追加 arguments
         if !arguments.is_empty() {
             entry.1.push_str(&arguments);
+            
+            // 尝试提取关键参数并更新 UI
+            if let Some(display) = self.displays.get_mut(&key) {
+                let tool_name = &entry.0;
+                if let Some(arg) = extract_key_argument(tool_name, &entry.1) {
+                    display.update_argument(arg);
+                }
+                display.render_streaming();
+            }
         }
+    }
+
+    /// 获取所有 UI 显示组件
+    pub fn get_displays(&self) -> &std::collections::HashMap<String, ToolCallDisplay> {
+        &self.displays
     }
 
     pub fn into_tool_calls(self) -> Vec<ToolCall> {
@@ -271,23 +299,51 @@ impl ToolCallAccumulator {
             .filter_map(|(id, (name, arguments))| {
                 // 过滤掉空的 tool call
                 if name.is_empty() || arguments.is_empty() {
+                    eprintln!("\x1b[33m[!] Warning:\x1b[0m Skipping empty tool call: id={}", id);
                     return None;
                 }
                 
                 // 验证 JSON 是否完整且有效
                 if !is_json_semantically_complete(&name, &arguments) {
+                    eprintln!("\x1b[33m[!] Warning:\x1b[0m Incomplete JSON for tool '{}': {}", name, &arguments[..arguments.len().min(50)]);
                     return None;
                 }
                 
                 // 再次验证是否可以解析
-                if serde_json::from_str::<serde_json::Value>(&arguments).is_err() {
-                    return None;
-                }
+                let fixed_arguments = if serde_json::from_str::<serde_json::Value>(&arguments).is_err() {
+                    // 尝试修复常见问题
+                    let mut fixed = arguments.clone();
+                    
+                    // 1. 添加缺失的右花括号
+                    let open_braces = fixed.matches('{').count();
+                    let close_braces = fixed.matches('}').count();
+                    if open_braces > close_braces {
+                        for _ in 0..(open_braces - close_braces) {
+                            fixed.push('}');
+                        }
+                    }
+                    
+                    // 2. 添加缺失的引号
+                    if fixed.matches('"').count() % 2 != 0 {
+                        fixed.push('"');
+                    }
+                    
+                    // 3. 验证修复后的 JSON
+                    if serde_json::from_str::<serde_json::Value>(&fixed).is_ok() {
+                        eprintln!("\x1b[32m[✓] Info:\x1b[0m Auto-fixed JSON for tool '{}'", name);
+                        fixed
+                    } else {
+                        eprintln!("\x1b[31m[✗] Error:\x1b[0m Failed to fix JSON for tool '{}'", name);
+                        return None;
+                    }
+                } else {
+                    arguments.clone()
+                };
                 
                 Some(ToolCall {
                     id,
                     tool_type: "function".to_string(),
-                    function: FunctionCall { name, arguments },
+                    function: FunctionCall { name, arguments: fixed_arguments },
                 })
             })
             .collect()
@@ -297,20 +353,30 @@ impl ToolCallAccumulator {
 pub async fn execute_tool_calls(
     tool_calls: &[ToolCall],
     working_dir: &Path,
+    displays: &mut std::collections::HashMap<String, ToolCallDisplay>,
+    require_approval: bool,
 ) -> Vec<Message> {
     let mut results = Vec::new();
 
     for tc in tool_calls {
-        let result = tools::execute_tool(
+        let tool_result = tools::execute_tool(
             &tc.function.name,
             &tc.function.arguments,
             working_dir,
+            require_approval,
         )
-        .unwrap_or_else(|e| format!("工具执行错误: {}", e));
+        .unwrap_or_else(|e| tools::ToolResult::error(format!("工具执行错误: {}", e)));
+
+        // 更新 UI 显示
+        if let Some(display) = displays.get_mut(&tc.id) {
+            display.finish(tool_result.success, Some(tool_result.brief.clone()));
+            println!();  // 换行
+            display.render_final();
+        }
 
         results.push(Message {
             role: "tool".to_string(),
-            content: result,
+            content: tool_result.output,
             tool_calls: None,
             tool_call_id: Some(tc.id.clone()),
             name: Some(tc.function.name.clone()),

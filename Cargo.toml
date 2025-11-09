@@ -1,15 +1,15 @@
 [package]
 name = "friendev"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
+# 核心依赖
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.11", features = ["json", "stream"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 clap = { version = "4", features = ["derive"] }
-rustyline = "13"
 uuid = { version = "1", features = ["v4", "serde"] }
 dirs = "5"
 tokio-stream = "0.1"
@@ -17,6 +17,29 @@ futures = "0.3"
 anyhow = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 rand = "0.8"
-termimad = "0.28"
-crossterm = "0.27"
-dialoguer = "0.11"
+
+# 终端 UI 框架
+ratatui = "0.26"                      # 现代化 TUI 框架
+crossterm = "0.27"                    # 跨平台终端控制
+tui-textarea = "0.4"                  # 多行文本编辑器组件
+
+# 高级 REPL
+reedline = "0.28"                     # 现代化 readline (Nushell 使用)
+rustyline = "13"                      # 保留作为备选
+
+# 样式美化
+colored = "2.1"                       # 简单颜色输出
+console = "0.15"                      # 跨平台终端增强
+unicode-width = "0.1"                 # 正确处理宽字符
+
+# 进度与交互
+indicatif = "0.17"                    # 进度条/Spinner
+dialoguer = "0.11"                    # 交互式提示
+
+# 代码与表格
+syntect = "5.1"                       # 语法高亮
+comfy-table = "7.1"                   # ASCII 表格
+
+# 工具组件
+# skim = "0.10"                      # 模糊查找器 (类 fzf) - Windows 不兼容
+termimad = "0.28"                     # Markdown 渲染

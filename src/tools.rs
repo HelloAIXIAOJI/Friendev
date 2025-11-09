@@ -3,6 +3,46 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fs;
 use std::path::Path;
+use std::sync::Mutex;
+use std::collections::HashSet;
+
+/// 会话级审批状态
+static APPROVED_ACTIONS: Mutex<Option<HashSet<String>>> = Mutex::new(None);
+
+/// 检查操作是否已被批准
+fn is_action_approved(action: &str) -> bool {
+    let mut approved = APPROVED_ACTIONS.lock().unwrap();
+    if approved.is_none() {
+        *approved = Some(HashSet::new());
+    }
+    approved.as_ref().unwrap().contains(action)
+}
+
+/// 添加操作到已批准列表
+fn approve_action_for_session(action: &str) {
+    let mut approved = APPROVED_ACTIONS.lock().unwrap();
+    if approved.is_none() {
+        *approved = Some(HashSet::new());
+    }
+    approved.as_mut().unwrap().insert(action.to_string());
+}
+
+/// 工具执行结果
+pub struct ToolResult {
+    pub success: bool,
+    pub brief: String,
+    pub output: String,
+}
+
+impl ToolResult {
+    pub fn ok(brief: String, output: String) -> Self {
+        Self { success: true, brief, output }
+    }
+
+    pub fn error(brief: String) -> Self {
+        Self { success: false, brief: brief.clone(), output: brief }
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Tool {
@@ -94,7 +134,7 @@ struct FileWriteArgs {
     content: String,
 }
 
-pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path) -> Result<String> {
+pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path, require_approval: bool) -> Result<ToolResult> {
     match name {
         "file_list" => {
             let args: FileListArgs = serde_json::from_str(arguments)
@@ -112,11 +152,11 @@ pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path) -> Result<S
             };
 
             if !target_path.exists() {
-                return Ok(format!("错误: 路径不存在: {}", target_path.display()));
+                return Ok(ToolResult::error(format!("路径不存在: {}", target_path.display())));
             }
 
             if !target_path.is_dir() {
-                return Ok(format!("错误: 不是目录: {}", target_path.display()));
+                return Ok(ToolResult::error(format!("不是目录: {}", target_path.display())));
             }
 
             let mut items = Vec::new();
@@ -138,18 +178,20 @@ pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path) -> Result<S
 
             items.sort();
 
-            let result = if items.is_empty() {
-                format!("目录为空: {}", target_path.display())
+            let brief = if items.is_empty() {
+                format!("目录为空")
             } else {
-                format!(
-                    "目录: {}\n共 {} 项:\n\n{}",
-                    target_path.display(),
-                    items.len(),
-                    items.join("\n")
-                )
+                format!("列出 {} 项", items.len())
             };
 
-            Ok(result)
+            let output = format!(
+                "目录: {}\n共 {} 项:\n\n{}",
+                target_path.display(),
+                items.len(),
+                items.join("\n")
+            );
+
+            Ok(ToolResult::ok(brief, output))
         }
         "file_read" => {
             let args: FileReadArgs = serde_json::from_str(arguments)?;
@@ -164,15 +206,21 @@ pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path) -> Result<S
             };
             
             if !target_path.exists() {
-                return Ok(format!("错误: 文件不存在: {}", target_path.display()));
+                return Ok(ToolResult::error(format!("文件不存在: {}", target_path.display())));
             }
             
             if !target_path.is_file() {
-                return Ok(format!("错误: 不是文件: {}", target_path.display()));
+                return Ok(ToolResult::error(format!("不是文件: {}", target_path.display())));
             }
             
             let content = fs::read_to_string(&target_path)?;
-            Ok(format!("文件: {}\n内容:\n{}", target_path.display(), content))
+            let lines = content.lines().count();
+            let bytes = content.len();
+            
+            let brief = format!("读取 {} 行, {} 字节", lines, bytes);
+            let output = format!("文件: {}\n内容:\n{}", target_path.display(), content);
+            
+            Ok(ToolResult::ok(brief, output))
         }
         "file_write" => {
             let args: FileWriteArgs = serde_json::from_str(arguments)?;
@@ -186,6 +234,25 @@ pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path) -> Result<S
                 }
             };
             
+            // 危险操作：需要用户确认
+            if require_approval && !is_action_approved("file_write") {
+                use crate::ui::prompt_approval;
+                let (approved, always) = prompt_approval(
+                    "WriteFile",
+                    &target_path.display().to_string(),
+                    Some(&args.content)  // 传递内容预览
+                )?;
+                
+                if !approved {
+                    return Ok(ToolResult::error("用户拒绝了该操作".to_string()));
+                }
+                
+                // 如果用户选择 Always，保存状态
+                if always {
+                    approve_action_for_session("file_write");
+                }
+            }
+            
             // 创建父目录（如果不存在）
             if let Some(parent) = target_path.parent() {
                 fs::create_dir_all(parent)?;
@@ -193,13 +260,16 @@ pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path) -> Result<S
             
             fs::write(&target_path, &args.content)?;
             
-            Ok(format!(
+            let brief = format!("写入 {} 字节", args.content.len());
+            let output = format!(
                 "成功写入文件: {}\n大小: {} 字节",
                 target_path.display(),
                 args.content.len()
-            ))
+            );
+            
+            Ok(ToolResult::ok(brief, output))
         }
-        _ => Ok(format!("未知工具: {}", name)),
+        _ => Ok(ToolResult::error(format!("未知工具: {}", name))),
     }
 }
 
