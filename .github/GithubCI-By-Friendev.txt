@@ -150,3 +150,60 @@ git push
 ```
 
 ✅ 这样修复后，Release 任务应该能正常上传构建产物到 GitHub Release 页面。如果你还有其他需求（比如生成 checksum、签名文件、发布到 crates.io 等），也可以继续扩展工作流！
+
+>> Run cd ./artifactsHTTP 403: Resource not accessible by integration (https://uploads.github.com/repos/HelloAIXIAOJI/Fr
+iendev/releases/260909669/assets?label=&name=friendev)Error: Process completed with exit code 1.
+
+[AI] 这个错误 `HTTP 403: Resource not accessible by integration` 表明 GitHub Actions 使用的 **GITHUB_TOKEN** 没有权限上传 Release Assets。这通常发生在以下情况：
+
+- 你使用的是 **pull request** 触发的 workflow（fork 的 PR 不会获得写权限）。
+- 或者你在 **release** 任务中没有正确配置权限。
+
+---
+
+### ✅ 解决方法：显式授予 `contents: write` 权限
+
+我们需要在 workflow 中为 `release` job 显式添加权限，如下所示：
+
+
+  ⠋ Using file_write (.github/workflows/ci.yml)
+
+  ──── Approval Required ──────────────────
+    WriteFile wants to modify:
+      ci.yml
+
+    Content preview:
+      name: CI/CD Pipeline
+
+      on:
+        push:
+          branches:
+      ... (99 more lines)
+
+    [Y]es / [N]o / [A]lways
+  ─────────────────────────────────────────
+  Your choice: y
+
+  • Used file_write
+    写入 2775 字节
+
+[AI] 已更新 `.github/workflows/ci.yml`，为 `release` 任务添加了以下关键内容：
+
+```yaml
+permissions:
+  contents: write
+```
+
+这将确保 GitHub Actions 的内置 token 有权限上传 Release Assets。
+
+你现在可以提交并推送更改：
+```bash
+git add .github/workflows/ci.yml
+git commit -m "Grant contents:write permission to release job"
+git push
+```
+
+✅ 之后，当发布新 Release 时，应该可以正常上传所有平台的二进制文件作为附件了。
+
+如有需要进一步增强功能（如生成 checksum、签名文件、发布到 crates.io 等），也可以继续扩展工作流！
+>>
