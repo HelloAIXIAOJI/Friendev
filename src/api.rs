@@ -81,8 +81,15 @@ pub struct ApiClient {
 
 impl ApiClient {
     pub fn new(config: Config) -> Self {
+        // 配置 HTTP 客户端：紧雖的超时设置，避免流式接收中断
+        let client = Client::builder()
+            .timeout(std::time::Duration::from_secs(300))  // 5 分钟超时
+            .connect_timeout(std::time::Duration::from_secs(60))  // 连接 1 分钟超时
+            .build()
+            .unwrap_or_else(|_| Client::new());
+        
         Self {
-            client: Client::new(),
+            client,
             config,
         }
     }
@@ -408,16 +415,55 @@ fn is_json_semantically_complete(tool_name: &str, arguments: &str) -> bool {
     
     // 根据不同工具检查必需参数
     match tool_name {
-        "file_read" | "file_write" => {
+        "file_read" | "file_list" => {
             // 必须有 path 参数，且不能为空
             obj.get("path")
                 .and_then(|v| v.as_str())
                 .map(|s| !s.is_empty())
-                .unwrap_or(false)
+                .unwrap_or(true)  // file_list 的 path 是可选的
         }
-        "file_list" => {
-            // file_list 的 path 是可选的，总是返回 true
+        "file_write" => {
+            // 必须有 path 参数
+            let has_path = obj.get("path")
+                .and_then(|v| v.as_str())
+                .map(|s| !s.is_empty())
+                .unwrap_or(false);
+            
+            if !has_path {
+                return false;
+            }
+            
+            // 必须有 content 参数（即使是空字符串也求是字符串类型）
+            // 注意：如果 content 値非常短（<10个字节）并且字符串未幅途形成（不求周期）
+            // 可能表示为不完整，握断为截断状态
+            let content_str = obj.get("content")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            
+            // 如果 content 求需且非常短，可能被截断了
+            if content_str.len() < 10 && content_str.len() > 0 {
+                // 检查是否以引号结尾（正常 JSON 字符串的设计）
+                // 或以斜汢结尾（被截断的踸迹）
+                if !content_str.ends_with('"') && !content_str.ends_with('\\') {
+                    return false;  // 似乎被截断了
+                }
+            }
+            
             true
+        }
+        "file_replace" => {
+            // 必须有 path 和 edits 参数
+            let has_path = obj.get("path")
+                .and_then(|v| v.as_str())
+                .map(|s| !s.is_empty())
+                .unwrap_or(false);
+            
+            let has_edits = obj.get("edits")
+                .and_then(|v| v.as_array())
+                .map(|arr| !arr.is_empty())
+                .unwrap_or(false);
+            
+            has_path && has_edits
         }
         _ => {
             // 其他工具，只要 JSON 结构完整就行
