@@ -98,7 +98,7 @@ pub fn get_available_tools() -> Vec<Tool> {
             tool_type: "function".to_string(),
             function: ToolFunction {
                 name: "file_write".to_string(),
-                description: "Write content to a file, creating it if it does not exist".to_string(),
+                description: "Write content to a file. When content is too long (>100 lines), use multiple calls: first with 'overwrite', then with 'append' mode.".to_string(),
                 parameters: json!({
                     "type": "object",
                     "properties": {
@@ -109,6 +109,12 @@ pub fn get_available_tools() -> Vec<Tool> {
                         "content": {
                             "type": "string",
                             "description": "Content to write"
+                        },
+                        "mode": {
+                            "type": "string",
+                            "enum": ["overwrite", "append"],
+                            "description": "Write mode: 'overwrite' to replace file content (default), 'append' to add to end of file",
+                            "default": "overwrite"
                         }
                     },
                     "required": ["path", "content"]
@@ -172,6 +178,12 @@ struct FileReadArgs {
 struct FileWriteArgs {
     path: String,
     content: String,
+    #[serde(default = "default_write_mode")]
+    mode: String,  // "overwrite" 或 "append"
+}
+
+fn default_write_mode() -> String {
+    "overwrite".to_string()
 }
 
 #[derive(Debug, Deserialize)]
@@ -288,12 +300,24 @@ pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path, require_app
                 }
             };
             
+            // 验证 mode 参数
+            let mode = args.mode.as_str();
+            if mode != "overwrite" && mode != "append" {
+                return Ok(ToolResult::error(format!("无效的写入模式: {}，只支持 'overwrite' 或 'append'", mode)));
+            }
+            
             // 危险操作：需要用户确认
             if require_approval && !is_action_approved("file_write") {
                 use crate::ui::prompt_approval;
+                let action_desc = if mode == "append" {
+                    format!("追加到文件: {}", target_path.display())
+                } else {
+                    format!("覆盖文件: {}", target_path.display())
+                };
+                
                 let (approved, always) = prompt_approval(
                     "WriteFile",
-                    &target_path.display().to_string(),
+                    &action_desc,
                     Some(&args.content)  // 传递内容预览
                 )?;
                 
@@ -312,16 +336,39 @@ pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path, require_app
                 fs::create_dir_all(parent)?;
             }
             
-            fs::write(&target_path, &args.content)?;
-            
-            let brief = format!("写入 {} 字节", args.content.len());
-            let output = format!(
-                "成功写入文件: {}\n大小: {} 字节",
-                target_path.display(),
-                args.content.len()
-            );
-            
-            Ok(ToolResult::ok(brief, output))
+            // 根据模式写入或追加
+            if mode == "append" {
+                // 追加模式
+                use std::fs::OpenOptions;
+                use std::io::Write;
+                
+                let mut file = OpenOptions::new()
+                    .create(true)
+                    .append(true)
+                    .open(&target_path)?;
+                file.write_all(args.content.as_bytes())?;
+                
+                let file_size = target_path.metadata()?.len();
+                let brief = format!("追加 {} 字节", args.content.len());
+                let output = format!(
+                    "成功追加到文件: {}\n追加: {} 字节\n当前大小: {} 字节",
+                    target_path.display(),
+                    args.content.len(),
+                    file_size
+                );
+                Ok(ToolResult::ok(brief, output))
+            } else {
+                // 覆盖模式
+                fs::write(&target_path, &args.content)?;
+                
+                let brief = format!("写入 {} 字节", args.content.len());
+                let output = format!(
+                    "成功写入文件: {}\n大小: {} 字节",
+                    target_path.display(),
+                    args.content.len()
+                );
+                Ok(ToolResult::ok(brief, output))
+            }
         }
         "file_replace" => {
             let args: FileReplaceArgs = serde_json::from_str(arguments)?;
