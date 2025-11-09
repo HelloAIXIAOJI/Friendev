@@ -236,6 +236,17 @@ async fn send_and_receive(
     let tool_calls = if has_tool_calls {
         let calls = tool_accumulator.into_tool_calls();
         if calls.is_empty() {
+            // 关键：检测到有 tool_call 标记但没有成功解析的调用
+            // 这意味着 JSON 被截断了，需要告诉 AI
+            eprintln!("\n\x1b[31m[✗] Critical:\x1b[0m Tool calls detected but all failed to parse (likely JSON truncation)");
+            eprintln!("\x1b[33m[!] Suggestion:\x1b[0m AI should use smaller chunks for file_write\n");
+            
+            // 在 content 中添加错误提示，让 AI 知道发生了什么
+            content.push_str("\n\n[SYSTEM ERROR: Tool call failed due to incomplete JSON in streaming. ");
+            content.push_str("This usually means the content parameter was too large (>3000 chars). ");
+            content.push_str("Please retry with smaller chunks: use file_write with mode='overwrite' for first ~50 lines, ");
+            content.push_str("then mode='append' for additional chunks.]");
+            
             None
         } else {
             Some(calls)
