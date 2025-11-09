@@ -106,3 +106,47 @@ git push
 
 现在工作流应该可以正常运行，并在每次 Push、PR、Release 或手动触发时构建多平台二进制文件。如有其他需求（如添加校验和、签名、Docker 镜像等），也可以继续扩展！
 >>
+>> RELEASE0sRun cd ./artifactsfailed to run git: fatal: not a git repository (or any of the parent directories): .gitErr
+or: Process completed with exit code 1.
+
+[AI] 这个错误是因为在 GitHub Actions 的 `release` 任务中，你尝试运行 `gh release upload` 命令，但当前工作目录不是一个 Git 仓库（即缺少 `.git` 目录）。这是因为 `actions/checkout` 默认不会在 `release` 作业中检出代码。
+
+### ✅ 解决方案
+你需要在 `release` 作业中也添加 `actions/checkout` 步骤，以便能够使用 `gh` CLI 工具访问仓库信息。
+
+---
+
+### 🔧 修改后的内容如下：
+
+
+  ⠋ Using file_write (.github/workflows/ci.yml)
+
+  ──── Approval Required ──────────────────
+    WriteFile wants to modify:
+      ci.yml
+
+    Content preview:
+      name: CI/CD Pipeline
+
+      on:
+        push:
+          branches:
+      ... (97 more lines)
+
+    [Y]es / [N]o / [A]lways
+  ─────────────────────────────────────────
+  Your choice: y
+
+  • Used file_write
+    写入 2736 字节
+
+[AI] 已更新 `.github/workflows/ci.yml`，在 `release` 任务中添加了 `actions/checkout@v4` 步骤，以确保 `gh` CLI 能正确识别 Git 仓库上下文。
+
+你现在可以提交并推送更改：
+```bash
+git add .github/workflows/ci.yml
+git commit -m "Fix release job: add checkout step"
+git push
+```
+
+✅ 这样修复后，Release 任务应该能正常上传构建产物到 GitHub Release 页面。如果你还有其他需求（比如生成 checksum、签名文件、发布到 crates.io 等），也可以继续扩展工作流！
