@@ -1,0 +1,55 @@
+
+  Current Model : Qwen/Qwen3-Embedding-8B
+  Current UI Language : en  |  Current AI Language : 简体中文
+  Friendev 0.1.0
+>> 你能为这个创建github的workflow吗，每次release、push、pr、合并与手动都能构建多平台的文件
+
+[AI]
+  ⠋ Using file_write (.github/workflows/ci.yml)
+  ──── Approval Required ──────────────────
+    WriteFile wants to modify:
+      ci.yml
+
+    Content preview:
+      name: CI/CD Pipeline
+
+      on:
+        push:
+          branches:
+      ... (94 more lines)
+
+    [Y]es / [N]o / [A]lways
+  ─────────────────────────────────────────
+  Your choice: Y
+
+  • Used file_write
+    写入 2673 字节
+
+[AI] 已为你创建了一个 GitHub Actions 工作流文件 `.github/workflows/ci.yml`，支持以下功能：
+
+### ✅ 构建触发条件
+- **Push 到 `main` 分支**
+- **Pull Request 到 `main` 分支**
+- **发布 Release**
+- **手动触发（Workflow Dispatch）**
+
+### 🧱 多平台构建目标
+| 平台       | 架构             | 输出文件名               |
+|------------|------------------|--------------------------|
+| Linux      | x86_64           | `friendev-linux-amd64`   |
+| macOS      | x86_64           | `friendev-macos-amd64`   |
+| macOS      | ARM64 (Apple Silicon) | `friendev-macos-arm64` |
+| Windows    | x86_64           | `friendev-windows-amd64.exe` |
+
+### 📦 自动上传 Release Assets
+当发布新版本（Release）时，自动将所有平台的二进制文件附加为资产。
+
+你可以直接提交并推送这个工作流文件到你的仓库中启用它：
+```bash
+git add .github/workflows/ci.yml
+git commit -m "Add GitHub Actions CI/CD workflow"
+git push
+```
+
+如果你还需要签名、校验和生成或更复杂的发布策略，也可以继续扩展这个工作流。需要的话我可以帮你完善！
+>>

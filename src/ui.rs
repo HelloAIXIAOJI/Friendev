@@ -150,14 +150,14 @@ pub fn prompt_approval(action: &str, file_path: &str, content_preview: Option<&s
         .unwrap_or(file_path);
     
     println!();
-    println!("{}", "  ┌─ ⚠ Approval Required ─────────────────┐".yellow());
-    println!("{}", format!("  │ {} wants to modify:", action).yellow());
-    println!("{}", format!("  │   {}", file_name).yellow().bold());
+    println!("{}", "  ──── Approval Required ──────────────────".yellow());
+    println!("{}", format!("    {} wants to modify:", action).yellow());
+    println!("{}", format!("      {}", file_name).yellow().bold());
     
     // 显示内容预览
     if let Some(preview) = content_preview {
-        println!("{}", "  │                                       │".yellow());
-        println!("{}", "  │ Content preview:".yellow());
+        println!("{}", "                                           ".yellow());
+        println!("{}", "    Content preview:".yellow());
         
         let lines: Vec<&str> = preview.lines().take(5).collect();
         for line in lines {
@@ -166,18 +166,18 @@ pub fn prompt_approval(action: &str, file_path: &str, content_preview: Option<&s
             } else {
                 line.to_string()
             };
-            println!("{}", format!("  │   {}", truncated).bright_black());
+            println!("{}", format!("      {}", truncated).bright_black());
         }
         
         let total_lines = preview.lines().count();
         if total_lines > 5 {
-            println!("{}", format!("  │   ... ({} more lines)", total_lines - 5).bright_black());
+            println!("{}", format!("      ... ({} more lines)", total_lines - 5).bright_black());
         }
     }
     
-    println!("{}", "  │                                       │".yellow());
-    println!("{}", "  │ [Y]es / [N]o / [A]lways               │".yellow());
-    println!("{}", "  └───────────────────────────────────────┘".yellow());
+    println!("{}", "                                           ".yellow());
+    println!("{}", "    [Y]es / [N]o / [A]lways                ".yellow());
+    println!("{}", "  ─────────────────────────────────────────".yellow());
     print!("  {} ", "Your choice:".bright_cyan());
     io::stdout().flush()?;
 
