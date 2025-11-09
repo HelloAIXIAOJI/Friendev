@@ -7,4 +7,8 @@ all friendev update changelog on here.
 
 ### new
 
-#### `file_replace` Tool
+- `file_replace` Tool
+
+### edit
+
+- System Prompt to English
