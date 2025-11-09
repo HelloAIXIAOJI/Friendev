@@ -70,7 +70,7 @@ pub fn get_available_tools() -> Vec<Tool> {
                     "properties": {
                         "path": {
                             "type": "string",
-                            "description": "目录路径（可选，默认为工作目录）"
+                            "description": "Directory path (optional, defaults to working directory)"
                         }
                     },
                     "required": []
@@ -81,13 +81,13 @@ pub fn get_available_tools() -> Vec<Tool> {
             tool_type: "function".to_string(),
             function: ToolFunction {
                 name: "file_read".to_string(),
-                description: "读取文件的内容".to_string(),
+                description: "Read the content of a file".to_string(),
                 parameters: json!({
                     "type": "object",
                     "properties": {
                         "path": {
                             "type": "string",
-                            "description": "要读取的文件路径"
+                            "description": "File path to read"
                         }
                     },
                     "required": ["path"]
@@ -98,17 +98,17 @@ pub fn get_available_tools() -> Vec<Tool> {
             tool_type: "function".to_string(),
             function: ToolFunction {
                 name: "file_write".to_string(),
-                description: "写入内容到文件，如果文件不存在则创建".to_string(),
+                description: "Write content to a file, creating it if it does not exist".to_string(),
                 parameters: json!({
                     "type": "object",
                     "properties": {
                         "path": {
                             "type": "string",
-                            "description": "要写入的文件路径"
+                            "description": "File path to write"
                         },
                         "content": {
                             "type": "string",
-                            "description": "要写入的内容"
+                            "description": "Content to write"
                         }
                     },
                     "required": ["path", "content"]
@@ -119,31 +119,31 @@ pub fn get_available_tools() -> Vec<Tool> {
             tool_type: "function".to_string(),
             function: ToolFunction {
                 name: "file_replace".to_string(),
-                description: "替换文件中的字符串，支持批量编辑。优先使用此工具而非 file_write 来修改现有文件。".to_string(),
+                description: "Replace strings in a file, supporting batch edits. Prefer this tool over file_write to modify existing files.".to_string(),
                 parameters: json!({
                     "type": "object",
                     "properties": {
                         "path": {
                             "type": "string",
-                            "description": "要编辑的文件路径"
+                            "description": "File path to edit"
                         },
                         "edits": {
                             "type": "array",
-                            "description": "编辑操作列表，按顺序应用",
+                            "description": "List of edit operations to apply in order",
                             "items": {
                                 "type": "object",
                                 "properties": {
                                     "old": {
                                         "type": "string",
-                                        "description": "要替换的旧字符串（支持多行）"
+                                        "description": "Old string to replace (supports multi-line)"
                                     },
                                     "new": {
                                         "type": "string",
-                                        "description": "新字符串（支持多行）"
+                                        "description": "New string (supports multi-line)"
                                     },
                                     "replace_all": {
                                         "type": "boolean",
-                                        "description": "是否替换所有匹配项（默认 false，只替换第一个）",
+                                        "description": "Whether to replace all matches (default false, replaces only the first)",
                                         "default": false
                                     }
                                 },
