@@ -308,7 +308,8 @@ impl ToolCallAccumulator {
                 
                 // 验证 JSON 是否完整且有效
                 if !is_json_semantically_complete(&name, &arguments) {
-                    eprintln!("\x1b[33m[!] Warning:\x1b[0m Incomplete JSON for tool '{}': {}", name, &arguments[..arguments.len().min(50)]);
+                    let preview: String = arguments.chars().take(50).collect();
+                    eprintln!("\x1b[33m[!] Warning:\x1b[0m Incomplete JSON for tool '{}': {}", name, preview);
                     return None;
                 }
                 

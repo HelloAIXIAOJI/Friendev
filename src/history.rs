@@ -110,8 +110,10 @@ impl ChatSession {
             .find(|m| m.role == "user")
             .map(|m| {
                 let content = m.content.trim();
-                if content.len() > 50 {
-                    format!("{}...", &content[..47])
+                let char_count = content.chars().count();
+                if char_count > 50 {
+                    let truncated: String = content.chars().take(47).collect();
+                    format!("{}...", truncated)
                 } else {
                     content.to_string()
                 }

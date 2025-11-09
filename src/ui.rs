@@ -130,12 +130,15 @@ fn normalize_path(path: &str) -> String {
 
 /// 缩短字符串中间部分
 fn shorten_middle(s: &str, max_len: usize) -> String {
-    if s.len() <= max_len {
+    let char_count = s.chars().count();
+    if char_count <= max_len {
         return s.to_string();
     }
     
     let half = (max_len - 3) / 2;
-    format!("{}...{}", &s[..half], &s[s.len() - half..])
+    let start: String = s.chars().take(half).collect();
+    let end: String = s.chars().skip(char_count - half).collect();
+    format!("{}...{}", start, end)
 }
 
 /// 用户审批提示
@@ -161,8 +164,9 @@ pub fn prompt_approval(action: &str, file_path: &str, content_preview: Option<&s
         
         let lines: Vec<&str> = preview.lines().take(5).collect();
         for line in lines {
-            let truncated = if line.len() > 35 {
-                format!("{}...", &line[..35])
+            let truncated = if line.chars().count() > 35 {
+                let shortened: String = line.chars().take(35).collect();
+                format!("{}...", shortened)
             } else {
                 line.to_string()
             };
