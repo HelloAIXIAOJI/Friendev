@@ -1,4 +1,4 @@
-name: 构建CodeNothing解释器
+name: 构建Friendev
 
 on:
   push:
@@ -24,89 +24,88 @@ env:
 
 jobs:
   build:
-    name: 构建解释器
+    name: Make Friendev
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Windows 平台
+          # Windows
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: codenothing-windows-x64
-            asset_name: codenothing-windows-x64.zip
-            release_name: Windows x64
-            exe_name: CodeNothing.exe
+            artifact_name: friendev-windows-amd64
+            asset_name: friendev-windows-amd64.zip
+            release_name: Windows AMD64
+            exe_name: friendev.exe
           - os: windows-latest
             target: i686-pc-windows-msvc
-            artifact_name: codenothing-windows-x32
-            asset_name: codenothing-windows-x32.zip
-            release_name: Windows x32
-            exe_name: CodeNothing.exe
+            artifact_name: friendev-windows-i686
+            asset_name: friendev-windows-i686.zip
+            release_name: Windows i686
+            exe_name: friendev.exe
           - os: windows-latest
             target: aarch64-pc-windows-msvc
-            artifact_name: codenothing-windows-arm64
-            asset_name: codenothing-windows-arm64.zip
+            artifact_name: friendev-windows-arm64
+            asset_name: friendev-windows-arm64.zip
             release_name: Windows ARM64
-            exe_name: CodeNothing.exe
-          # Linux 平台
+            exe_name: friendev.exe
+          # Linux Platform
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact_name: codenothing-linux-x64
-            asset_name: codenothing-linux-x64.tar.gz
-            release_name: Linux x64
-            exe_name: CodeNothing
+            artifact_name: friendev-linux-amd64
+            asset_name: friendev-linux-amd64.tar.gz
+            release_name: Linux AMD64
+            exe_name: friendev
           - os: ubuntu-latest
             target: i686-unknown-linux-gnu
-            artifact_name: codenothing-linux-x32
-            asset_name: codenothing-linux-x32.tar.gz
-            release_name: Linux x32
-            exe_name: CodeNothing
+            artifact_name: friendev-linux-i686
+            asset_name: friendev-linux-i686.tar.gz
+            release_name: Linux i686
+            exe_name: friendev
           - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
-            artifact_name: codenothing-linux-arm64
-            asset_name: codenothing-linux-arm64.tar.gz
+            artifact_name: friendev-linux-arm64
+            asset_name: friendev-linux-arm64.tar.gz
             release_name: Linux ARM64
-            exe_name: CodeNothing
-          # Android 平台
+            exe_name: friendev
+          # Android
           - os: ubuntu-latest
             target: aarch64-linux-android
-            artifact_name: codenothing-android-arm64
-            asset_name: codenothing-android-arm64.tar.gz
+            artifact_name: friendev-android-arm64
+            asset_name: friendev-android-arm64.tar.gz
             release_name: Android ARM64
-            exe_name: CodeNothing
-          # macOS 平台
+            exe_name: friendev
+          # macOS
           - os: macos-latest
             target: x86_64-apple-darwin
-            artifact_name: codenothing-macos-intel
-            asset_name: codenothing-macos-intel.tar.gz
-            release_name: macOS Intel
-            exe_name: CodeNothing
+            artifact_name: friendev-macos-amd64
+            asset_name: friendev-macos-amd64.tar.gz
+            release_name: macOS AMD64
+            exe_name: friendev
           - os: macos-latest
             target: aarch64-apple-darwin
-            artifact_name: codenothing-macos-silicon
-            asset_name: codenothing-macos-silicon.tar.gz
+            artifact_name: friendev-macos-arm64
+            asset_name: friendev-macos-arm64.tar.gz
             release_name: macOS Apple Silicon
-            exe_name: CodeNothing
+            exe_name: friendev
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: 设置Rust工具链
+    - name: Set up Rust
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
         target: ${{ matrix.target }}
         override: true
 
-    - name: 安装 Windows 交叉编译工具
+    - name: Install Cross-Compilation Dependencies (Windows)
       if: matrix.os == 'windows-latest' && matrix.target != 'x86_64-pc-windows-msvc'
       run: |
-        # Windows 交叉编译通常由 Rust 工具链自动处理
-        echo "Windows 交叉编译目标: ${{ matrix.target }}"
-
-    - name: 安装交叉编译依赖 (Linux)
+        # Windows cross-compilation is usually handled automatically by the Rust toolchain
+        echo "Windows cross-compilation target: ${{ matrix.target }}"
+    - name: Install Cross-Compilation Dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
         case ${{ matrix.target }} in
@@ -129,7 +128,7 @@ jobs:
             ;;
         esac
 
-    - name: 验证交叉编译工具
+    - name: Verify Cross-Compilation Tools
       if: matrix.os == 'ubuntu-latest' && matrix.target != 'x86_64-unknown-linux-gnu'
       run: |
         case ${{ matrix.target }} in
@@ -141,14 +140,14 @@ jobs:
             ;;
         esac
 
-    - name: 设置 Android NDK
+    - name: Android NDK
       if: matrix.target == 'aarch64-linux-android'
       uses: nttld/setup-ndk@v1
       with:
         ndk-version: r25c
         add-to-path: false
 
-    - name: 配置 Android 环境变量
+    - name: Configure Android Environment Variables
       if: matrix.target == 'aarch64-linux-android'
       run: |
         echo "CC_aarch64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang" >> $GITHUB_ENV
@@ -156,19 +155,17 @@ jobs:
         echo "AR_aarch64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" >> $GITHUB_ENV
         echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang" >> $GITHUB_ENV
 
-
-    
-    - name: 显示构建环境信息
+    - name: Show Build Environment Info
       run: |
-        echo "构建目标: ${{ matrix.target }}"
-        echo "运行环境: ${{ matrix.os }}"
+        echo "Build Target: ${{ matrix.target }}"
+        echo "Operating System: ${{ matrix.os }}"
         rustc --version
         cargo --version
-        echo "已安装的目标:"
+        echo "Installed Targets:"
         rustup target list --installed
       shell: bash
 
-    - name: 构建
+    - name: Build
       uses: actions-rs/cargo@v1
       with:
         command: build
@@ -176,49 +173,31 @@ jobs:
       env:
         RUST_BACKTRACE: 1
     
-    - name: 创建输出目录
+    - name: Create Output Directory
       run: mkdir -p release-package
       shell: bash
     
-    - name: 打包Windows
+    - name: Windows
       if: matrix.os == 'windows-latest'
       run: |
         cp target/${{ matrix.target }}/release/${{ matrix.exe_name }} release-package/
-        # 如果examples目录存在，则复制
-        if [ -d "examples" ]; then
-          cp -r examples release-package/
-        else
-          echo "警告：examples目录不存在，跳过复制"
-          # 创建一个空的examples目录，确保有内容
-          mkdir -p release-package/examples
-          echo "# CodeNothing 示例" > release-package/examples/README.md
-        fi
         7z a ${{ matrix.asset_name }} ./release-package/*
       shell: bash
     
-    - name: 打包Linux/macOS/Android
+    - name: Linux/macOS/Android
       if: matrix.os != 'windows-latest'
       run: |
         cp target/${{ matrix.target }}/release/${{ matrix.exe_name }} release-package/
-        # 如果examples目录存在，则复制
-        if [ -d "examples" ]; then
-          cp -r examples release-package/
-        else
-          echo "警告：examples目录不存在，跳过复制"
-          # 创建一个空的examples目录，确保有内容
-          mkdir -p release-package/examples
-          echo "# CodeNothing 示例" > release-package/examples/README.md
-        fi
         tar -czvf ${{ matrix.asset_name }} -C release-package .
       shell: bash
     
-    - name: 上传构建产物
+    - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.artifact_name }}
         path: ${{ matrix.asset_name }}
     
-    - name: 创建发布
+    - name: Create Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release'
       with:
