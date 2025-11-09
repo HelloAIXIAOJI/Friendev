@@ -291,21 +291,6 @@ pub fn execute_tool(name: &str, arguments: &str, working_dir: &Path, require_app
         "file_write" => {
             let args: FileWriteArgs = serde_json::from_str(arguments)?;
             
-            // 预先检查内容长度，防止流式截断
-            const MAX_CONTENT_LENGTH: usize = 2500;
-            if args.content.len() > MAX_CONTENT_LENGTH {
-                let lines = args.content.lines().count();
-                return Ok(ToolResult::error(format!(
-                    "内容过长 ({} 字符, {} 行)，超过限制 {} 字符。\n\
-                    请使用分块策略：\n\
-                    1. 首次使用 mode='overwrite' 写入前 ~50 行\n\
-                    2. 然后使用 mode='append' 逐次追加剩余内容",
-                    args.content.len(),
-                    lines,
-                    MAX_CONTENT_LENGTH
-                )));
-            }
-            
             let target_path = {
                 let p = Path::new(&args.path);
                 if p.is_absolute() {
