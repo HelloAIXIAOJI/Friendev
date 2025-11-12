@@ -1,292 +1,18 @@
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fs;
 use std::path::Path;
-use std::sync::Mutex;
-use std::collections::HashSet;
 
-/// 会话级审批状态
-static APPROVED_ACTIONS: Mutex<Option<HashSet<String>>> = Mutex::new(None);
+use crate::tools::types::{ToolResult, is_action_approved, approve_action_for_session};
+use crate::tools::args::{FileListArgs, FileReadArgs, FileWriteArgs, FileReplaceArgs, SearchArgs};
+use crate::ui::prompt_approval;
 
-/// 检查操作是否已被批准
-fn is_action_approved(action: &str) -> bool {
-    let mut approved = APPROVED_ACTIONS.lock().unwrap();
-    if approved.is_none() {
-        *approved = Some(HashSet::new());
-    }
-    approved.as_ref().unwrap().contains(action)
-}
-
-/// 添加操作到已批准列表
-fn approve_action_for_session(action: &str) {
-    let mut approved = APPROVED_ACTIONS.lock().unwrap();
-    if approved.is_none() {
-        *approved = Some(HashSet::new());
-    }
-    approved.as_mut().unwrap().insert(action.to_string());
-}
-
-/// 工具执行结果
-pub struct ToolResult {
-    pub success: bool,
-    pub brief: String,
-    pub output: String,
-}
-
-impl ToolResult {
-    pub fn ok(brief: String, output: String) -> Self {
-        Self { success: true, brief, output }
-    }
-
-    pub fn error(brief: String) -> Self {
-        Self { success: false, brief: brief.clone(), output: brief }
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Tool {
-    #[serde(rename = "type")]
-    pub tool_type: String,
-    pub function: ToolFunction,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ToolFunction {
-    pub name: String,
-    pub description: String,
-    pub parameters: serde_json::Value,
-}
-
-pub fn get_available_tools() -> Vec<Tool> {
-    vec![
-        Tool {
-            tool_type: "function".to_string(),
-            function: ToolFunction {
-                name: "file_list".to_string(),
-                description: "List all files and subdirectories in the specified directory".to_string(),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "path": {
-                            "type": "string",
-                            "description": "Directory path (optional, defaults to working directory)"
-                        }
-                    },
-                    "required": []
-                }),
-            },
-        },
-        Tool {
-            tool_type: "function".to_string(),
-            function: ToolFunction {
-                name: "file_read".to_string(),
-                description: "Read the content of a file".to_string(),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "path": {
-                            "type": "string",
-                            "description": "File path to read"
-                        }
-                    },
-                    "required": ["path"]
-                }),
-            },
-        },
-        Tool {
-            tool_type: "function".to_string(),
-            function: ToolFunction {
-                name: "file_write".to_string(),
-                description: "Write content to a file. IMPORTANT: content must be <2000 chars per call. For large files: use mode='overwrite' for first ~50 lines, then mode='append' for each additional chunk.".to_string(),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "path": {
-                            "type": "string",
-                            "description": "File path to write"
-                        },
-                        "content": {
-                            "type": "string",
-                            "description": "Content to write"
-                        },
-                        "mode": {
-                            "type": "string",
-                            "enum": ["overwrite", "append"],
-                            "description": "Write mode: 'overwrite' to replace file content (default), 'append' to add to end of file",
-                            "default": "overwrite"
-                        }
-                    },
-                    "required": ["path", "content"]
-                }),
-            },
-        },
-        Tool {
-            tool_type: "function".to_string(),
-            function: ToolFunction {
-                name: "file_replace".to_string(),
-                description: "Replace strings in a file, supporting batch edits. Prefer this tool over file_write to modify existing files.".to_string(),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "path": {
-                            "type": "string",
-                            "description": "File path to edit"
-                        },
-                        "edits": {
-                            "type": "array",
-                            "description": "List of edit operations to apply in order",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "old": {
-                                        "type": "string",
-                                        "description": "Old string to replace (supports multi-line)"
-                                    },
-                                    "new": {
-                                        "type": "string",
-                                        "description": "New string (supports multi-line)"
-                                    },
-                                    "replace_all": {
-                                        "type": "boolean",
-                                        "description": "Whether to replace all matches (default false, replaces only the first)",
-                                        "default": false
-                                    }
-                                },
-                                "required": ["old", "new"]
-                            }
-                        }
-                    },
-                    "required": ["path", "edits"]
-                }),
-            },
-        },
-        Tool {
-            tool_type: "function".to_string(),
-            function: ToolFunction {
-                name: "network_search_auto".to_string(),
-                description: "Search the web with automatic fallback: tries DuckDuckGo first, then Bing if DuckDuckGo fails. Returns title, URL, and snippet for each result.".to_string(),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "keywords": {
-                            "type": "string",
-                            "description": "Search keywords or query"
-                        },
-                        "max_results": {
-                            "type": "integer",
-                            "description": "Maximum number of results to return (default 5, max 20)",
-                            "default": 5,
-                            "minimum": 1,
-                            "maximum": 20
-                        }
-                    },
-                    "required": ["keywords"]
-                }),
-            },
-        },
-        Tool {
-            tool_type: "function".to_string(),
-            function: ToolFunction {
-                name: "network_search_duckduckgo".to_string(),
-                description: "Search the web using DuckDuckGo search engine. Returns title, URL, and snippet for each result.".to_string(),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "keywords": {
-                            "type": "string",
-                            "description": "Search keywords or query"
-                        },
-                        "max_results": {
-                            "type": "integer",
-                            "description": "Maximum number of results to return (default 5, max 20)",
-                            "default": 5,
-                            "minimum": 1,
-                            "maximum": 20
-                        }
-                    },
-                    "required": ["keywords"]
-                }),
-            },
-        },
-        Tool {
-            tool_type: "function".to_string(),
-            function: ToolFunction {
-                name: "network_search_bing".to_string(),
-                description: "Search the web using Bing search engine. Returns title, URL, and snippet for each result.".to_string(),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "keywords": {
-                            "type": "string",
-                            "description": "Search keywords or query"
-                        },
-                        "max_results": {
-                            "type": "integer",
-                            "description": "Maximum number of results to return (default 5, max 20)",
-                            "default": 5,
-                            "minimum": 1,
-                            "maximum": 20
-                        }
-                    },
-                    "required": ["keywords"]
-                }),
-            },
-        },
-    ]
-}
-
-#[derive(Debug, Deserialize)]
-struct FileListArgs {
-    path: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct FileReadArgs {
-    path: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct FileWriteArgs {
-    path: String,
-    content: String,
-    #[serde(default = "default_write_mode")]
-    mode: String,  // "overwrite" 或 "append"
-}
-
-fn default_write_mode() -> String {
-    "overwrite".to_string()
-}
-
-#[derive(Debug, Deserialize)]
-struct Edit {
-    old: String,
-    new: String,
-    #[serde(default)]
-    replace_all: bool,
-}
-
-#[derive(Debug, Deserialize)]
-struct FileReplaceArgs {
-    path: String,
-    edits: Vec<Edit>,
-}
-
-#[derive(Debug, Deserialize)]
-struct SearchArgs {
-    keywords: String,
-    #[serde(default = "default_max_results")]
-    max_results: usize,
-}
-
-fn default_max_results() -> usize {
-    5
+// 限制max_results到20以内
+fn limit_results(max: usize) -> usize {
+    std::cmp::min(std::cmp::max(1, max), 20)
 }
 
 pub async fn execute_tool(name: &str, arguments: &str, working_dir: &Path, require_approval: bool) -> Result<ToolResult> {
-    // 限制max_results到20以内
-    let limit_results = |max: usize| std::cmp::min(std::cmp::max(1, max), 20);
-    
     match name {
         "file_list" => {
             let args: FileListArgs = serde_json::from_str(arguments)
@@ -320,7 +46,7 @@ pub async fn execute_tool(name: &str, arguments: &str, working_dir: &Path, requi
                 
                 let metadata = entry.metadata()?;
                 let size = if metadata.is_file() {
-                    format_size(metadata.len())
+                    crate::tools::utils::format_size(metadata.len())
                 } else {
                     "-".to_string()
                 };
@@ -394,7 +120,6 @@ pub async fn execute_tool(name: &str, arguments: &str, working_dir: &Path, requi
             
             // 危险操作：需要用户确认
             if require_approval && !is_action_approved("file_write") {
-                use crate::ui::prompt_approval;
                 let action_desc = if mode == "append" {
                     format!("追加到文件: {}", target_path.display())
                 } else {
@@ -479,7 +204,6 @@ pub async fn execute_tool(name: &str, arguments: &str, working_dir: &Path, requi
             
             // 需要审批（file_replace 也是危险操作）
             if require_approval && !is_action_approved("file_replace") {
-                use crate::ui::prompt_approval;
                 
                 // 生成预览内容
                 let preview = args.edits.iter()
@@ -640,32 +364,4 @@ pub async fn execute_tool(name: &str, arguments: &str, working_dir: &Path, requi
         }
         _ => Ok(ToolResult::error(format!("未知工具: {}", name))),
     }
-}
-
-fn format_size(bytes: u64) -> String {
-    const KB: u64 = 1024;
-    const MB: u64 = KB * 1024;
-    const GB: u64 = MB * 1024;
-
-    if bytes >= GB {
-        format!("{:.2} GB", bytes as f64 / GB as f64)
-    } else if bytes >= MB {
-        format!("{:.2} MB", bytes as f64 / MB as f64)
-    } else if bytes >= KB {
-        format!("{:.2} KB", bytes as f64 / KB as f64)
-    } else {
-        format!("{} B", bytes)
-    }
-}
-
-/// 自动生成工具列表描述，用于系统提示词
-pub fn get_tools_description() -> String {
-    let tools = get_available_tools();
-    let mut descriptions = Vec::new();
-    
-    for tool in tools {
-        descriptions.push(format!("- {}: {}", tool.function.name, tool.function.description));
-    }
-    
-    descriptions.join("\n")
 }
