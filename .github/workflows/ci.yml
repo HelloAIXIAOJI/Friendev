@@ -226,8 +226,31 @@ jobs:
         override: true
 
     - name: Install cross
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-latest' && matrix.target != 's390x-unknown-linux-gnu' && matrix.target != 'i686-linux-android'
       run: cargo install cross --locked
+
+    - name: Install toolchain dependencies (s390x)
+      if: matrix.target == 's390x-unknown-linux-gnu'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-s390x-linux-gnu g++-s390x-linux-gnu
+        echo "CC_s390x_unknown_linux_gnu=s390x-linux-gnu-gcc" >> $GITHUB_ENV
+        echo "CARGO_TARGET_S390X_UNKNOWN_LINUX_GNU_LINKER=s390x-linux-gnu-gcc" >> $GITHUB_ENV
+
+    - name: Android NDK (for i686-android)
+      if: matrix.target == 'i686-linux-android'
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r25c
+        add-to-path: false
+
+    - name: Configure i686-android environment
+      if: matrix.target == 'i686-linux-android'
+      run: |
+        echo "CC_i686_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android21-clang" >> $GITHUB_ENV
+        echo "CXX_i686_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android21-clang++" >> $GITHUB_ENV
+        echo "AR_i686_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" >> $GITHUB_ENV
+        echo "CARGO_TARGET_I686_LINUX_ANDROID_LINKER=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android21-clang" >> $GITHUB_ENV
 
     - name: Show Build Environment Info
       run: |
@@ -239,9 +262,11 @@ jobs:
         rustup target list --installed
       shell: bash
 
-    - name: Build (using cross for Linux/Android/BSD targets)
+    - name: Build (using cross for most Linux/Android/BSD targets)
       if: |
-        matrix.os == 'ubuntu-latest' && (
+        matrix.os == 'ubuntu-latest' && 
+        matrix.target != 's390x-unknown-linux-gnu' && 
+        matrix.target != 'i686-linux-android' && (
           contains(matrix.target, 'linux') || 
           contains(matrix.target, 'android') ||
           contains(matrix.target, 'freebsd') ||
@@ -255,6 +280,17 @@ jobs:
         args: --release --target ${{ matrix.target }}
       env:
         RUST_BACKTRACE: 1
+        RING_PREGENERATE_ASM: 1
+
+    - name: Build (native cargo for s390x and i686-android)
+      if: matrix.target == 's390x-unknown-linux-gnu' || matrix.target == 'i686-linux-android'
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --release --target ${{ matrix.target }}
+      env:
+        RUST_BACKTRACE: 1
+        RING_PREGENERATE_ASM: 1
 
     - name: Build (native for Windows/macOS)
       if: matrix.os != 'ubuntu-latest'
@@ -264,6 +300,7 @@ jobs:
         args: --release --target ${{ matrix.target }}
       env:
         RUST_BACKTRACE: 1
+        RING_PREGENERATE_ASM: 1
     
     - name: Create Output Directory
       run: mkdir -p release-package
