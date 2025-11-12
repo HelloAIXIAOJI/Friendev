@@ -50,24 +50,92 @@ jobs:
             asset_name: friendev-windows-arm64.zip
             release_name: Windows ARM64
             exe_name: friendev.exe
-          # Linux Platform
+          - os: windows-latest
+            target: i586-pc-windows-msvc
+            artifact_name: friendev-windows-i586
+            asset_name: friendev-windows-i586.zip
+            release_name: Windows i586
+            exe_name: friendev.exe
+          - os: windows-latest
+            target: x86_64-pc-windows-gnu
+            artifact_name: friendev-windows-amd64-gnu
+            asset_name: friendev-windows-amd64-gnu.zip
+            release_name: Windows AMD64 GNU
+            exe_name: friendev.exe
+          # Linux Platform - x86
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             artifact_name: friendev-linux-amd64
             asset_name: friendev-linux-amd64.tar.gz
-            release_name: Linux AMD64
+            release_name: Linux AMD64 GNU
+            exe_name: friendev
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            artifact_name: friendev-linux-amd64-musl
+            asset_name: friendev-linux-amd64-musl.tar.gz
+            release_name: Linux AMD64 MUSL
             exe_name: friendev
           - os: ubuntu-latest
             target: i686-unknown-linux-gnu
             artifact_name: friendev-linux-i686
             asset_name: friendev-linux-i686.tar.gz
-            release_name: Linux i686
+            release_name: Linux i686 GNU
             exe_name: friendev
+          - os: ubuntu-latest
+            target: i586-unknown-linux-gnu
+            artifact_name: friendev-linux-i586
+            asset_name: friendev-linux-i586.tar.gz
+            release_name: Linux i586 GNU
+            exe_name: friendev
+          # Linux Platform - ARM
           - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             artifact_name: friendev-linux-arm64
             asset_name: friendev-linux-arm64.tar.gz
-            release_name: Linux ARM64
+            release_name: Linux ARM64 GNU
+            exe_name: friendev
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+            artifact_name: friendev-linux-arm64-musl
+            asset_name: friendev-linux-arm64-musl.tar.gz
+            release_name: Linux ARM64 MUSL
+            exe_name: friendev
+          - os: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+            artifact_name: friendev-linux-armv7
+            asset_name: friendev-linux-armv7.tar.gz
+            release_name: Linux ARMv7
+            exe_name: friendev
+          - os: ubuntu-latest
+            target: arm-unknown-linux-gnueabihf
+            artifact_name: friendev-linux-arm
+            asset_name: friendev-linux-arm.tar.gz
+            release_name: Linux ARM
+            exe_name: friendev
+          # Linux Platform - Other architectures
+          - os: ubuntu-latest
+            target: riscv64gc-unknown-linux-gnu
+            artifact_name: friendev-linux-riscv64
+            asset_name: friendev-linux-riscv64.tar.gz
+            release_name: Linux RISC-V 64
+            exe_name: friendev
+          - os: ubuntu-latest
+            target: loongarch64-unknown-linux-gnu
+            artifact_name: friendev-linux-loongarch64
+            asset_name: friendev-linux-loongarch64.tar.gz
+            release_name: Linux LoongArch64
+            exe_name: friendev
+          - os: ubuntu-latest
+            target: powerpc64le-unknown-linux-gnu
+            artifact_name: friendev-linux-powerpc64le
+            asset_name: friendev-linux-powerpc64le.tar.gz
+            release_name: Linux PowerPC64LE
+            exe_name: friendev
+          - os: ubuntu-latest
+            target: s390x-unknown-linux-gnu
+            artifact_name: friendev-linux-s390x
+            asset_name: friendev-linux-s390x.tar.gz
+            release_name: Linux s390x
             exe_name: friendev
           # Android
           - os: ubuntu-latest
@@ -75,6 +143,24 @@ jobs:
             artifact_name: friendev-android-arm64
             asset_name: friendev-android-arm64.tar.gz
             release_name: Android ARM64
+            exe_name: friendev
+          - os: ubuntu-latest
+            target: armv7-linux-androideabi
+            artifact_name: friendev-android-armv7
+            asset_name: friendev-android-armv7.tar.gz
+            release_name: Android ARMv7
+            exe_name: friendev
+          - os: ubuntu-latest
+            target: x86_64-linux-android
+            artifact_name: friendev-android-x86_64
+            asset_name: friendev-android-x86_64.tar.gz
+            release_name: Android x86_64
+            exe_name: friendev
+          - os: ubuntu-latest
+            target: i686-linux-android
+            artifact_name: friendev-android-i686
+            asset_name: friendev-android-i686.tar.gz
+            release_name: Android i686
             exe_name: friendev
           # macOS
           - os: macos-latest
@@ -88,6 +174,45 @@ jobs:
             artifact_name: friendev-macos-arm64
             asset_name: friendev-macos-arm64.tar.gz
             release_name: macOS Apple Silicon
+            exe_name: friendev
+          - os: macos-latest
+            target: x86_64-apple-ios
+            artifact_name: friendev-ios-x86_64
+            asset_name: friendev-ios-x86_64.tar.gz
+            release_name: iOS x86_64
+            exe_name: friendev
+          - os: macos-latest
+            target: aarch64-apple-ios
+            artifact_name: friendev-ios-arm64
+            asset_name: friendev-ios-arm64.tar.gz
+            release_name: iOS ARM64
+            exe_name: friendev
+          # FreeBSD
+          - os: ubuntu-latest
+            target: x86_64-unknown-freebsd
+            artifact_name: friendev-freebsd-amd64
+            asset_name: friendev-freebsd-amd64.tar.gz
+            release_name: FreeBSD AMD64
+            exe_name: friendev
+          - os: ubuntu-latest
+            target: i686-unknown-freebsd
+            artifact_name: friendev-freebsd-i686
+            asset_name: friendev-freebsd-i686.tar.gz
+            release_name: FreeBSD i686
+            exe_name: friendev
+          # NetBSD
+          - os: ubuntu-latest
+            target: x86_64-unknown-netbsd
+            artifact_name: friendev-netbsd-amd64
+            asset_name: friendev-netbsd-amd64.tar.gz
+            release_name: NetBSD AMD64
+            exe_name: friendev
+          # OpenBSD
+          - os: ubuntu-latest
+            target: x86_64-unknown-openbsd
+            artifact_name: friendev-openbsd-amd64
+            asset_name: friendev-openbsd-amd64.tar.gz
+            release_name: OpenBSD AMD64
             exe_name: friendev
 
     steps:
@@ -108,52 +233,125 @@ jobs:
     - name: Install Cross-Compilation Dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
+        sudo apt-get update
         case ${{ matrix.target }} in
-          i686-unknown-linux-gnu)
-            sudo apt-get update
-            sudo apt-get install -y gcc-multilib g++-multilib
+          i686-unknown-linux-gnu|i586-unknown-linux-gnu)
+            sudo apt-get install -y gcc-i686-linux-gnu g++-i686-linux-gnu
             echo "CC_i686_unknown_linux_gnu=i686-linux-gnu-gcc" >> $GITHUB_ENV
             echo "CXX_i686_unknown_linux_gnu=i686-linux-gnu-g++" >> $GITHUB_ENV
             echo "CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_LINKER=i686-linux-gnu-gcc" >> $GITHUB_ENV
             ;;
-          aarch64-unknown-linux-gnu)
-            sudo apt-get update
-            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          aarch64-unknown-linux-gnu|aarch64-unknown-linux-musl)
+            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu musl-tools
             echo "CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
             echo "CXX_aarch64_unknown_linux_gnu=aarch64-linux-gnu-g++" >> $GITHUB_ENV
             echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
             ;;
-          aarch64-linux-android)
-            # Android NDK 通过 setup-ndk 安装
+          armv7-unknown-linux-gnueabihf|arm-unknown-linux-gnueabihf)
+            sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+            echo "CC_arm_unknown_linux_gnueabihf=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
+            echo "CXX_arm_unknown_linux_gnueabihf=arm-linux-gnueabihf-g++" >> $GITHUB_ENV
+            echo "CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
+            echo "CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
+            ;;
+          riscv64gc-unknown-linux-gnu)
+            sudo apt-get install -y gcc-riscv64-linux-gnu g++-riscv64-linux-gnu
+            echo "CC_riscv64gc_unknown_linux_gnu=riscv64-linux-gnu-gcc" >> $GITHUB_ENV
+            echo "CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc" >> $GITHUB_ENV
+            ;;
+          powerpc64le-unknown-linux-gnu)
+            sudo apt-get install -y gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu
+            echo "CC_powerpc64le_unknown_linux_gnu=powerpc64le-linux-gnu-gcc" >> $GITHUB_ENV
+            echo "CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_LINKER=powerpc64le-linux-gnu-gcc" >> $GITHUB_ENV
+            ;;
+          s390x-unknown-linux-gnu)
+            sudo apt-get install -y gcc-s390x-linux-gnu g++-s390x-linux-gnu
+            echo "CC_s390x_unknown_linux_gnu=s390x-linux-gnu-gcc" >> $GITHUB_ENV
+            echo "CARGO_TARGET_S390X_UNKNOWN_LINUX_GNU_LINKER=s390x-linux-gnu-gcc" >> $GITHUB_ENV
+            ;;
+          x86_64-unknown-linux-musl)
+            sudo apt-get install -y musl-tools
+            ;;
+          *-linux-android)
+            # Handled by setup-ndk later
+            ;;
+          x86_64-unknown-freebsd|i686-unknown-freebsd)
+            sudo apt-get install -y clang lld
+            ;;
+          x86_64-unknown-netbsd)
+            sudo apt-get install -y clang lld
+            ;;
+          x86_64-unknown-openbsd)
+            sudo apt-get install -y clang lld
+            ;;
+          *)
+            echo "No extra dependencies needed for target ${{ matrix.target }}"
             ;;
         esac
 
     - name: Verify Cross-Compilation Tools
-      if: matrix.os == 'ubuntu-latest' && matrix.target != 'x86_64-unknown-linux-gnu'
+      if: matrix.os == 'ubuntu-latest' && matrix.target != 'x86_64-unknown-linux-gnu' && matrix.target != 'x86_64-unknown-linux-musl'
       run: |
         case ${{ matrix.target }} in
-          i686-unknown-linux-gnu)
+          i686-unknown-linux-gnu|i586-unknown-linux-gnu)
             which i686-linux-gnu-gcc || echo "警告: i686-linux-gnu-gcc 未找到"
             ;;
-          aarch64-unknown-linux-gnu)
+          aarch64-unknown-linux-gnu|aarch64-unknown-linux-musl)
             which aarch64-linux-gnu-gcc || echo "警告: aarch64-linux-gnu-gcc 未找到"
+            ;;
+          armv7-unknown-linux-gnueabihf|arm-unknown-linux-gnueabihf)
+            which arm-linux-gnueabihf-gcc || echo "警告: arm-linux-gnueabihf-gcc 未找到"
+            ;;
+          riscv64gc-unknown-linux-gnu)
+            which riscv64-linux-gnu-gcc || echo "警告: riscv64-linux-gnu-gcc 未找到"
+            ;;
+          powerpc64le-unknown-linux-gnu)
+            which powerpc64le-linux-gnu-gcc || echo "警告: powerpc64le-linux-gnu-gcc 未找到"
+            ;;
+          s390x-unknown-linux-gnu)
+            which s390x-linux-gnu-gcc || echo "警告: s390x-linux-gnu-gcc 未找到"
+            ;;
+          x86_64-unknown-freebsd|i686-unknown-freebsd|x86_64-unknown-netbsd|x86_64-unknown-openbsd)
+            which clang || echo "警告: clang 未找到"
             ;;
         esac
 
     - name: Android NDK
-      if: matrix.target == 'aarch64-linux-android'
+      if: contains(matrix.target, 'android')
       uses: nttld/setup-ndk@v1
       with:
         ndk-version: r25c
         add-to-path: false
 
     - name: Configure Android Environment Variables
-      if: matrix.target == 'aarch64-linux-android'
+      if: contains(matrix.target, 'android')
       run: |
-        echo "CC_aarch64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang" >> $GITHUB_ENV
-        echo "CXX_aarch64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++" >> $GITHUB_ENV
-        echo "AR_aarch64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" >> $GITHUB_ENV
-        echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang" >> $GITHUB_ENV
+        case ${{ matrix.target }} in
+          aarch64-linux-android)
+            echo "CC_aarch64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang" >> $GITHUB_ENV
+            echo "CXX_aarch64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++" >> $GITHUB_ENV
+            echo "AR_aarch64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" >> $GITHUB_ENV
+            echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang" >> $GITHUB_ENV
+            ;;
+          armv7-linux-androideabi)
+            echo "CC_armv7_linux_androideabi=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang" >> $GITHUB_ENV
+            echo "CXX_armv7_linux_androideabi=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang++" >> $GITHUB_ENV
+            echo "AR_armv7_linux_androideabi=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" >> $GITHUB_ENV
+            echo "CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang" >> $GITHUB_ENV
+            ;;
+          x86_64-linux-android)
+            echo "CC_x86_64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang" >> $GITHUB_ENV
+            echo "CXX_x86_64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang++" >> $GITHUB_ENV
+            echo "AR_x86_64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" >> $GITHUB_ENV
+            echo "CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang" >> $GITHUB_ENV
+            ;;
+          i686-linux-android)
+            echo "CC_i686_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android21-clang" >> $GITHUB_ENV
+            echo "CXX_i686_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android21-clang++" >> $GITHUB_ENV
+            echo "AR_i686_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" >> $GITHUB_ENV
+            echo "CARGO_TARGET_I686_LINUX_ANDROID_LINKER=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android21-clang" >> $GITHUB_ENV
+            ;;
+        esac
 
     - name: Show Build Environment Info
       run: |
