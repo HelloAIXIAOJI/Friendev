@@ -304,6 +304,13 @@ pub async fn execute_tool(name: &str, arguments: &str, working_dir: &Path, requi
             
             // 读取文件
             let mut content = fs::read_to_string(&target_path)?;
+            
+            // 检测厚实换行符风格
+            let uses_crlf = content.contains("\r\n");
+            
+            // 关键：规范化换行符为 Unix \n
+            // 这样整个处理上都会应清同一種换行符，避免匹配失败
+            content = content.replace("\r\n", "\n");
             let original_content = content.clone();
             
             // 应用所有编辑
@@ -436,7 +443,13 @@ pub async fn execute_tool(name: &str, arguments: &str, working_dir: &Path, requi
             }
             
             // 写回文件
-            fs::write(&target_path, &content)?;
+            // 根据厚实换行符风格恢复
+            let final_content = if uses_crlf {
+                content.replace("\n", "\r\n")
+            } else {
+                content  // Unix 风格，保持 \n
+            };
+            fs::write(&target_path, &final_content)?;
             
             let brief = format!("应用了 {} 个编辑，{} 个替换", args.edits.len(), replacements_made);
             let output = format!(
