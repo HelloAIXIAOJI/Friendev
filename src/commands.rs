@@ -99,11 +99,16 @@ fn handle_history_command(
     match parts.get(1) {
         Some(&"list") => {
             let sessions = ChatSession::list_all()?;
-            if sessions.is_empty() {
+            // Filter out sessions with 0 messages
+            let filtered_sessions: Vec<_> = sessions.into_iter()
+                .filter(|s| s.messages.len() > 0)
+                .collect();
+                
+            if filtered_sessions.is_empty() {
                 println!("\n\x1b[90m[i] {}\x1b[0m\n", i18n.get("no_history"));
             } else {
                 println!("\n\x1b[1;33m{}:\x1b[0m", i18n.get("chat_history"));
-                for (i, s) in sessions.iter().enumerate() {
+                for (i, s) in filtered_sessions.iter().enumerate() {
                     if s.id == session.id {
                         println!(
                             "  \x1b[32m[*]\x1b[0m \x1b[1m{}\x1b[0m. \x1b[90m{}\x1b[0m\n      \x1b[36m>\x1b[0m {} \x1b[90m({} {})\x1b[0m\n      \x1b[2m{}\x1b[0m",
