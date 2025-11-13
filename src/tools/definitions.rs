@@ -41,7 +41,7 @@ pub fn get_available_tools() -> Vec<Tool> {
             tool_type: "function".to_string(),
             function: ToolFunction {
                 name: "file_write".to_string(),
-                description: "Write content to a file. IMPORTANT: content must be <2000 chars per call. For large files: use mode='overwrite' for first ~50 lines, then mode='append' for each additional chunk.".to_string(),
+                description: "Write content to a file.".to_string(),
                 parameters: json!({
                     "type": "object",
                     "properties": {
