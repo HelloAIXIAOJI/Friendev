@@ -31,16 +31,30 @@ pub fn approve_action_for_session(action: &str) {
 pub struct ToolResult {
     pub success: bool,
     pub brief: String,
-    pub output: String,
+    pub message: String,
+    pub verification_required: bool,
+    pub verification_message: Option<String>,
 }
 
 impl ToolResult {
     pub fn ok(brief: String, output: String) -> Self {
-        Self { success: true, brief, output }
+        Self { 
+            success: true, 
+            brief, 
+            message: output,
+            verification_required: false,
+            verification_message: None,
+        }
     }
 
     pub fn error(brief: String) -> Self {
-        Self { success: false, brief: brief.clone(), output: brief }
+        Self { 
+            success: false, 
+            brief: brief.clone(), 
+            message: brief,
+            verification_required: false,
+            verification_message: None,
+        }
     }
 }
 

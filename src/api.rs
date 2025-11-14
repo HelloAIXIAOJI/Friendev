@@ -473,7 +473,7 @@ pub async fn execute_tool_calls(
 
         results.push(Message {
             role: "tool".to_string(),
-            content: tool_result.output,
+            content: tool_result.message,
             tool_calls: None,
             tool_call_id: Some(tc.id.clone()),
             name: Some(tc.function.name.clone()),
