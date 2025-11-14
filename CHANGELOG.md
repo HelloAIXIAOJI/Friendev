@@ -2,6 +2,11 @@
 
 all friendev update changelog on here.
 ---
+## [0.1.4] - 2025-11-15
+新增了file_diff_edit工具，`file_diff_edit` 是一个用于精确编辑文件内容的工具，使用 diff 风格的 hunks 来进行批量行级编辑。
+
+
+---
 ## [0.1.3] - 2025-11-14
 
 ### Added
