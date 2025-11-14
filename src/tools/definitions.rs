@@ -225,5 +225,27 @@ pub fn get_available_tools() -> Vec<Tool> {
                 }),
             },
         },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
+                name: "run_command".to_string(),
+                description: "Execute a shell command with approval prompts. Supports foreground and background execution.".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {
+                        "command": {
+                            "type": "string",
+                            "description": "The shell command to execute"
+                        },
+                        "background": {
+                            "type": "boolean",
+                            "description": "Whether to run the command in background (returns immediately with a run_id) or foreground (waits and returns output)",
+                            "default": false
+                        }
+                    },
+                    "required": ["command"]
+                }),
+            },
+        },
     ]
 }

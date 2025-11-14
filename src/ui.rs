@@ -227,7 +227,6 @@ pub fn show_detailed_content(action: &str, file_path: &str, content: &str) -> io
     
     // 显示完整内容，使用终端友好的格式
     let lines: Vec<&str> = content.lines().collect();
-    let total_lines = lines.len();
     
     for (i, line) in lines.iter().enumerate() {
         let line_num = format!("{:3}:", i + 1).bright_black();

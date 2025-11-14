@@ -93,8 +93,8 @@ fn analyze_project_structure(working_dir: &Path) -> Result<String> {
     // 从 .gitattributes 读取二进制文件标记
     let binary_files = load_gitattributes(working_dir);
     
-    // 使用 ignore crate 正确遮罩 .gitignore
-    let mut walker = WalkBuilder::new(working_dir)
+    // 使用 ignore crate 正确遇罩 .gitignore
+    let walker = WalkBuilder::new(working_dir)
         .git_ignore(true)
         .git_global(false)
         .git_exclude(false)

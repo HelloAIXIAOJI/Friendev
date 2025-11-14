@@ -49,6 +49,11 @@ impl I18n {
         m.insert("cmd_language_ai".to_string(), "Set AI language".to_string());
         m.insert("cmd_help".to_string(), "Show help".to_string());
         m.insert("cmd_exit".to_string(), "Exit program".to_string());
+        m.insert("cmd_agents_md".to_string(), "Generate AGENTS.md file".to_string());
+        m.insert("cmd_runcommand_list".to_string(), "List commands requiring approval".to_string());
+        m.insert("cmd_runcommand_add".to_string(), "Add command to approval list".to_string());
+        m.insert("cmd_runcommand_del".to_string(), "Remove command from approval list".to_string());
+        m.insert("cmd_runcommand_info".to_string(), "Show background command details".to_string());
         
         // Status messages
         m.insert("goodbye".to_string(), "Goodbye!".to_string());
@@ -82,6 +87,7 @@ impl I18n {
         m.insert("help_history".to_string(), "History Commands".to_string());
         m.insert("help_language".to_string(), "Language Commands".to_string());
         m.insert("help_other".to_string(), "Other Commands".to_string());
+        m.insert("help_runcommand".to_string(), "Run Command Settings".to_string());
         
         // Language
         m.insert("ui_language_set".to_string(), "UI language set to".to_string());
@@ -116,6 +122,11 @@ impl I18n {
         m.insert("cmd_language_ai".to_string(), "设置 AI 语言".to_string());
         m.insert("cmd_help".to_string(), "显示帮助".to_string());
         m.insert("cmd_exit".to_string(), "退出程序".to_string());
+        m.insert("cmd_agents_md".to_string(), "生成 AGENTS.md 文件".to_string());
+        m.insert("cmd_runcommand_list".to_string(), "列出需要审批的命令".to_string());
+        m.insert("cmd_runcommand_add".to_string(), "添加命令到审批列表".to_string());
+        m.insert("cmd_runcommand_del".to_string(), "从审批列表移除命令".to_string());
+        m.insert("cmd_runcommand_info".to_string(), "显示后台命令详情".to_string());
         
         // 状态消息
         m.insert("goodbye".to_string(), "再见！".to_string());
@@ -149,6 +160,7 @@ impl I18n {
         m.insert("help_history".to_string(), "历史命令".to_string());
         m.insert("help_language".to_string(), "语言命令".to_string());
         m.insert("help_other".to_string(), "其他命令".to_string());
+        m.insert("help_runcommand".to_string(), "运行命令设置".to_string());
         
         // 语言
         m.insert("ui_language_set".to_string(), "界面语言已设置为".to_string());

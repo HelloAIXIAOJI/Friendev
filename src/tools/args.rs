@@ -63,3 +63,10 @@ pub struct FileDiffEditArgs {
     pub path: String,
     pub hunks: Vec<DiffHunk>, // 多个 hunk 编辑
 }
+
+#[derive(Debug, Deserialize)]
+pub struct RunCommandArgs {
+    pub command: String,
+    #[serde(default)]
+    pub background: bool, // 是否后台运行
+}
