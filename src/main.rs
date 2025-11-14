@@ -214,7 +214,8 @@ async fn main() -> Result<()> {
 // - prompts.rs: 提示与欢迎信息 (get_system_prompt, print_welcome, print_help)
 // - security.rs: 安全检查 (is_input_suspicious)
 
-/// 构建消息序列。包含 SYSTEM + 历史 + AGENTS.md（如果存在）
+/// 构建消息序列。包含 SYSTEM + 历史。AGENTS.md 已集成于系统提示中
+/// （实时载入，无需单独更新）
 fn build_messages_with_agents_md(
     session: &ChatSession,
     config: &Config,
@@ -222,7 +223,11 @@ fn build_messages_with_agents_md(
     let mut messages = vec![
         Message {
             role: "system".to_string(),
-            content: prompts::get_system_prompt(&config.ai_language, &config.current_model),
+            content: prompts::get_system_prompt(
+                &config.ai_language, 
+                &config.current_model,
+                &session.working_directory
+            ),
             tool_calls: None,
             tool_call_id: None,
             name: None,
@@ -231,22 +236,6 @@ fn build_messages_with_agents_md(
     
     // 添加历史消息
     messages.extend(session.messages.clone());
-    
-    // 先检查是否存在 AGENTS.md
-    if let Ok(Some(agents_content)) = agents::load_agents_md(&session.working_directory) {
-        // 旧的 AGENTS.md 消息（由上次发送），从 messages 中移除
-        // 也就是需要移除准最后一条 USER 消息之前的所有 USER 消息
-        // 但实际上：AGENTS.md 不会被保存到 session.messages
-        // 所以不需要删除，直接添加新的即可
-        
-        messages.push(Message {
-            role: "user".to_string(),
-            content: format!("# Project Context (AGENTS.md)\n\n{}", agents_content),
-            tool_calls: None,
-            tool_call_id: None,
-            name: None,
-        });
-    }
     
     Ok(messages)
 }

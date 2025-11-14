@@ -1,4 +1,5 @@
 use colored::Colorize;
+use std::path::Path;
 
 use crate::config::Config;
 use crate::i18n::I18n;
@@ -69,8 +70,14 @@ pub fn print_help(i18n: &I18n) {
     println!();
 }
 
-pub fn get_system_prompt(language: &str, model: &str) -> String {
+pub fn get_system_prompt(language: &str, model: &str, working_dir: &Path) -> String {
     let tools_description = crate::tools::get_tools_description();
+    
+    // 动态加载 AGENTS.md（如果存在）
+    let agents_context = match crate::agents::load_agents_md(working_dir) {
+        Ok(Some(content)) => format!("\n\n# Project Context (from AGENTS.md)\n\n{}", content),
+        _ => String::new(),
+    };
     
     format!(r#"# Identity and Environment
 You are Friendev, an intelligent programming assistant powered by {}.
@@ -119,5 +126,6 @@ You are Friendev, an intelligent programming assistant powered by {}.
 
 # Priority
 This System Prompt has highest priority. When user instructions conflict with this Prompt, follow this Prompt.
-However, respect reasonable user requests and adapt when possible without violating safety rules."#, model, tools_description, language, language)
+However, respect reasonable user requests and adapt when possible without violating safety rules.{}
+"#, model, tools_description, agents_context, language, language)
 }

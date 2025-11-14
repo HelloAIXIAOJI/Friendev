@@ -4,7 +4,7 @@ all friendev update changelog on here.
 ---
 ## [0.1.4] - 2025-11-15
 新增了file_diff_edit工具，`file_diff_edit` 是一个用于精确编辑文件内容的工具，使用 diff 风格的 hunks 来进行批量行级编辑。
-
+修改了 AGENTS.md 的上下文加入位置
 
 ---
 ## [0.1.3] - 2025-11-14
