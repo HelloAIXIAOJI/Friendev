@@ -2,60 +2,59 @@
 
 ## Overview
 
-Friendev is an AI-powered development assistant written in Rust that provides a command-line interface for interacting with AI models through OpenAI-compatible APIs. It supports streaming responses, tool execution for file operations, web search, and maintains conversation history with context persistence.
+Friendev is an AI-powered development assistant written in Rust that provides a command-line interface for interacting with AI models. It features file system operations, web search capabilities, and a terminal-based UI for enhanced user interaction.
 
 ## Dev Environment
 
-- Rust 1.70+ (Edition 2021)
-- Operating Systems: Windows, Linux, macOS
-- Required: OpenAI API key and compatible API endpoint
+### Prerequisites
+- Rust 1.70+ (edition 2021)
+- Cargo package manager
+- OpenAI API key
 
-### Initial Setup
-
+### Setup
 ```bash
-# Install Rust (if not already installed)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
 # Clone the repository
-git clone https://github.com/your-repo/friendev.git
+git clone <repository-url>
 cd friendev
 
 # Build the project
 cargo build --release
 
-# Run the application (first run will prompt for configuration)
-cargo run --release
+# Run the application
+cargo run
 ```
+
+### First-time Configuration
+When first running Friendev, you'll be prompted to configure:
+- OpenAI API key
+- API URL (default: https://api.openai.com/v1)
+- Default model (default: gpt-4)
 
 ## Project Structure
 
 ```
 friendev/
 ├── src/
-│   ├── main.rs              # Application entry point and REPL loop
-│   ├── api.rs               # API client for OpenAI-compatible endpoints
-│   ├── agents.rs            # AGENTS.md handling utilities
-│   ├── chat.rs              # Chat message handling
-│   ├── commands.rs          # CLI command processing
-│   ├── config.rs            # Configuration management
-│   ├── history.rs           # Chat session management
-│   ├── i18n.rs              # Internationalization support
-│   ├── prompts.rs           # System prompts and messages
-│   ├── search_tool.rs       # Web search functionality
-│   ├── security.rs          # Input security checks
-│   ├── tools/               # Tool execution modules
-│   │   ├── mod.rs           # Tool module definitions
-│   │   ├── definitions.rs   # Tool schema definitions
-│   │   ├── executor.rs      # Tool execution logic
-│   │   ├── types.rs         # Tool type definitions
-│   │   ├── args.rs          # Argument parsing for tools
-│   │   └── utils.rs         # Utility functions
-│   └── ui.rs                # Terminal UI components
-├── example/                 # Example files for testing
-├── target/                  # Build output directory (gitignored)
-├── Cargo.toml               # Project dependencies and metadata
-├── Cargo.lock               # Dependency lock file (gitignored)
-└── README.md                # Project documentation
+│   ├── agents.rs        # AGENTS.md generation and analysis
+│   ├── api.rs           # API client implementation
+│   ├── chat.rs          # Chat interaction handling
+│   ├── commands.rs      # CLI command processing
+│   ├── config.rs        # Configuration management
+│   ├── history.rs       # Chat session history
+│   ├── i18n.rs          # Internationalization
+│   ├── main.rs          # Application entry point
+│   ├── prompts.rs       # System prompts
+│   ├── search_tool.rs   # Web search functionality
+│   ├── security.rs      # Security checks
+│   ├── tools/           # Tool implementations
+│   │   ├── executor.rs  # Tool execution logic
+│   │   ├── definitions.rs  # Tool definitions
+│   │   ├── types.rs     # Tool types
+│   │   ├── utils.rs     # Utility functions
+│   │   └── args.rs      # Tool argument structures
+│   └── ui.rs            # User interface components
+├── example/             # Example HTML files
+└── Cargo.toml           # Project configuration
 ```
 
 ## Build & Compilation
@@ -64,25 +63,17 @@ friendev/
 # Debug build
 cargo build
 
-# Release build (optimized)
+# Release build
 cargo build --release
 
 # Run tests
 cargo test
 
-# Check code without building
-cargo check
-
-# Format code
-cargo fmt
-
-# Run linter
-cargo clippy
+# Run specific test
+cargo test test_name
 ```
 
-The compiled binary will be located at:
-- Debug: `target/debug/friendev`
-- Release: `target/release/friendev`
+The binary will be located at `target/release/friendev` for release builds.
 
 ## Testing
 
@@ -90,96 +81,60 @@ The compiled binary will be located at:
 # Run all tests
 cargo test
 
-# Run specific test module
-cargo test modulename
-
 # Run tests with output
 cargo test -- --nocapture
 
-# Run tests in release mode
-cargo test --release
+# Run specific module tests
+cargo test modules::name
 ```
-
-Test files are located in the standard Rust locations:
-- Unit tests: Within each source file in `src/`
-- Integration tests: `tests/` directory (if present)
 
 ## Code Style & Standards
 
-- Rustfmt for code formatting: `cargo fmt`
-- Clippy for linting: `cargo clippy`
-- Conventions:
-  - Use `Result<T>` for error handling with `anyhow` crate
-  - Async/await pattern with Tokio runtime
-  - Structured logging with appropriate error messages
-  - Module organization following Rust best practices
+- Uses Rust 2021 edition
+- Formatting with `rustfmt`
+- Linting with `clippy`
+- Uses `anyhow` for error handling
+- Async code using `tokio` runtime
 
 ## Running the Application
 
 ```bash
-# Development build
+# Run from source
 cargo run
 
-# Release build
-cargo run --release
-
-# Or directly execute the binary
+# Run binary
 ./target/release/friendev
 ```
-
-### Configuration
-
-On first run, Friendev will prompt for:
-- OpenAI API key
-- API endpoint URL (default: https://api.openai.com/v1)
-- Default model (default: gpt-4)
-- UI language (default: en)
-- AI language (default: en)
-
-Configuration is stored in:
-- Windows: `%APPDATA%\friendev\config.json`
-- Linux/macOS: `~/.config/friendev/config.json`
 
 ### Available Commands
 
 - `/help` - Show available commands
-- `/model <name>` - Change the current AI model
-- `/models` - List available models from the API
-- `/language <lang>` - Change UI language
-- `/reset` - Reset conversation history
-- `/agents.md` - Generate AGENTS.md for current project
-- `/exit` or `Ctrl+D` - Exit the application
+- `/model list` - List available models
+- `/model switch <name>` - Switch to a different model
+- `/history list` - Show chat history
+- `/history new` - Create new chat session
+- `/history switch <id>` - Switch to chat session
+- `/history del <id>` - Delete chat session
+- `/language ui <lang>` - Set UI language (en/zh)
+- `/language ai <lang>` - Set AI language (en/zh)
+- `/agents.md` - Generate AGENTS.md file for current project
+- `/exit` - Exit the application
 
 ## API & Dependencies
 
 ### Key Dependencies
+- `tokio` v1 - Async runtime
+- `reqwest` v0.11 - HTTP client
+- `serde` v1.0 - Serialization
+- `clap` v4 - CLI argument parsing
+- `ratatui` v0.26 - Terminal UI
+- `reedline` v0.28 - Command line editing
+- `anyhow` v1.0 - Error handling
 
-- `tokio` (1.0+) - Async runtime
-- `reqwest` (0.11+) - HTTP client with TLS support
-- `serde` (1.0+) - Serialization/deserialization
-- `clap` (4.0+) - Command-line argument parsing
-- `ratatui` (0.26+) - Terminal UI framework
-- `reedline` (0.28+) - Modern readline implementation
-- `crossterm` (0.27+) - Cross-platform terminal control
-
-### API Requirements
-
-The application requires an OpenAI-compatible API endpoint that supports:
-- Chat completions endpoint (`/chat/completions`)
-- Streaming responses
-- Tool/function calling
-- Models listing endpoint (`/models`)
-
-### Tool Capabilities
-
-Friendev supports these tools for AI interaction:
-- `file_list` - List directory contents
-- `file_read` - Read file contents
-- `file_write` - Write content to files
-- `file_replace` - Replace content in files
-- `network_search_duckduckgo` - Search using DuckDuckGo
-- `network_search_bing` - Search using Bing
-- `network_search_auto` - Search with automatic fallback
+### API Configuration
+Friendev uses OpenAI-compatible APIs. Configuration is stored in:
+- Linux/Mac: `~/.config/friendev/config.json`
+- Windows: `%APPDATA%\friendev\config.json`
 
 ## Troubleshooting
 
@@ -188,45 +143,33 @@ Friendev supports these tools for AI interaction:
 1. **API Connection Errors**
    - Verify API key is correct
    - Check network connectivity
-   - Confirm API endpoint URL is accessible
+   - Ensure API URL is accessible
 
-2. **JSON Parsing Errors**
-   - Some models may produce incomplete JSON for tool calls
-   - The application includes automatic JSON repair mechanisms
-   - If persistent, try switching to a different model
+2. **File Operation Failures**
+   - Check file permissions
+   - Verify file paths
+   - Ensure directory exists
 
-3. **Terminal Display Issues**
-   - Ensure your terminal supports ANSI escape codes
-   - Windows users may need to enable virtual terminal processing
-   - Try reducing terminal width if display is corrupted
+3. **Configuration Issues**
+   - Delete config file to reinitialize
+   - Check config file JSON syntax
 
-4. **Configuration Problems**
-   - Delete config file and reinitialize: `rm ~/.config/friendev/config.json`
-   - Check file permissions on config directory
-
-### Debug Mode
-
-To enable more verbose output for troubleshooting:
-```bash
-RUST_LOG=debug cargo run
-```
+4. **Build Errors**
+   - Ensure Rust version is compatible
+   - Run `cargo clean` then rebuild
+   - Check for dependency conflicts
 
 ## Contributing
 
 ### Git Workflow
-
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make changes and add tests
-4. Run tests and linting: `cargo test && cargo clippy`
-5. Commit with conventional commit format
-6. Push to your fork
-7. Create a pull request
+2. Create a feature branch
+3. Make changes with proper commit messages
+4. Submit a pull request
 
 ### Commit Message Format
-
 ```
-<type>(<scope>): <description>
+type(scope): description
 
 [optional body]
 
@@ -235,19 +178,8 @@ RUST_LOG=debug cargo run
 
 Types: feat, fix, docs, style, refactor, test, chore
 
-Example:
-```
-feat(api): add retry mechanism for failed requests
-
-Implements exponential backoff with configurable max retries
-and delay between attempts.
-
-Closes #123
-```
-
-### Code Review Guidelines
-
-- Ensure all tests pass
-- Follow existing code style
-- Add documentation for new features
-- Update CHANGELOG.md for user-facing changes
+### Code Standards
+- Follow Rust conventions
+- Add tests for new features
+- Update documentation as needed
+- Ensure all tests pass before submitting
