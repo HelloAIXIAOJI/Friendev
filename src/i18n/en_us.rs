@@ -66,9 +66,18 @@ pub fn get_messages() -> HashMap<String, String> {
     // Language
     m.insert("ui_language_set".to_string(), "UI language set to".to_string());
     m.insert("ai_language_set".to_string(), "AI response language set to".to_string());
-    m.insert("supported_languages".to_string(), "UI support: en and zh. AI support: depending on the model.".to_string());
+    m.insert("supported_languages".to_string(), "AI support depends on the model.".to_string());
     m.insert("current_ui_lang".to_string(), "Current UI Language".to_string());
     m.insert("current_ai_lang".to_string(), "Current AI Language".to_string());
+    
+    // Setup initialization
+    m.insert("setup_welcome".to_string(), "Welcome to Friendev! First-time use requires initialization configuration.".to_string());
+    m.insert("setup_api_key".to_string(), "Please enter OpenAI API Key".to_string());
+    m.insert("setup_api_url".to_string(), "Please enter OpenAI Base URL".to_string());
+    m.insert("setup_model".to_string(), "Please enter the default model".to_string());
+    m.insert("setup_ui_language".to_string(), "Please select UI language".to_string());
+    m.insert("setup_ai_language".to_string(), "Please enter AI response language".to_string());
+    m.insert("setup_saved".to_string(), "Configuration saved!".to_string());
     
     m
 }

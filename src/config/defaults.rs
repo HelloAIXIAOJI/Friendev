@@ -8,12 +8,14 @@ pub fn default_retry_delay_ms() -> u64 {
     300
 }
 
-/// Default UI language
+use crate::i18n::SUPPORTED_LANGUAGES;
+
+/// Default UI language (first supported language)
 pub fn default_ui_language() -> String {
-    "en".to_string()
+    SUPPORTED_LANGUAGES[0].to_string()
 }
 
-/// Default AI language
+/// Default AI language (first supported language)
 pub fn default_ai_language() -> String {
-    "en".to_string()
+    SUPPORTED_LANGUAGES[0].to_string()
 }

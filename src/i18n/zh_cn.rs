@@ -66,9 +66,18 @@ pub fn get_messages() -> HashMap<String, String> {
     // 语言
     m.insert("ui_language_set".to_string(), "界面语言已设置为".to_string());
     m.insert("ai_language_set".to_string(), "AI 回复语言已设置为".to_string());
-    m.insert("supported_languages".to_string(), "UI支持: en与zh。AI支持：根据模型而定。".to_string());
+    m.insert("supported_languages".to_string(), "AI 支持取决于所用模型。".to_string());
     m.insert("current_ui_lang".to_string(), "当前界面语言".to_string());
     m.insert("current_ai_lang".to_string(), "当前 AI 语言".to_string());
+    
+    // 初始化设置
+    m.insert("setup_welcome".to_string(), "欢迎使用 Friendev！首次使用需要初始化配置。".to_string());
+    m.insert("setup_api_key".to_string(), "请输入 OpenAI API Key".to_string());
+    m.insert("setup_api_url".to_string(), "请输入 OpenAI API URL".to_string());
+    m.insert("setup_model".to_string(), "请输入默认模型".to_string());
+    m.insert("setup_ui_language".to_string(), "请选择界面语言".to_string());
+    m.insert("setup_ai_language".to_string(), "请输入 AI 回复语言".to_string());
+    m.insert("setup_saved".to_string(), "配置已保存！".to_string());
     
     m
 }

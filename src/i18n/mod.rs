@@ -5,6 +5,12 @@ mod loader;
 use std::collections::HashMap;
 use loader::load_messages;
 
+// Re-export language validation and supported languages
+pub use loader::{is_language_supported, supported_languages_str};
+
+/// Re-export SUPPORTED_LANGUAGES directly from loader (single source of truth)
+pub use loader::SUPPORTED_LANGUAGES;
+
 /// Internationalization context storing language and translations
 #[derive(Debug, Clone)]
 pub struct I18n {
