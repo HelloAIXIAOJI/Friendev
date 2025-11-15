@@ -5,19 +5,19 @@ use super::defaults;
 
 /// Initialize configuration through interactive prompts
 pub fn initialize_config() -> Result<Config> {
-    println!("欢迎使用 Friendev！首次使用需要初始化配置。\n");
+    println!("Welcome to Friendev! First-time use requires initialization configuration.\n");
     
     let api_key = dialoguer::Input::<String>::new()
-        .with_prompt("请输入 OpenAI API Key")
+        .with_prompt("Please enter OpenAI API Key")
         .interact_text()?;
 
     let api_url = dialoguer::Input::<String>::new()
-        .with_prompt("请输入 OpenAI API URL")
+        .with_prompt("Please enter OpenAI Base URL")
         .default("https://api.openai.com/v1".to_string())
         .interact_text()?;
 
     let current_model = dialoguer::Input::<String>::new()
-        .with_prompt("请输入默认模型")
+        .with_prompt("Please enter the default model.")
         .default("gpt-4".to_string())
         .interact_text()?;
 
