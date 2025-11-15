@@ -20,10 +20,18 @@ pub async fn initialize_app() -> Result<AppState> {
     // Check for --ally flag
     let auto_approve = env::args().any(|arg| arg == "--ally");
     
+    // Check for --setup flag to force setup
+    let force_setup = env::args().any(|arg| arg == "--setup");
+    
     // Load or initialize config
-    let config = match Config::load()? {
-        Some(c) => c,
-        None => Config::initialize()?,
+    let config = if force_setup {
+        // Force setup regardless of existing config
+        Config::initialize()?
+    } else {
+        match Config::load()? {
+            Some(c) => c,
+            None => Config::initialize()?,
+        }
     };
     
     // Create i18n instance
