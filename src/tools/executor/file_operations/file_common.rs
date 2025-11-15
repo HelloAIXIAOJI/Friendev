@@ -1,0 +1,127 @@
+use std::path::PathBuf;
+use std::path::Path;
+use anyhow::Result;
+
+use crate::tools::types::ToolResult;
+use crate::tools::types::{is_action_approved, approve_action_for_session};
+use crate::ui::prompt_approval;
+
+/// 规范化路径 - 处理相对路径和绝对路径
+pub fn normalize_path(path_str: &str, working_dir: &Path) -> PathBuf {
+    let p = Path::new(path_str);
+    if p.is_absolute() {
+        p.to_path_buf()
+    } else {
+        working_dir.join(p)
+    }
+}
+
+/// 验证文件存在
+pub fn verify_file_exists(path: &Path) -> Result<ToolResult> {
+    if !path.exists() {
+        return Ok(ToolResult::error(format!("文件不存在: {}", path.display())));
+    }
+    if !path.is_file() {
+        return Ok(ToolResult::error(format!("不是文件: {}", path.display())));
+    }
+    Ok(ToolResult::ok(String::new(), String::new()))
+}
+
+/// 验证目录存在
+pub fn verify_dir_exists(path: &Path) -> Result<ToolResult> {
+    if !path.exists() {
+        return Ok(ToolResult::error(format!("路径不存在: {}", path.display())));
+    }
+    if !path.is_dir() {
+        return Ok(ToolResult::error(format!("不是目录: {}", path.display())));
+    }
+    Ok(ToolResult::ok(String::new(), String::new()))
+}
+
+/// 显示审批对话框并返回用户决策
+pub async fn request_approval(
+    tool_name: &str,
+    description: &str,
+    preview: Option<&str>,
+) -> Result<(bool, bool, bool)> {
+    Ok(prompt_approval(tool_name, description, preview)?)
+}
+
+/// 处理审批流程
+pub async fn handle_approval_flow(
+    tool_id: &str,
+    approval_desc: &str,
+    preview: Option<&str>,
+    require_approval: bool,
+) -> Result<Option<String>> {
+    if !require_approval {
+        return Ok(None);
+    }
+
+    if is_action_approved(tool_id) {
+        return Ok(None);
+    }
+
+    let (approved, always, _view_details) = request_approval(
+        tool_id,
+        approval_desc,
+        preview,
+    ).await?;
+
+    if !approved {
+        return Ok(Some("用户拒绝了该操作".to_string()));
+    }
+
+    if always {
+        approve_action_for_session(tool_id);
+    }
+
+    Ok(None)
+}
+
+/// 处理带详细内容展示的审批流程
+pub async fn handle_approval_with_details(
+    tool_id: &str,
+    approval_desc: &str,
+    preview: Option<&str>,
+    detail_title: &str,
+    detail_content: &str,
+    require_approval: bool,
+) -> Result<Option<String>> {
+    if !require_approval {
+        return Ok(None);
+    }
+
+    if is_action_approved(tool_id) {
+        return Ok(None);
+    }
+
+    let (approved, always, view_details) = request_approval(
+        tool_id,
+        approval_desc,
+        preview,
+    ).await?;
+
+    // 如果用户选择查看详细信息
+    if view_details {
+        let continue_operation = crate::ui::show_detailed_content(
+            tool_id,
+            detail_title,
+            detail_content
+        )?;
+
+        if !continue_operation {
+            return Ok(Some("用户取消了该操作".to_string()));
+        }
+    }
+
+    if !approved {
+        return Ok(Some("用户拒绝了该操作".to_string()));
+    }
+
+    if always {
+        approve_action_for_session(tool_id);
+    }
+
+    Ok(None)
+}
