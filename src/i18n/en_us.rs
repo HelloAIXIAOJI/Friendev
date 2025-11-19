@@ -78,6 +78,28 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("setup_ui_language".to_string(), "Please select UI language".to_string());
     m.insert("setup_ai_language".to_string(), "Please enter AI response language".to_string());
     m.insert("setup_saved".to_string(), "Configuration saved!".to_string());
+
+    // UI: approval prompt & details
+    m.insert("approval_title".to_string(), "  ──── Approval Required ──────────────────".to_string());
+    m.insert("approval_empty_line".to_string(), "                                           ".to_string());
+    m.insert("approval_separator".to_string(), "  ─────────────────────────────────────────".to_string());
+    m.insert("approval_action_wants".to_string(), "wants to modify".to_string());
+    m.insert("approval_content_preview".to_string(), "Content preview:".to_string());
+    m.insert("approval_choice_hint".to_string(), "[Y]es / [N]o / [I]nfo / [A]lways".to_string());
+    m.insert("approval_choice_prompt".to_string(), "Your choice:".to_string());
+    m.insert("approval_always_approved".to_string(), "Approved for this session".to_string());
+    m.insert("approval_rejected".to_string(), "Rejected".to_string());
+
+    m.insert("details_title".to_string(), "  ──── Detailed Code Changes ──────────────────".to_string());
+    m.insert("details_separator".to_string(), "  ──────────────────────────────────────────".to_string());
+    m.insert("details_tool".to_string(), "Tool:".to_string());
+    m.insert("details_file".to_string(), "File:".to_string());
+    m.insert("details_choice_hint".to_string(), "[C]ontinue / [A]bort".to_string());
+    m.insert("details_choice_prompt".to_string(), "Your choice:".to_string());
+
+    // UI: tool call display
+    m.insert("tool_action_used".to_string(), "Used".to_string());
+    m.insert("tool_action_using".to_string(), "Using".to_string());
     
     m
 }

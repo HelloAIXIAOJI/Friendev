@@ -1,6 +1,8 @@
 use colored::Colorize;
 use std::io::{self, Write};
 
+use crate::ui::get_i18n;
+
 /// UI 组件，用于展示工具调用的流式进度
 #[derive(Clone)]
 pub struct ToolCallDisplay {
@@ -36,6 +38,8 @@ impl ToolCallDisplay {
 
     /// 渲染正在进行的状态（流式显示）
     pub fn render_streaming(&self) {
+        let i18n = get_i18n();
+
         let status = if self.is_finished {
             if self.is_success {
                 "•".green()
@@ -46,7 +50,11 @@ impl ToolCallDisplay {
             "⠋".bright_black()
         };
 
-        let action = if self.is_finished { "Used" } else { "Using" };
+        let action = if self.is_finished {
+            i18n.get("tool_action_used")
+        } else {
+            i18n.get("tool_action_using")
+        };
         
         print!("\r  {} {} {}", 
             status, 
@@ -63,6 +71,8 @@ impl ToolCallDisplay {
 
     /// 渲染最终状态
     pub fn render_final(&self) {
+        let i18n = get_i18n();
+
         let bullet = if self.is_success {
             "•".green()
         } else {
@@ -71,7 +81,7 @@ impl ToolCallDisplay {
 
         println!("  {} {} {}", 
             bullet,
-            "Used".dimmed(),
+            i18n.get("tool_action_used").dimmed(),
             self.name.cyan().bold()
         );
 

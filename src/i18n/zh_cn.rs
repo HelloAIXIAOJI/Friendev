@@ -78,6 +78,28 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("setup_ui_language".to_string(), "请选择界面语言".to_string());
     m.insert("setup_ai_language".to_string(), "请输入 AI 回复语言".to_string());
     m.insert("setup_saved".to_string(), "配置已保存！".to_string());
+
+    // UI：审批提示与详情
+    m.insert("approval_title".to_string(), "  ──── 需要审批 ──────────────────".to_string());
+    m.insert("approval_empty_line".to_string(), "                                           ".to_string());
+    m.insert("approval_separator".to_string(), "  ─────────────────────────────────────────".to_string());
+    m.insert("approval_action_wants".to_string(), "准备修改".to_string());
+    m.insert("approval_content_preview".to_string(), "内容预览:".to_string());
+    m.insert("approval_choice_hint".to_string(), "[Y]同意 / [N]拒绝 / [I]详情 / [A]本次会话始终允许".to_string());
+    m.insert("approval_choice_prompt".to_string(), "请输入选择:".to_string());
+    m.insert("approval_always_approved".to_string(), "本次会话内已设为始终允许".to_string());
+    m.insert("approval_rejected".to_string(), "已拒绝".to_string());
+
+    m.insert("details_title".to_string(), "  ──── 代码变更详情 ──────────────────".to_string());
+    m.insert("details_separator".to_string(), "  ──────────────────────────────────────────".to_string());
+    m.insert("details_tool".to_string(), "工具:".to_string());
+    m.insert("details_file".to_string(), "文件:".to_string());
+    m.insert("details_choice_hint".to_string(), "[C]继续 / [A]终止".to_string());
+    m.insert("details_choice_prompt".to_string(), "请输入选择:".to_string());
+
+    // UI：工具调用展示
+    m.insert("tool_action_used".to_string(), "已使用".to_string());
+    m.insert("tool_action_using".to_string(), "正在使用".to_string());
     
     m
 }

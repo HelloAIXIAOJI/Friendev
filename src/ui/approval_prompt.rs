@@ -1,6 +1,8 @@
 use colored::Colorize;
 use std::io::{self, Write};
 
+use crate::ui::get_i18n;
+
 /// 用户审批提示
 /// 返回 (approved, always, view_details)
 pub fn prompt_approval(action: &str, file_path: &str, content_preview: Option<&str>) -> io::Result<(bool, bool, bool)> {
@@ -12,15 +14,20 @@ pub fn prompt_approval(action: &str, file_path: &str, content_preview: Option<&s
         .and_then(|n| n.to_str())
         .unwrap_or(file_path);
     
+    let i18n = get_i18n();
+
     println!();
-    println!("{}", "  ──── Approval Required ──────────────────".yellow());
-    println!("{}", format!("    {} wants to modify:", action).yellow());
+    println!("{}", i18n.get("approval_title").yellow());
+    println!(
+        "{}",
+        format!("    {} {}:", action, i18n.get("approval_action_wants")).yellow()
+    );
     println!("{}", format!("      {}", file_name).yellow().bold());
     
     // 显示内容预览
     if let Some(preview) = content_preview {
-        println!("{}", "                                           ".yellow());
-        println!("{}", "    Content preview:".yellow());
+        println!("{}", i18n.get("approval_empty_line").yellow());
+        println!("{}", format!("    {}", i18n.get("approval_content_preview")).yellow());
         
         let lines: Vec<&str> = preview.lines().take(5).collect();
         for line in lines {
@@ -39,10 +46,13 @@ pub fn prompt_approval(action: &str, file_path: &str, content_preview: Option<&s
         }
     }
     
-    println!("{}", "                                           ".yellow());
-    println!("{}", "    [Y]es / [N]o / [I]nfo / [A]lways       ".yellow());
-    println!("{}", "  ─────────────────────────────────────────".yellow());
-    print!("  {} ", "Your choice:".bright_cyan());
+    println!("{}", i18n.get("approval_empty_line").yellow());
+    println!(
+        "{}",
+        format!("    {}", i18n.get("approval_choice_hint")).yellow()
+    );
+    println!("{}", i18n.get("approval_separator").yellow());
+    print!("  {} ", i18n.get("approval_choice_prompt").bright_cyan());
     io::stdout().flush()?;
 
     let mut input = String::new();
@@ -57,11 +67,15 @@ pub fn prompt_approval(action: &str, file_path: &str, content_preview: Option<&s
             Ok((true, false, true))  // 返回 true, false, true 表示需要查看详细信息
         }
         "a" | "always" => {
-            println!("  {} Approved for this session", "✓".green());
+            println!(
+                "  {} {}",
+                "✓".green(),
+                i18n.get("approval_always_approved")
+            );
             Ok((true, true, false))  // 返回 true, true, false 表示 always
         }
         _ => {
-            println!("  {} Rejected", "✗".red());
+            println!("  {} {}", "✗".red(), i18n.get("approval_rejected"));
             Ok((false, false, false))
         }
     }
@@ -77,11 +91,21 @@ pub fn show_detailed_content(action: &str, file_path: &str, content: &str) -> io
         .and_then(|n| n.to_str())
         .unwrap_or(file_path);
     
+    let i18n = get_i18n();
+
     println!();
-    println!("{}", "  ──── Detailed Code Changes ──────────────────".cyan());
-    println!("{}", format!("    Tool: {}", action).cyan());
-    println!("{}", format!("    File: {}", file_name).cyan().bold());
-    println!("{}", "  ──────────────────────────────────────────".cyan());
+    println!("{}", i18n.get("details_title").cyan());
+    println!(
+        "{}",
+        format!("    {} {}", i18n.get("details_tool"), action).cyan()
+    );
+    println!(
+        "{}",
+        format!("    {} {}", i18n.get("details_file"), file_name)
+            .cyan()
+            .bold()
+    );
+    println!("{}", i18n.get("details_separator").cyan());
     println!();
     
     // 显示完整内容，使用终端友好的格式
@@ -93,10 +117,13 @@ pub fn show_detailed_content(action: &str, file_path: &str, content: &str) -> io
     }
     
     println!();
+    println!("{}", i18n.get("details_separator").cyan());
+    println!(
+        "{}",
+        format!("    {}", i18n.get("details_choice_hint")).cyan()
+    );
     println!("{}", "  ──────────────────────────────────────────".cyan());
-    println!("{}", "    [C]ontinue / [A]bort                    ".cyan());
-    println!("{}", "  ──────────────────────────────────────────".cyan());
-    print!("  {} ", "Your choice:".bright_cyan());
+    print!("  {} ", i18n.get("details_choice_prompt").bright_cyan());
     io::stdout().flush()?;
 
     let mut input = String::new();
