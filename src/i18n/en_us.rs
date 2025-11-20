@@ -152,5 +152,32 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("run_command_fg_output".to_string(), "Command: {}\nExit code: {}\nStatus: {}\n\nOutput:\n{}".to_string());
     m.insert("run_command_execute_error".to_string(), "Failed to execute command: {}".to_string());
 
+    // Language command extras
+    m.insert("lang_ui_unsupported".to_string(), "Unsupported UI language: '{}'".to_string());
+    m.insert("lang_supported_label".to_string(), "Supported languages".to_string());
+    m.insert("lang_supported_ui_label".to_string(), "Supported UI languages:".to_string());
+
+    // Runcommand command messages
+    m.insert("runcommand_no_commands".to_string(), "No commands require approval".to_string());
+    m.insert("runcommand_list_header".to_string(), "Commands requiring approval".to_string());
+    m.insert("runcommand_load_config_failed".to_string(), "Failed to load command config".to_string());
+    m.insert("runcommand_add_ok".to_string(), "Added '{}' to approval list".to_string());
+    m.insert("runcommand_add_exists".to_string(), "'{}' is already in approval list".to_string());
+    m.insert("runcommand_del_ok".to_string(), "Removed '{}' from approval list".to_string());
+    m.insert("runcommand_del_not_found".to_string(), "'{}' is not in approval list".to_string());
+    m.insert("runcommand_info_header".to_string(), "Background Command Info".to_string());
+    m.insert("runcommand_info_id".to_string(), "ID:".to_string());
+    m.insert("runcommand_info_command".to_string(), "Command:".to_string());
+    m.insert("runcommand_info_status".to_string(), "Status:".to_string());
+    m.insert("runcommand_info_started".to_string(), "Started:".to_string());
+    m.insert("runcommand_info_exit_code".to_string(), "Exit Code:".to_string());
+    m.insert("runcommand_info_output".to_string(), "Output".to_string());
+    m.insert("runcommand_info_not_found".to_string(), "Command with ID '{}' not found".to_string());
+    m.insert("runcommand_help_header".to_string(), "Help for /runcommand".to_string());
+
+    // Agents command messages
+    m.insert("agents_analyzing_project".to_string(), "Analyzing project structure...".to_string());
+    m.insert("agents_sending_to_ai".to_string(), "Sending to AI for AGENTS.md generation...".to_string());
+
     m
 }

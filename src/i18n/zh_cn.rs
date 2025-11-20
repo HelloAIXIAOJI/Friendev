@@ -152,5 +152,32 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("run_command_fg_output".to_string(), "命令: {}\n退出码: {}\n状态: {}\n\n输出:\n{}".to_string());
     m.insert("run_command_execute_error".to_string(), "执行命令失败: {}".to_string());
 
+    // Language command extras
+    m.insert("lang_ui_unsupported".to_string(), "不支持的界面语言: '{}'".to_string());
+    m.insert("lang_supported_label".to_string(), "支持的语言".to_string());
+    m.insert("lang_supported_ui_label".to_string(), "支持的界面语言:".to_string());
+
+    // Runcommand command messages
+    m.insert("runcommand_no_commands".to_string(), "当前没有需要审批的命令".to_string());
+    m.insert("runcommand_list_header".to_string(), "需要审批的命令".to_string());
+    m.insert("runcommand_load_config_failed".to_string(), "加载命令配置失败".to_string());
+    m.insert("runcommand_add_ok".to_string(), "已将 '{}' 添加到审批列表".to_string());
+    m.insert("runcommand_add_exists".to_string(), "'{}' 已在审批列表中".to_string());
+    m.insert("runcommand_del_ok".to_string(), "已从审批列表移除 '{}'".to_string());
+    m.insert("runcommand_del_not_found".to_string(), "'{}' 不在审批列表中".to_string());
+    m.insert("runcommand_info_header".to_string(), "后台命令信息".to_string());
+    m.insert("runcommand_info_id".to_string(), "ID:".to_string());
+    m.insert("runcommand_info_command".to_string(), "命令:".to_string());
+    m.insert("runcommand_info_status".to_string(), "状态:".to_string());
+    m.insert("runcommand_info_started".to_string(), "开始时间:".to_string());
+    m.insert("runcommand_info_exit_code".to_string(), "退出码:".to_string());
+    m.insert("runcommand_info_output".to_string(), "输出".to_string());
+    m.insert("runcommand_info_not_found".to_string(), "未找到 ID 为 '{}' 的命令".to_string());
+    m.insert("runcommand_help_header".to_string(), "/runcommand 帮助".to_string());
+
+    // Agents command messages
+    m.insert("agents_analyzing_project".to_string(), "正在分析项目结构...".to_string());
+    m.insert("agents_sending_to_ai".to_string(), "正在发送给 AI 生成 AGENTS.md...".to_string());
+
     m
 }

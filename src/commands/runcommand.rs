@@ -3,7 +3,7 @@ use anyhow::Result;
 use crate::i18n::I18n;
 
 /// Handle /runcommand command
-pub fn handle_run_command_command(parts: &[&str], _i18n: &I18n) -> Result<()> {
+pub fn handle_run_command_command(parts: &[&str], i18n: &I18n) -> Result<()> {
     match parts.get(1) {
         Some(&"list") => {
             match crate::tools::command_manager::CommandConfig::load() {
@@ -11,16 +11,26 @@ pub fn handle_run_command_command(parts: &[&str], _i18n: &I18n) -> Result<()> {
                     let commands = config.list_always_approve_commands();
 
                     if commands.is_empty() {
-                        println!("\n\x1b[90m[i] No commands require approval\x1b[0m\n");
+                        println!(
+                            "\n\x1b[90m[i] {}\x1b[0m\n",
+                            i18n.get("runcommand_no_commands")
+                        );
                     } else {
-                        println!("\n\x1b[1;33mCommands requiring approval:\x1b[0m");
+                        println!(
+                            "\n\x1b[1;33m{}:\x1b[0m",
+                            i18n.get("runcommand_list_header")
+                        );
                         for (i, cmd) in commands.iter().enumerate() {
                             println!("  \x1b[32m[{}]\x1b[0m {}", i + 1, cmd);
                         }
                         println!();
                     }
                 }
-                Err(e) => eprintln!("\n\x1b[31m[X] Failed to load command config:\x1b[0m {}\n", e),
+                Err(e) => eprintln!(
+                    "\n\x1b[31m[X] {}:\x1b[0m {}\n",
+                    i18n.get("runcommand_load_config_failed"),
+                    e
+                ),
             }
         }
         Some(&"add") => {
@@ -28,19 +38,32 @@ pub fn handle_run_command_command(parts: &[&str], _i18n: &I18n) -> Result<()> {
                 let mut config = match crate::tools::command_manager::CommandConfig::load() {
                     Ok(c) => c,
                     Err(e) => {
-                        eprintln!("\n\x1b[31m[X] Failed to load command config:\x1b[0m {}\n", e);
+                        eprintln!(
+                            "\n\x1b[31m[X] {}:\x1b[0m {}\n",
+                            i18n.get("runcommand_load_config_failed"),
+                            e
+                        );
                         return Ok(());
                     }
                 };
 
                 if config.add_always_approve_command(cmd) {
                     config.save()?;
-                    println!("\n\x1b[32m[OK]\x1b[0m Added '{}' to approval list\n", cmd);
+                    println!(
+                        "\n\x1b[32m[OK]\x1b[0m {}\n",
+                        i18n.get("runcommand_add_ok").replace("{}", cmd)
+                    );
                 } else {
-                    println!("\n\x1b[33m[!] '{}' is already in approval list\n", cmd);
+                    println!(
+                        "\n\x1b[33m[!] {}\n",
+                        i18n.get("runcommand_add_exists").replace("{}", cmd)
+                    );
                 }
             } else {
-                println!("\n\x1b[33m[!] Usage:\x1b[0m /runcommand add <command>\n");
+                println!(
+                    "\n\x1b[33m[!] {}:\x1b[0m /runcommand add <command>\n",
+                    i18n.get("usage")
+                );
             }
         }
         Some(&"del") | Some(&"remove") => {
@@ -48,19 +71,32 @@ pub fn handle_run_command_command(parts: &[&str], _i18n: &I18n) -> Result<()> {
                 let mut config = match crate::tools::command_manager::CommandConfig::load() {
                     Ok(c) => c,
                     Err(e) => {
-                        eprintln!("\n\x1b[31m[X] Failed to load command config:\x1b[0m {}\n", e);
+                        eprintln!(
+                            "\n\x1b[31m[X] {}:\x1b[0m {}\n",
+                            i18n.get("runcommand_load_config_failed"),
+                            e
+                        );
                         return Ok(());
                     }
                 };
 
                 if config.remove_always_approve_command(cmd) {
                     config.save()?;
-                    println!("\n\x1b[32m[OK]\x1b[0m Removed '{}' from approval list\n", cmd);
+                    println!(
+                        "\n\x1b[32m[OK]\x1b[0m {}\n",
+                        i18n.get("runcommand_del_ok").replace("{}", cmd)
+                    );
                 } else {
-                    println!("\n\x1b[33m[!] '{}' is not in approval list\n", cmd);
+                    println!(
+                        "\n\x1b[33m[!] {}\n",
+                        i18n.get("runcommand_del_not_found").replace("{}", cmd)
+                    );
                 }
             } else {
-                println!("\n\x1b[33m[!] Usage:\x1b[0m /runcommand del <command>\n");
+                println!(
+                    "\n\x1b[33m[!] {}:\x1b[0m /runcommand del <command>\n",
+                    i18n.get("usage")
+                );
             }
         }
         Some(&"info") => {
@@ -68,38 +104,67 @@ pub fn handle_run_command_command(parts: &[&str], _i18n: &I18n) -> Result<()> {
                 match crate::tools::command_manager::CommandConfig::load() {
                     Ok(config) => {
                         if let Some(cmd) = config.get_background_command(id_str) {
-                            println!("\n\x1b[1;33mBackground Command Info:\x1b[0m");
-                            println!("  ID: {}", cmd.id);
-                            println!("  Command: {}", cmd.command);
-                            println!("  Status: {}", cmd.status);
-                            println!("  Started: {}", cmd.start_time.format("%Y-%m-%d %H:%M:%S UTC"));
+                            println!(
+                                "\n\x1b[1;33m{}:\x1b[0m",
+                                i18n.get("runcommand_info_header")
+                            );
+                            println!("  {} {}", i18n.get("runcommand_info_id"), cmd.id);
+                            println!("  {} {}", i18n.get("runcommand_info_command"), cmd.command);
+                            println!("  {} {}", i18n.get("runcommand_info_status"), cmd.status);
+                            println!(
+                                "  {} {}",
+                                i18n.get("runcommand_info_started"),
+                                cmd.start_time.format("%Y-%m-%d %H:%M:%S UTC")
+                            );
 
                             if let Some(code) = cmd.exit_code {
-                                println!("  Exit Code: {}", code);
+                                println!("  {} {}", i18n.get("runcommand_info_exit_code"), code);
                             }
 
                             if let Some(output) = &cmd.output {
-                                println!("\n\x1b[1;33mOutput:\x1b[0m");
+                                println!("\n\x1b[1;33m{}:\x1b[0m", i18n.get("runcommand_info_output"));
                                 println!("  {}", output.replace("\n", "\n  "));
                             }
 
                             println!();
                         } else {
-                            println!("\n\x1b[31m[X] Command with ID '{}' not found\x1b[0m\n", id_str);
+                            println!(
+                                "\n\x1b[31m[X] {}\x1b[0m\n",
+                                i18n.get("runcommand_info_not_found").replace("{}", id_str)
+                            );
                         }
                     }
-                    Err(e) => eprintln!("\n\x1b[31m[X] Failed to load command config:\x1b[0m {}\n", e),
+                    Err(e) => eprintln!(
+                        "\n\x1b[31m[X] {}:\x1b[0m {}\n",
+                        i18n.get("runcommand_load_config_failed"),
+                        e
+                    ),
                 }
             } else {
-                println!("\n\x1b[33m[!] Usage:\x1b[0m /runcommand info <id>\n");
+                println!(
+                    "\n\x1b[33m[!] {}:\x1b[0m /runcommand info <id>\n",
+                    i18n.get("usage")
+                );
             }
         }
         _ => {
-            println!("\n\x1b[33m[?] Help for /runcommand:\x1b[0m");
-            println!("    \x1b[36m/runcommand\x1b[0m list        List commands requiring approval");
-            println!("    \x1b[36m/runcommand\x1b[0m add <cmd>   Add command to approval list");
-            println!("    \x1b[36m/runcommand\x1b[0m del <cmd>   Remove command from approval list");
-            println!("    \x1b[36m/runcommand\x1b[0m info <id>   Show background command details\n");
+            println!("\n\x1b[33m[?] {}:\x1b[0m", i18n.get("runcommand_help_header"));
+            println!(
+                "    \x1b[36m/runcommand\x1b[0m list        {}",
+                i18n.get("cmd_runcommand_list")
+            );
+            println!(
+                "    \x1b[36m/runcommand\x1b[0m add <cmd>   {}",
+                i18n.get("cmd_runcommand_add")
+            );
+            println!(
+                "    \x1b[36m/runcommand\x1b[0m del <cmd>   {}",
+                i18n.get("cmd_runcommand_del")
+            );
+            println!(
+                "    \x1b[36m/runcommand\x1b[0m info <id>   {}\n",
+                i18n.get("cmd_runcommand_info")
+            );
         }
     }
     Ok(())

@@ -13,8 +13,16 @@ pub fn handle_language_command(
         Some(&"ui") => {
             if let Some(lang) = parts.get(2) {
                 if !is_language_supported(lang) {
-                    println!("\n\x1b[31m[✗] Error:\x1b[0m Unsupported UI language: '{}'", lang);
-                    println!("\x1b[33m[!] Supported languages:\x1b[0m {}\n", supported_languages_str());
+                    println!(
+                        "\n\x1b[31m[✗] {}:\x1b[0m {}\n",
+                        i18n.get("error"),
+                        i18n.get("lang_ui_unsupported").replace("{}", lang)
+                    );
+                    println!(
+                        "\x1b[33m[!] {}:\x1b[0m {}\n",
+                        i18n.get("lang_supported_label"),
+                        supported_languages_str()
+                    );
                 } else {
                     config.update_ui_language(lang.to_string())?;
                     let new_i18n = I18n::new(lang);
@@ -23,7 +31,11 @@ pub fn handle_language_command(
             } else {
                 println!("\n\x1b[36m[>]\x1b[0m {}: {}\n", i18n.get("current_ui_lang"), config.ui_language);
                 println!("\x1b[33m[!] {}:\x1b[0m /language ui <lang>", i18n.get("usage"));
-                println!("    Supported languages: {}\n", supported_languages_str());
+                println!(
+                    "    {} {}\n",
+                    i18n.get("lang_supported_label"),
+                    supported_languages_str()
+                );
             }
         }
         Some(&"ai") => {
@@ -40,7 +52,11 @@ pub fn handle_language_command(
             println!("\n\x1b[33m[?] {}:\x1b[0m", i18n.get("help_language"));
             println!("    \x1b[36m/language\x1b[0m ui <lang>  {}", i18n.get("cmd_language_ui"));
             println!("    \x1b[36m/language\x1b[0m ai <lang>  {}", i18n.get("cmd_language_ai"));
-            println!("\n    Supported UI languages: {}\n", supported_languages_str());
+            println!(
+                "\n    {} {}\n",
+                i18n.get("lang_supported_ui_label"),
+                supported_languages_str()
+            );
         }
     }
     Ok(())
