@@ -2,6 +2,11 @@
 
 all friendev update changelog on here.
 ---
+## [0.1.5] - 2025-11-20
+#### Added
+- Internationalization (i18n) support introduced for all UI components
+- Optimized the prompt for generating AGENTS.md
+---
 ## [0.1.4] - 2025-11-15
 
 ### Added
