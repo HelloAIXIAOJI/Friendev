@@ -192,5 +192,12 @@ pub fn get_messages() -> HashMap<String, String> {
     // History summary
     m.insert("history_new_chat_summary".to_string(), "新聊天".to_string());
 
+    // Chat output labels
+    m.insert("chat_think_label".to_string(), "思考".to_string());
+    m.insert("chat_ai_label".to_string(), "AI".to_string());
+    m.insert("chat_tool_parse_error".to_string(), "检测到工具调用，但全部解析失败".to_string());
+    m.insert("chat_debug_info_label".to_string(), "调试信息".to_string());
+    m.insert("chat_tool_parse_debug".to_string(), "请检查工具参数是否为合法 JSON".to_string());
+
     m
 }

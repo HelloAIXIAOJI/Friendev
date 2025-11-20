@@ -192,5 +192,12 @@ pub fn get_messages() -> HashMap<String, String> {
     // History summary
     m.insert("history_new_chat_summary".to_string(), "New Chat".to_string());
 
+    // Chat output labels
+    m.insert("chat_think_label".to_string(), "THINK".to_string());
+    m.insert("chat_ai_label".to_string(), "AI".to_string());
+    m.insert("chat_tool_parse_error".to_string(), "Tool calls detected but all failed to parse".to_string());
+    m.insert("chat_debug_info_label".to_string(), "Debug Info".to_string());
+    m.insert("chat_tool_parse_debug".to_string(), "Check if tool arguments are valid JSON".to_string());
+
     m
 }
