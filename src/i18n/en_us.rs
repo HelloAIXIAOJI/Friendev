@@ -189,5 +189,8 @@ pub fn get_messages() -> HashMap<String, String> {
     // History maintenance messages
     m.insert("history_cleanup_empty".to_string(), "Cleaned up {} empty session(s)".to_string());
 
+    // History summary
+    m.insert("history_new_chat_summary".to_string(), "New Chat".to_string());
+
     m
 }

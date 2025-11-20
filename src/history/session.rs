@@ -6,6 +6,7 @@ use anyhow::Result;
 use super::types::Message;
 use super::persistence;
 use super::management;
+use crate::ui::get_i18n;
 
 /// Chat session containing messages and metadata
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -53,6 +54,7 @@ impl ChatSession {
 
     /// Get session summary from first user message
     pub fn summary(&self) -> String {
+        let i18n = get_i18n();
         let first_user_msg = self
             .messages
             .iter()
@@ -67,7 +69,7 @@ impl ChatSession {
                     content.to_string()
                 }
             })
-            .unwrap_or_else(|| "New Chat".to_string());
+            .unwrap_or_else(|| i18n.get("history_new_chat_summary"));
 
         first_user_msg
     }
