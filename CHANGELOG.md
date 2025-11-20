@@ -1,6 +1,5 @@
 # Changelog
-
-all friendev update changelog on here.
+- all friendev update changelog on here.
 ---
 ## [0.1.5] - 2025-11-20
 #### Added
