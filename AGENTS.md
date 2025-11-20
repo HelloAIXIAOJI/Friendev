@@ -2,78 +2,63 @@
 
 ## Overview
 
-Friendev is an AI-powered development assistant written in Rust that provides a command-line interface for interacting with AI models. It features file system operations, web search capabilities, and a terminal-based UI for enhanced user interaction.
+Friendev is an AI-powered development assistant written in Rust that provides a terminal-based REPL interface for interacting with AI models and development tools. It enables developers to leverage AI capabilities for coding assistance, file management, web search, and command execution.
 
 ## Dev Environment
 
 ### Prerequisites
-- Rust 1.70+ (edition 2021)
+- Rust 1.70+ (stable toolchain)
 - Cargo package manager
-- OpenAI API key
 
 ### Setup
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/your-repo/friendev.git
 cd friendev
 
-# Build the project
+# Install dependencies
 cargo build --release
-
-# Run the application
-cargo run
 ```
-
-### First-time Configuration
-When first running Friendev, you'll be prompted to configure:
-- OpenAI API key
-- API URL (default: https://api.openai.com/v1)
-- Default model (default: gpt-4)
 
 ## Project Structure
 
 ```
-friendev/
-├── src/
-│   ├── agents.rs        # AGENTS.md generation and analysis
-│   ├── api.rs           # API client implementation
-│   ├── chat.rs          # Chat interaction handling
-│   ├── commands.rs      # CLI command processing
-│   ├── config.rs        # Configuration management
-│   ├── history.rs       # Chat session history
-│   ├── i18n.rs          # Internationalization
-│   ├── main.rs          # Application entry point
-│   ├── prompts.rs       # System prompts
-│   ├── search_tool.rs   # Web search functionality
-│   ├── security.rs      # Security checks
-│   ├── tools/           # Tool implementations
-│   │   ├── executor.rs  # Tool execution logic
-│   │   ├── definitions.rs  # Tool definitions
-│   │   ├── types.rs     # Tool types
-│   │   ├── utils.rs     # Utility functions
-│   │   └── args.rs      # Tool argument structures
-│   └── ui.rs            # User interface components
-├── example/             # Example HTML files
-└── Cargo.toml           # Project configuration
+src/
+├── agents/          # AI agent implementations
+├── api/             # API client implementations
+├── app/             # Application initialization and main logic
+├── chat/            # Chat functionality and message handling
+├── commands/        # Command parsing and execution
+├── config/          # Configuration management
+├── history/         # Session history management
+├── i18n/            # Internationalization support
+├── search_tool/     # Web search functionality
+├── tools/           # Development tools implementation
+├── ui/              # Terminal UI components
+├── main.rs          # Application entry point
+├── prompts.rs       # AI prompt definitions
+└── security.rs      # Security-related functionality
 ```
 
 ## Build & Compilation
 
+### Build Commands
 ```bash
-# Debug build
+# Development build
 cargo build
 
-# Release build
+# Release build with optimizations
 cargo build --release
 
-# Run tests
-cargo test
-
-# Run specific test
-cargo test test_name
+# Cross-platform builds (requires cross tool for non-native targets)
+cargo install cross --locked
+cross build --release --target <target-triple>
 ```
 
-The binary will be located at `target/release/friendev` for release builds.
+### Output Locations
+- Development builds: `target/debug/friendev`
+- Release builds: `target/release/friendev`
+- Cross-platform builds: `target/<target-triple>/release/friendev`
 
 ## Testing
 
@@ -81,105 +66,134 @@ The binary will be located at `target/release/friendev` for release builds.
 # Run all tests
 cargo test
 
-# Run tests with output
+# Run tests with coverage
 cargo test -- --nocapture
 
-# Run specific module tests
-cargo test modules::name
+# Run specific test module
+cargo test <module_name>
 ```
 
 ## Code Style & Standards
 
-- Uses Rust 2021 edition
-- Formatting with `rustfmt`
-- Linting with `clippy`
-- Uses `anyhow` for error handling
-- Async code using `tokio` runtime
+### Rust Formatting
+```bash
+# Format code
+cargo fmt
+
+# Check formatting without making changes
+cargo fmt --check
+```
+
+### Linting
+```bash
+# Run clippy lints
+cargo clippy
+
+# Run clippy with all checks
+cargo clippy --all-targets --all-features -- -D warnings
+```
+
+### Code Conventions
+- Follow Rust API Guidelines (RUST-0001 to RUST-0021)
+- Use `anyhow::Result` for error handling
+- Implement `async/await` patterns for I/O operations
+- Structure modules with clear separation of concerns
 
 ## Running the Application
 
+### Start Command
 ```bash
-# Run from source
+# Development version
 cargo run
 
-# Run binary
+# Release version
 ./target/release/friendev
+
+# With specific parameters
+./target/release/friendev --setup --ally
 ```
 
-### Available Commands
+### Command Line Options
+- `--setup`: Force initial setup workflow
+- `--ally`: Automatically approve all "Approval Required" prompts
 
-- `/help` - Show available commands
-- `/model list` - List available models
-- `/model switch <name>` - Switch to a different model
-- `/history list` - Show chat history
-- `/history new` - Create new chat session
-- `/history switch <id>` - Switch to chat session
-- `/history del <id>` - Delete chat session
-- `/language ui <lang>` - Set UI language (en/zh)
-- `/language ai <lang>` - Set AI language (en/zh)
-- `/agents.md` - Generate AGENTS.md file for current project
-- `/exit` - Exit the application
+### Configuration
+- Configuration files are stored in user's config directory (determined by `dirs` crate)
+- Language preferences are stored in the config file
+- Session history is automatically managed
 
 ## API & Dependencies
 
-### Key Dependencies
-- `tokio` v1 - Async runtime
-- `reqwest` v0.11 - HTTP client
-- `serde` v1.0 - Serialization
-- `clap` v4 - CLI argument parsing
-- `ratatui` v0.26 - Terminal UI
-- `reedline` v0.28 - Command line editing
-- `anyhow` v1.0 - Error handling
+### Core Dependencies
+- `tokio` v1: Async runtime with full features
+- `reqwest` v0.11: HTTP client with JSON, streaming, and TLS support
+- `serde` v1.0: Serialization framework with derive features
+- `clap` v4: Command line argument parsing
+- `uuid` v1: UUID generation with v4 and serde support
 
-### API Configuration
-Friendev uses OpenAI-compatible APIs. Configuration is stored in:
-- Linux/Mac: `~/.config/friendev/config.json`
-- Windows: `%APPDATA%\friendev\config.json`
+### UI Dependencies
+- `ratatui` v0.26: Modern TUI framework
+- `crossterm` v0.27: Cross-platform terminal control
+- `reedline` v0.28: Modern readline implementation
+- `indicatif` v0.17: Progress indicators and spinners
+
+### Tool Dependencies
+- `syntect` v5.1: Syntax highlighting
+- `scraper` v0.19: HTML parsing
+- `regex` v1.10: Regular expressions
+- `url` v2.5: URL parsing and manipulation
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **API Connection Errors**
-   - Verify API key is correct
-   - Check network connectivity
-   - Ensure API URL is accessible
+**Build Failures**
+```bash
+# Update Rust toolchain
+rustup update stable
 
-2. **File Operation Failures**
-   - Check file permissions
-   - Verify file paths
-   - Ensure directory exists
+# Clean build artifacts
+cargo clean
+```
 
-3. **Configuration Issues**
-   - Delete config file to reinitialize
-   - Check config file JSON syntax
+**Cross-compilation Issues**
+```bash
+# Install cross-compilation tool
+cargo install cross --locked
 
-4. **Build Errors**
-   - Ensure Rust version is compatible
-   - Run `cargo clean` then rebuild
-   - Check for dependency conflicts
+# Build for specific target
+cross build --release --target <target-triple>
+```
+
+**Configuration Issues**
+```bash
+# Reset configuration
+rm -rf ~/.config/friendev
+./target/release/friendev --setup
+```
 
 ## Contributing
 
 ### Git Workflow
-1. Fork the repository
-2. Create a feature branch
-3. Make changes with proper commit messages
-4. Submit a pull request
+1. Create feature branch from `main`
+2. Make changes with appropriate commits
+3. Ensure all tests pass and code is formatted
+4. Submit pull request to `main` branch
 
 ### Commit Message Format
+Follow conventional commits format:
 ```
-type(scope): description
+<type>(<scope>): <description>
 
 [optional body]
 
-[optional footer]
+[optional footer(s)]
 ```
 
-Types: feat, fix, docs, style, refactor, test, chore
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
-### Code Standards
-- Follow Rust conventions
-- Add tests for new features
+### Pull Request Guidelines
+- Include description of changes
+- Link to relevant issues
+- Ensure CI builds successfully
 - Update documentation as needed
-- Ensure all tests pass before submitting
