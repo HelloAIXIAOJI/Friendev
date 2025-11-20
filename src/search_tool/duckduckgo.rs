@@ -3,6 +3,7 @@ use reqwest::Client;
 use scraper::{Html, Selector};
 use super::types::SearchResult;
 use super::html_parser::clean_html;
+use crate::ui::get_i18n;
 
 /// Search using DuckDuckGo
 pub async fn search_duckduckgo(client: &Client, keywords: &str, max_results: usize) -> Result<Vec<SearchResult>> {
@@ -77,7 +78,11 @@ fn parse_duckduckgo_html(html: &str, max_results: usize) -> Result<Vec<SearchRes
     }
 
     if results.is_empty() {
-        return Err(anyhow!("DuckDuckGo未找到搜索结果"));
+        let i18n = get_i18n();
+        return Err(anyhow!(
+            "{}",
+            i18n.get("search_ddg_no_results")
+        ));
     }
 
     Ok(results)

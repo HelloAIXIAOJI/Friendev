@@ -3,6 +3,7 @@ use reqwest::Client;
 use scraper::{Html, Selector};
 use super::types::SearchResult;
 use super::html_parser::clean_html;
+use crate::ui::get_i18n;
 
 /// Search using Bing
 pub async fn search_bing(client: &Client, keywords: &str, max_results: usize) -> Result<Vec<SearchResult>> {
@@ -12,16 +13,35 @@ pub async fn search_bing(client: &Client, keywords: &str, max_results: usize) ->
         .get(&url)
         .send()
         .await
-        .map_err(|e| anyhow!("Bing请求失败: {}", e))?;
+        .map_err(|e| {
+            let i18n = get_i18n();
+            anyhow!(
+                "{}: {}",
+                i18n.get("search_bing_request_failed"),
+                e
+            )
+        })?;
 
     if !response.status().is_success() {
-        return Err(anyhow!("Bing返回状态码: {}", response.status()));
+        let i18n = get_i18n();
+        return Err(anyhow!(
+            "{}: {}",
+            i18n.get("search_bing_status_code"),
+            response.status()
+        ));
     }
 
     let body = response
         .text()
         .await
-        .map_err(|e| anyhow!("读取Bing响应失败: {}", e))?;
+        .map_err(|e| {
+            let i18n = get_i18n();
+            anyhow!(
+                "{}: {}",
+                i18n.get("search_bing_read_failed"),
+                e
+            )
+        })?;
 
     parse_bing_html(&body, max_results)
 }
@@ -70,7 +90,8 @@ fn parse_bing_html(html: &str, max_results: usize) -> Result<Vec<SearchResult>> 
     }
 
     if results.is_empty() {
-        return Err(anyhow!("Bing未找到搜索结果"));
+        let i18n = get_i18n();
+        return Err(anyhow!("{}", i18n.get("search_bing_no_results")));
     }
 
     Ok(results)

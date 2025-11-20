@@ -142,6 +142,13 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("search_brief".to_string(), "Found {} results".to_string());
     m.insert("search_error_with_engine".to_string(), "{} search failed: {}".to_string());
     m.insert("search_error".to_string(), "Search failed: {}".to_string());
+    m.insert("search_ddg_no_results".to_string(), "DuckDuckGo: no results found".to_string());
+    m.insert("search_bing_request_failed".to_string(), "Bing request failed".to_string());
+    m.insert("search_bing_status_code".to_string(), "Bing returned status code".to_string());
+    m.insert("search_bing_read_failed".to_string(), "Failed to read Bing response".to_string());
+    m.insert("search_bing_no_results".to_string(), "Bing: no results found".to_string());
+    m.insert("search_ddg_error_prefix".to_string(), "DuckDuckGo ERROR".to_string());
+    m.insert("search_try_bing".to_string(), "Try Bing...".to_string());
 
     // Run command tool messages
     m.insert("run_command_user_cancelled".to_string(), "User cancelled the operation".to_string());
