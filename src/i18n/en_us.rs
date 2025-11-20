@@ -186,5 +186,8 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("agents_analyzing_project".to_string(), "Analyzing project structure...".to_string());
     m.insert("agents_sending_to_ai".to_string(), "Sending to AI for AGENTS.md generation...".to_string());
 
+    // History maintenance messages
+    m.insert("history_cleanup_empty".to_string(), "Cleaned up {} empty session(s)".to_string());
+
     m
 }

@@ -2,6 +2,7 @@ use anyhow::Result;
 use std::fs;
 use super::session::ChatSession;
 use super::persistence::{session_path, list_all_sessions};
+use crate::ui::get_i18n;
 
 /// Delete a session
 pub fn delete_session(session: &ChatSession) -> Result<()> {
@@ -25,7 +26,13 @@ pub fn cleanup_empty_sessions() -> Result<()> {
     }
     
     if deleted_count > 0 {
-        println!("\x1b[33m[*] Cleaned up {} empty session(s)\x1b[0m", deleted_count);
+        let i18n = get_i18n();
+        println!(
+            "\x1b[33m[*] {}\x1b[0m",
+            i18n
+                .get("history_cleanup_empty")
+                .replace("{}", &deleted_count.to_string())
+        );
     }
     
     Ok(())

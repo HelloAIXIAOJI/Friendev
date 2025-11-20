@@ -186,5 +186,8 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("agents_analyzing_project".to_string(), "正在分析项目结构...".to_string());
     m.insert("agents_sending_to_ai".to_string(), "正在发送给 AI 生成 AGENTS.md...".to_string());
 
+    // History maintenance messages
+    m.insert("history_cleanup_empty".to_string(), "已清理 {} 个空会话".to_string());
+
     m
 }
