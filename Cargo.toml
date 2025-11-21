@@ -3,6 +3,9 @@ name = "friendev"
 version = "0.1.3"
 edition = "2021"
 
+[workspace]
+members = ["."]
+
 [dependencies]
 # 核心依赖
 tokio = { version = "1", features = ["full"] }
