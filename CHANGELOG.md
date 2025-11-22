@@ -2,6 +2,10 @@
 
 all friendev update changelog on here.
 ---
+## [0.2.0] - 2025-11-22
+- Refactoring for C/S architecture
+- Split into multiple crates, becoming a multi-crate workspace
+---
 ## [0.1.5] - 2025-11-20
 #### Added
 - Internationalization (i18n) support introduced for all UI components
