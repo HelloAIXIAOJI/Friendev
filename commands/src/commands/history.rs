@@ -2,8 +2,8 @@ use anyhow::Result;
 use std::env;
 use uuid::Uuid;
 
-use config::Config;
 use ::history::ChatSession;
+use config::Config;
 use i18n::I18n;
 
 /// Handle /history command
@@ -16,8 +16,10 @@ pub fn handle_history_command(
     match parts.get(1) {
         Some(&"list") => {
             let sessions = ChatSession::list_all()?;
-            let filtered_sessions: Vec<_> =
-                sessions.into_iter().filter(|s| !s.messages.is_empty()).collect();
+            let filtered_sessions: Vec<_> = sessions
+                .into_iter()
+                .filter(|s| !s.messages.is_empty())
+                .collect();
 
             if filtered_sessions.is_empty() {
                 println!("\n\x1b[90m[i] {}\x1b[0m\n", i18n.get("no_history"));

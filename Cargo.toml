@@ -10,15 +10,21 @@ members = [
     "commands",
     "api",
     "app",
+    "app_client",
+    "app_server",
     "chat",
     "config",
     "history",
     "i18n",
+    "rpc",
+    "rpc",
     "search_tool",
     "tools",
     "ui",
     "security",
-    "prompts",
+    "core_shared",
+    "server",
+    "core_shared",
 ]
 
 [dependencies]
@@ -70,13 +76,15 @@ urlencoding = "2.1"                   # URL编码
 ignore = "0.4"                        # .gitignore 规则正确处理
 agents = { path = "agents" }
 commands = { path = "commands" }
-app = { path = "app" }
-api = { path = "api" }
-chat = { path = "chat" }
-config = { path = "config" }
-history = { path = "history" }
-i18n = { path = "i18n" }
-prompts = { path = "prompts" }
-security = { path = "security" }
-tools = { path = "tools" }
-ui = { path = "ui" }
+ app = { path = "app" }
+ api = { path = "api" }
+ chat = { path = "chat" }
+ config = { path = "config" }
+ history = { path = "history" }
+ i18n = { path = "i18n" }
+ prompts = { path = "prompts" }
+ security = { path = "security" }
+ tools = { path = "tools" }
+ ui = { path = "ui" }
+ rpc = { path = "rpc" }
+app_server = { path = "app_server" }

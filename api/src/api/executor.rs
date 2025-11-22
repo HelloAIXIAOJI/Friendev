@@ -1,6 +1,8 @@
 use std::path::Path;
 
 use history::{Message, ToolCall};
+use rpc::protocol::StreamEvent;
+use std::collections::VecDeque;
 use tools;
 use ui::get_i18n;
 use ui::ToolCallDisplay;
@@ -11,6 +13,7 @@ pub async fn execute_tool_calls(
     working_dir: &Path,
     displays: &mut std::collections::HashMap<String, ToolCallDisplay>,
     require_approval: bool,
+    events: &mut VecDeque<StreamEvent>,
 ) -> Vec<Message> {
     let mut results = Vec::new();
 
@@ -40,6 +43,11 @@ pub async fn execute_tool_calls(
             continue;
         }
 
+        events.push_back(StreamEvent::ToolStatus {
+            id: tc.id.clone(),
+            status: format!("running {}", tc.function.name),
+        });
+
         let tool_result = tools::execute_tool(
             &tc.function.name,
             &tc.function.arguments,
@@ -59,6 +67,22 @@ pub async fn execute_tool_calls(
             display.finish(tool_result.success, Some(tool_result.brief.clone()));
             println!();
             display.render_final();
+        }
+
+        let status_msg = if tool_result.success {
+            format!("{} finished", tc.function.name)
+        } else {
+            format!("{} failed", tc.function.name)
+        };
+        events.push_back(StreamEvent::ToolStatus {
+            id: tc.id.clone(),
+            status: status_msg,
+        });
+        if !tool_result.brief.is_empty() {
+            events.push_back(StreamEvent::OutputLine(tool_result.brief.clone()));
+        }
+        if !tool_result.message.is_empty() {
+            events.push_back(StreamEvent::OutputLine(tool_result.message.clone()));
         }
 
         results.push(Message {

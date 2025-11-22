@@ -15,8 +15,8 @@ pub struct AppState {
     pub auto_approve: bool,
 }
 
-/// Initialize the application
-pub async fn initialize_app() -> Result<AppState> {
+/// Prepare initial server state
+pub async fn initialize_state() -> Result<AppState> {
     // Check for --ally flag
     let auto_approve = env::args().any(|arg| arg == "--ally");
 

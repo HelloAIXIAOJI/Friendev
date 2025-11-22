@@ -4,19 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+app_client = { path = "../app_client" }
+rpc = { path = "../rpc" }
 anyhow = "1.0"
-futures = "0.3"
-tokio = { version = "1", features = ["full"] }
-
-api = { path = "../api" }
-agents = { path = "../agents" }
-chat = { path = "../chat" }
-commands = { path = "../commands" }
-config = { path = "../config" }
-history = { path = "../history" }
-i18n = { path = "../i18n" }
-prompts = { path = "../prompts" }
-security = { path = "../security" }
-tools = { path = "../tools" }
-ui = { path = "../ui" }
-rustyline = "13"
+tokio = { version = "1", features = ["time"] }

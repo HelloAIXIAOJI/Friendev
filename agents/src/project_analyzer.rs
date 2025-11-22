@@ -25,20 +25,20 @@ pub fn analyze_project_structure(working_dir: &Path) -> Result<String> {
 
     // Collect top-level files and directories
     for entry in walker.flatten() {
-            let path = entry.path();
+        let path = entry.path();
 
-            // Skip the parent directory itself
-            if path == working_dir {
-                continue;
-            }
+        // Skip the parent directory itself
+        if path == working_dir {
+            continue;
+        }
 
-            // Skip non-direct children (depth > 1)
-            let relative_path = path.strip_prefix(working_dir).unwrap_or(path);
-            if relative_path.components().count() > 1 {
-                continue;
-            }
+        // Skip non-direct children (depth > 1)
+        let relative_path = path.strip_prefix(working_dir).unwrap_or(path);
+        if relative_path.components().count() > 1 {
+            continue;
+        }
 
-            entries.push(path.to_path_buf());
+        entries.push(path.to_path_buf());
     }
 
     entries.sort();

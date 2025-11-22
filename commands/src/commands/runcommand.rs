@@ -1,6 +1,6 @@
 use anyhow::Result;
-use tools::CommandConfig;
 use i18n::I18n;
+use tools::CommandConfig;
 
 /// Handle /runcommand command
 pub fn handle_run_command_command(parts: &[&str], i18n: &I18n) -> Result<()> {

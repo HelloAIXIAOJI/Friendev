@@ -1,0 +1,19 @@
+[package]
+name = "app_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+async-trait = "0.1"
+api = { path = "../api" }
+chat = { path = "../chat" }
+commands = { path = "../commands" }
+config = { path = "../config" }
+history = { path = "../history" }
+i18n = { path = "../i18n" }
+rpc = { path = "../rpc" }
+security = { path = "../security" }
+tools = { path = "../tools" }
+ui = { path = "../ui" }
+prompts = { path = "../prompts" }

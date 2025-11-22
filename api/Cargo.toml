@@ -18,3 +18,4 @@ config = { path = "../config" }
 history = { path = "../history" }
 tools = { path = "../tools" }
 ui = { path = "../ui" }
+rpc = { path = "../rpc" }

@@ -7,9 +7,9 @@ mod runcommand;
 
 use anyhow::Result;
 
+use ::history::ChatSession;
 use api::ApiClient;
 use config::Config;
-use ::history::ChatSession;
 use i18n::I18n;
 
 pub use agents::handle_agents_md_command;

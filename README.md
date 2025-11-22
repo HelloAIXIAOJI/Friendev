@@ -4,4 +4,5 @@ This is a **FRIENDEV**
 
 > **AI-Powered Development Assistant*
 
+Build: `cargo build --workspace`
 Install: `if [ -f /usr/bin/curl ];then curl -sSO https://friendev.thelang.cn/install.sh;else wget -O install.sh https://friendev.thelang.cn/install.sh;fi;bash install.sh`
