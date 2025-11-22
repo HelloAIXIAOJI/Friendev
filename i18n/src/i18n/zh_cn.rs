@@ -150,7 +150,7 @@ pub fn get_messages() -> HashMap<String, String> {
     );
     m.insert(
         "approval_choice_hint".to_string(),
-        "[Y]同意 / [N]拒绝 / [I]详情 / [A]本次会话始终允许".to_string(),
+        "[Y]同意 / [N]拒绝 / [I]详情 / [A]记住 / [R]审查".to_string(),
     );
     m.insert(
         "approval_choice_prompt".to_string(),
@@ -161,6 +161,58 @@ pub fn get_messages() -> HashMap<String, String> {
         "本次会话内已设为始终允许".to_string(),
     );
     m.insert("approval_rejected".to_string(), "已拒绝".to_string());
+    m.insert(
+        "approval_review_unavailable".to_string(),
+        "当前无法使用审查助手".to_string(),
+    );
+    m.insert(
+        "approval_review_error".to_string(),
+        "审查失败：{}".to_string(),
+    );
+    m.insert(
+        "approval_review_request".to_string(),
+        "正在请求 AI 审查操作 '{}'。".to_string(),
+    );
+    m.insert(
+        "approval_review_wait".to_string(),
+        "等待审查返回结果...".to_string(),
+    );
+    m.insert("approval_review_done".to_string(), "审查完成".to_string());
+    m.insert(
+        "approval_review_result".to_string(),
+        "AI 审查结果：".to_string(),
+    );
+    m.insert(
+        "approval_review_tool_error".to_string(),
+        "审查返回了当前不支持的工具调用".to_string(),
+    );
+    m.insert(
+        "approval_review_no_preview".to_string(),
+        "（无更多预览信息）".to_string(),
+    );
+    m.insert(
+        "approval_review_parse_error".to_string(),
+        "无法解析审查结果：{}".to_string(),
+    );
+    m.insert("approval_review_raw".to_string(), "原始响应:".to_string());
+    m.insert("approval_review_decision".to_string(), "建议:".to_string());
+    m.insert("approval_review_details".to_string(), "详情:".to_string());
+    m.insert(
+        "approval_review_bad_decision".to_string(),
+        "检测到非预期的建议结果：{}（期望“同意”或“拒绝”）。".to_string(),
+    );
+    m.insert(
+        "approval_review_followup".to_string(),
+        "审查完成，请输入最终决定（仅限 Y/N）。".to_string(),
+    );
+    m.insert(
+        "approval_review_decision_prompt".to_string(),
+        "最终决定 [Y/N]:".to_string(),
+    );
+    m.insert(
+        "approval_review_invalid_choice".to_string(),
+        "输入无效，请输入 Y 或 N。".to_string(),
+    );
 
     m.insert(
         "details_title".to_string(),

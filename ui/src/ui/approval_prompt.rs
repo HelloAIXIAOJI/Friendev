@@ -1,7 +1,26 @@
 use colored::Colorize;
 use std::io::{self, Write};
+use std::sync::OnceLock;
 
 use super::get_i18n;
+use i18n::I18n;
+
+type ReviewHandler = dyn Fn(&ReviewRequest) -> io::Result<()> + Send + Sync + 'static;
+
+static REVIEW_HANDLER: OnceLock<Box<ReviewHandler>> = OnceLock::new();
+
+pub struct ReviewRequest<'a> {
+    pub action: &'a str,
+    pub subject: &'a str,
+    pub preview: Option<&'a str>,
+}
+
+pub fn set_review_handler<F>(handler: F)
+where
+    F: Fn(&ReviewRequest) -> io::Result<()> + Send + Sync + 'static,
+{
+    let _ = REVIEW_HANDLER.set(Box::new(handler));
+}
 
 /// 用户审批提示
 /// 返回 (approved, always, view_details)
@@ -12,7 +31,6 @@ pub fn prompt_approval(
 ) -> io::Result<(bool, bool, bool)> {
     use std::path::Path;
 
-    // 提取文件名
     let file_name = Path::new(file_path)
         .file_name()
         .and_then(|n| n.to_str())
@@ -28,7 +46,6 @@ pub fn prompt_approval(
     );
     println!("{}", format!("      {}", file_name).yellow().bold());
 
-    // 显示内容预览
     if let Some(preview) = content_preview {
         println!("{}", i18n.get("approval_empty_line").yellow());
         println!(
@@ -61,26 +78,84 @@ pub fn prompt_approval(
         "{}",
         format!("    {}", i18n.get("approval_choice_hint")).yellow()
     );
-    println!("{}", i18n.get("approval_separator").yellow());
-    print!("  {} ", i18n.get("approval_choice_prompt").bright_cyan());
-    io::stdout().flush()?;
 
-    let mut input = String::new();
-    io::stdin().read_line(&mut input)?;
+    let separator = i18n.get("approval_separator");
+    let prompt_label = i18n.get("approval_choice_prompt");
 
-    let choice = input.trim().to_lowercase();
-    match choice.as_str() {
-        "y" | "yes" => Ok((true, false, false)),
-        "i" | "info" => {
-            Ok((true, false, true)) // 返回 true, false, true 表示需要查看详细信息
+    loop {
+        println!("{}", separator.as_str().yellow());
+        print!("  {} ", prompt_label.as_str().bright_cyan());
+        io::stdout().flush()?;
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input)?;
+
+        let choice = input.trim().to_lowercase();
+        match choice.as_str() {
+            "y" | "yes" => return Ok((true, false, false)),
+            "i" | "info" => {
+                return Ok((true, false, true));
+            }
+            "a" | "always" => {
+                println!("  {} {}", "✓".green(), i18n.get("approval_always_approved"));
+                return Ok((true, true, false));
+            }
+            "r" | "review" => {
+                let request = ReviewRequest {
+                    action,
+                    subject: file_path,
+                    preview: content_preview,
+                };
+
+                if let Some(handler) = REVIEW_HANDLER.get() {
+                    if let Err(err) = handler(&request) {
+                        println!(
+                            "  {} {}",
+                            "!".yellow(),
+                            i18n.get("approval_review_error")
+                                .replace("{}", &err.to_string())
+                        );
+                        continue;
+                    }
+
+                    let approved = prompt_review_decision(&i18n)?;
+                    return Ok((approved, false, false));
+                } else {
+                    println!(
+                        "  {} {}",
+                        "!".yellow(),
+                        i18n.get("approval_review_unavailable")
+                    );
+                }
+            }
+            _ => {
+                println!("  {} {}", "✗".red(), i18n.get("approval_rejected"));
+                return Ok((false, false, false));
+            }
         }
-        "a" | "always" => {
-            println!("  {} {}", "✓".green(), i18n.get("approval_always_approved"));
-            Ok((true, true, false)) // 返回 true, true, false 表示 always
-        }
-        _ => {
-            println!("  {} {}", "✗".red(), i18n.get("approval_rejected"));
-            Ok((false, false, false))
+    }
+}
+
+fn prompt_review_decision(i18n: &I18n) -> io::Result<bool> {
+    println!();
+    println!("  {}", i18n.get("approval_review_followup"));
+
+    loop {
+        let prompt = i18n.get("approval_review_decision_prompt");
+        print!("  {} ", prompt.bright_cyan());
+        io::stdout().flush()?;
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input)?;
+
+        match input.trim().to_lowercase().as_str() {
+            "y" | "yes" => return Ok(true),
+            "n" | "no" => return Ok(false),
+            _ => println!(
+                "  {} {}",
+                "!".yellow(),
+                i18n.get("approval_review_invalid_choice")
+            ),
         }
     }
 }

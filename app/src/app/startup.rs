@@ -1,3 +1,4 @@
+use super::review;
 use anyhow::Result;
 use api::ApiClient;
 use config::Config;
@@ -63,6 +64,9 @@ pub async fn initialize_app() -> Result<AppState> {
 
     // Create API client
     let api_client = ApiClient::new(config.clone());
+
+    // Install review handler for approval prompts
+    review::install_review_handler(api_client.clone(), config.clone());
 
     // Print welcome message
     prompts::print_welcome(&config, &i18n);

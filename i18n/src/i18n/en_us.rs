@@ -201,7 +201,7 @@ pub fn get_messages() -> HashMap<String, String> {
     );
     m.insert(
         "approval_choice_hint".to_string(),
-        "[Y]es / [N]o / [I]nfo / [A]lways".to_string(),
+        "[Y]es / [N]o / [I]nfo / [A]lways / [R]eview".to_string(),
     );
     m.insert(
         "approval_choice_prompt".to_string(),
@@ -212,6 +212,70 @@ pub fn get_messages() -> HashMap<String, String> {
         "Approved for this session".to_string(),
     );
     m.insert("approval_rejected".to_string(), "Rejected".to_string());
+    m.insert(
+        "approval_review_unavailable".to_string(),
+        "Review helper is not available.".to_string(),
+    );
+    m.insert(
+        "approval_review_error".to_string(),
+        "Review failed: {}".to_string(),
+    );
+    m.insert(
+        "approval_review_request".to_string(),
+        "Requesting AI review for action '{}'.".to_string(),
+    );
+    m.insert(
+        "approval_review_wait".to_string(),
+        "Waiting for review response...".to_string(),
+    );
+    m.insert(
+        "approval_review_done".to_string(),
+        "Review completed".to_string(),
+    );
+    m.insert(
+        "approval_review_result".to_string(),
+        "AI Review:".to_string(),
+    );
+    m.insert(
+        "approval_review_tool_error".to_string(),
+        "Review returned unsupported tool calls.".to_string(),
+    );
+    m.insert(
+        "approval_review_no_preview".to_string(),
+        "(no additional preview available)".to_string(),
+    );
+    m.insert(
+        "approval_review_parse_error".to_string(),
+        "Failed to parse review output: {}".to_string(),
+    );
+    m.insert(
+        "approval_review_raw".to_string(),
+        "Raw response:".to_string(),
+    );
+    m.insert(
+        "approval_review_decision".to_string(),
+        "Decision:".to_string(),
+    );
+    m.insert(
+        "approval_review_details".to_string(),
+        "Details:".to_string(),
+    );
+    m.insert(
+        "approval_review_bad_decision".to_string(),
+        "Unexpected decision value: {} (expected '同意' or '拒绝').".to_string(),
+    );
+    m.insert(
+        "approval_review_followup".to_string(),
+        "Review complete. Please enter the final decision (Y/N only).".to_string(),
+    );
+    m.insert(
+        "approval_review_decision_prompt".to_string(),
+        "Final decision [Y/N]:".to_string(),
+    );
+    m.insert(
+        "approval_review_invalid_choice".to_string(),
+        "Invalid choice. Please enter Y or N.".to_string(),
+    );
 
     m.insert(
         "details_title".to_string(),

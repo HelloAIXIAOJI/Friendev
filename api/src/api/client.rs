@@ -12,6 +12,7 @@ use super::parser::parse_sse_line;
 use super::stream::SseLineStream;
 use super::types::{ChatRequest, ModelsResponse, StreamChunk};
 
+#[derive(Clone)]
 pub struct ApiClient {
     client: Client,
     config: Config,
