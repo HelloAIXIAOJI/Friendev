@@ -3,8 +3,6 @@
 ---
 ## [0.2.1] - 2025-11-22
 - Roll back the codebase to the time before it was refactored into C/S (Only Client), as there are many issues
-
-
 ---
 ## [0.2.0] - 2025-11-22
 - Refactoring for C/S architecture
