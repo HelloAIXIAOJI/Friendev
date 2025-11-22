@@ -38,24 +38,28 @@ jobs:
             asset_name: friendev-windows-amd64.zip
             release_name: Windows AMD64
             exe_name: friendev.exe
+            server_exe_name: friendev-server.exe
           - os: windows-latest
             target: i686-pc-windows-msvc
             artifact_name: friendev-windows-i686
             asset_name: friendev-windows-i686.zip
             release_name: Windows i686
             exe_name: friendev.exe
+            server_exe_name: friendev-server.exe
           - os: windows-latest
             target: aarch64-pc-windows-msvc
             artifact_name: friendev-windows-arm64
             asset_name: friendev-windows-arm64.zip
             release_name: Windows ARM64
             exe_name: friendev.exe
+            server_exe_name: friendev-server.exe
           - os: windows-latest
             target: x86_64-pc-windows-gnu
             artifact_name: friendev-windows-amd64-gnu
             asset_name: friendev-windows-amd64-gnu.zip
             release_name: Windows AMD64 GNU
             exe_name: friendev.exe
+            server_exe_name: friendev-server.exe
           # Linux Platform - x86
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
@@ -63,18 +67,21 @@ jobs:
             asset_name: friendev-linux-amd64.tar.gz
             release_name: Linux AMD64 GNU
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
             artifact_name: friendev-linux-amd64-musl
             asset_name: friendev-linux-amd64-musl.tar.gz
             release_name: Linux AMD64 MUSL
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: ubuntu-latest
             target: i686-unknown-linux-gnu
             artifact_name: friendev-linux-i686
             asset_name: friendev-linux-i686.tar.gz
             release_name: Linux i686 GNU
             exe_name: friendev
+            server_exe_name: friendev-server
           # Linux Platform - ARM
           - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
@@ -82,24 +89,28 @@ jobs:
             asset_name: friendev-linux-arm64.tar.gz
             release_name: Linux ARM64 GNU
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
             artifact_name: friendev-linux-arm64-musl
             asset_name: friendev-linux-arm64-musl.tar.gz
             release_name: Linux ARM64 MUSL
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: ubuntu-latest
             target: armv7-unknown-linux-gnueabihf
             artifact_name: friendev-linux-armv7
             asset_name: friendev-linux-armv7.tar.gz
             release_name: Linux ARMv7
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: ubuntu-latest
             target: arm-unknown-linux-gnueabihf
             artifact_name: friendev-linux-arm
             asset_name: friendev-linux-arm.tar.gz
             release_name: Linux ARM
             exe_name: friendev
+            server_exe_name: friendev-server
           # Linux Platform - Other architectures
           - os: ubuntu-latest
             target: riscv64gc-unknown-linux-gnu
@@ -107,18 +118,21 @@ jobs:
             asset_name: friendev-linux-riscv64.tar.gz
             release_name: Linux RISC-V 64
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: ubuntu-latest
             target: powerpc64le-unknown-linux-gnu
             artifact_name: friendev-linux-powerpc64le
             asset_name: friendev-linux-powerpc64le.tar.gz
             release_name: Linux PowerPC64LE
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: ubuntu-latest
             target: s390x-unknown-linux-gnu
             artifact_name: friendev-linux-s390x
             asset_name: friendev-linux-s390x.tar.gz
             release_name: Linux s390x
             exe_name: friendev
+            server_exe_name: friendev-server
           # Android
           - os: ubuntu-latest
             target: aarch64-linux-android
@@ -126,24 +140,28 @@ jobs:
             asset_name: friendev-android-arm64.tar.gz
             release_name: Android ARM64
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: ubuntu-latest
             target: armv7-linux-androideabi
             artifact_name: friendev-android-armv7
             asset_name: friendev-android-armv7.tar.gz
             release_name: Android ARMv7
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: ubuntu-latest
             target: x86_64-linux-android
             artifact_name: friendev-android-x86_64
             asset_name: friendev-android-x86_64.tar.gz
             release_name: Android x86_64
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: ubuntu-latest
             target: i686-linux-android
             artifact_name: friendev-android-i686
             asset_name: friendev-android-i686.tar.gz
             release_name: Android i686
             exe_name: friendev
+            server_exe_name: friendev-server
           # macOS
           - os: macos-latest
             target: x86_64-apple-darwin
@@ -151,24 +169,28 @@ jobs:
             asset_name: friendev-macos-amd64.tar.gz
             release_name: macOS AMD64
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: macos-latest
             target: aarch64-apple-darwin
             artifact_name: friendev-macos-arm64
             asset_name: friendev-macos-arm64.tar.gz
             release_name: macOS Apple Silicon
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: macos-latest
             target: x86_64-apple-ios
             artifact_name: friendev-ios-x86_64
             asset_name: friendev-ios-x86_64.tar.gz
             release_name: iOS x86_64
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: macos-latest
             target: aarch64-apple-ios
             artifact_name: friendev-ios-arm64
             asset_name: friendev-ios-arm64.tar.gz
             release_name: iOS ARM64
             exe_name: friendev
+            server_exe_name: friendev-server
           # FreeBSD
           - os: ubuntu-latest
             target: x86_64-unknown-freebsd
@@ -176,12 +198,14 @@ jobs:
             asset_name: friendev-freebsd-amd64.tar.gz
             release_name: FreeBSD AMD64
             exe_name: friendev
+            server_exe_name: friendev-server
           - os: ubuntu-latest
             target: i686-unknown-freebsd
             artifact_name: friendev-freebsd-i686
             asset_name: friendev-freebsd-i686.tar.gz
             release_name: FreeBSD i686
             exe_name: friendev
+            server_exe_name: friendev-server
 
     steps:
     - uses: actions/checkout@v3
@@ -266,7 +290,7 @@ jobs:
       with:
         use-cross: true
         command: build
-        args: --release --target ${{ matrix.target }}
+        args: --release --workspace --bins --target ${{ matrix.target }}
       env:
         RUST_BACKTRACE: 1
 
@@ -275,7 +299,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release --target ${{ matrix.target }}
+        args: --release --workspace --bins --target ${{ matrix.target }}
       env:
         RUST_BACKTRACE: 1
 
@@ -284,7 +308,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release --target ${{ matrix.target }}
+        args: --release --workspace --bins --target ${{ matrix.target }}
       env:
         RUST_BACKTRACE: 1
     
@@ -296,6 +320,7 @@ jobs:
       if: matrix.os == 'windows-latest'
       run: |
         cp target/${{ matrix.target }}/release/${{ matrix.exe_name }} release-package/
+        cp target/${{ matrix.target }}/release/${{ matrix.server_exe_name }} release-package/
         7z a ${{ matrix.asset_name }} ./release-package/*
       shell: bash
     
@@ -303,6 +328,7 @@ jobs:
       if: matrix.os != 'windows-latest'
       run: |
         cp target/${{ matrix.target }}/release/${{ matrix.exe_name }} release-package/
+        cp target/${{ matrix.target }}/release/${{ matrix.server_exe_name }} release-package/
         tar -czvf ${{ matrix.asset_name }} -C release-package .
       shell: bash
     
