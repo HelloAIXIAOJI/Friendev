@@ -1,4 +1,4 @@
-<img width="523" height="146" alt="image" src="https://github.com/user-attachments/assets/623c8f20-eaa3-4975-9e91-4b1e7a5d0206" />
+<img width="1107" height="977" alt="image" src="https://github.com/user-attachments/assets/641a3e04-32ff-4fba-8efe-00ac11d59ebd" />
 
 This is a **FRIENDEV**
 

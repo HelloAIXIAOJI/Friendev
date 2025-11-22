@@ -1,6 +1,5 @@
 # Changelog
-
-all friendev update changelog on here.
+- all friendev update changelog on here.
 ---
 ## [0.2.0] - 2025-11-22
 - Refactoring for C/S architecture
