@@ -12,4 +12,5 @@ config = { path = "../config" }
 history = { path = "../history" }
 i18n = { path = "../i18n" }
 tools = { path = "../tools" }
+ui = { path = "../ui" }
 uuid = { version = "1", features = ["v4"] }

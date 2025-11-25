@@ -1,6 +1,7 @@
 mod approval_prompt;
 mod spinner;
 mod tool_call_display;
+mod model_selector;
 pub mod enhanced_output;
 
 use config::Config;
@@ -11,6 +12,7 @@ pub use approval_prompt::{set_review_handler, ReviewRequest};
 pub use spinner::Spinner;
 pub use tool_call_display::{extract_key_argument, ToolCallDisplay};
 pub use enhanced_output::ToolProgress;
+pub use model_selector::{select_model, print_model_list};
 
 /// 获取当前 UI 语言对应的 I18n 实例
 pub fn get_i18n() -> I18n {

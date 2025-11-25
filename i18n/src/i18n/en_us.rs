@@ -22,6 +22,10 @@ pub fn get_messages() -> HashMap<String, String> {
     );
 
     // Commands
+    m.insert(
+        "cmd_model_interactive".to_string(),
+        "Interactive model selector".to_string(),
+    );
     m.insert("cmd_model_list".to_string(), "List all models".to_string());
     m.insert("cmd_model_switch".to_string(), "Switch model".to_string());
     m.insert(
@@ -75,6 +79,26 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert(
         "switched_model".to_string(),
         "Switched to model".to_string(),
+    );
+    m.insert(
+        "model_selector_prompt".to_string(),
+        "Select a model".to_string(),
+    );
+    m.insert(
+        "model_already_active".to_string(),
+        "Model already active:".to_string(),
+    );
+    m.insert(
+        "model_selection_cancelled".to_string(),
+        "Model selection cancelled".to_string(),
+    );
+    m.insert(
+        "no_models_available".to_string(),
+        "No models available".to_string(),
+    );
+    m.insert(
+        "interactive_mode_failed".to_string(),
+        "Interactive mode not available, showing list".to_string(),
     );
     m.insert(
         "switched_session".to_string(),

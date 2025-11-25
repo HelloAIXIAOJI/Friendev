@@ -19,6 +19,10 @@ pub fn get_messages() -> HashMap<String, String> {
     );
 
     // 命令
+    m.insert(
+        "cmd_model_interactive".to_string(),
+        "交互式模型选择器".to_string(),
+    );
     m.insert("cmd_model_list".to_string(), "列出所有模型".to_string());
     m.insert("cmd_model_switch".to_string(), "切换模型".to_string());
     m.insert("cmd_history_list".to_string(), "列出聊天历史".to_string());
@@ -55,6 +59,26 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("loading_models".to_string(), "正在加载模型...".to_string());
     m.insert("available_models".to_string(), "可用模型".to_string());
     m.insert("switched_model".to_string(), "已切换到模型".to_string());
+    m.insert(
+        "model_selector_prompt".to_string(),
+        "选择一个模型".to_string(),
+    );
+    m.insert(
+        "model_already_active".to_string(),
+        "模型已经是当前活动模型:".to_string(),
+    );
+    m.insert(
+        "model_selection_cancelled".to_string(),
+        "已取消模型选择".to_string(),
+    );
+    m.insert(
+        "no_models_available".to_string(),
+        "没有可用的模型".to_string(),
+    );
+    m.insert(
+        "interactive_mode_failed".to_string(),
+        "交互模式不可用，显示列表".to_string(),
+    );
     m.insert("switched_session".to_string(), "已切换到会话".to_string());
     m.insert("created_session".to_string(), "已创建新会话".to_string());
     m.insert("deleted_session".to_string(), "已删除会话".to_string());
