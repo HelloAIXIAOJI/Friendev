@@ -2,7 +2,7 @@ use anyhow::Result;
 use std::fs;
 use std::path::Path;
 
-use super::file_common::{handle_approval_with_details, normalize_path};
+use super::file_common::normalize_path;
 use crate::tools::args::FileDiffEditArgs;
 use crate::types::ToolResult;
 
@@ -30,25 +30,7 @@ pub async fn execute_file_diff_edit(
         )));
     }
 
-    // 生成预览内容
-    let preview = generate_preview(&args);
-
-    // 处理审批流程
-    let file_content = fs::read_to_string(&target_path)?;
-    let detailed_changes = generate_detailed_changes(&file_content, &args);
-
-    if let Some(err) = handle_approval_with_details(
-        "file_diff_edit",
-        &target_path.display().to_string(),
-        Some(&preview),
-        &target_path.display().to_string(),
-        &detailed_changes,
-        require_approval,
-    )
-    .await?
-    {
-        return Ok(ToolResult::error(err));
-    }
+    let _ = require_approval;
 
     // 读取文件
     let content = fs::read_to_string(&target_path)?;

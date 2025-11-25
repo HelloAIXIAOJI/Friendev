@@ -1,8 +1,8 @@
 use anyhow::Result;
 
 use crate::tools::args::RunCommandArgs;
-use crate::types::{approve_action_for_session, is_action_approved, ToolResult};
-use ui::{get_i18n, prompt_approval};
+use crate::types::ToolResult;
+use ui::get_i18n;
 
 pub async fn execute_run_command(arguments: &str, require_approval: bool) -> Result<ToolResult> {
     let args: RunCommandArgs = serde_json::from_str(arguments)?;
@@ -11,56 +11,7 @@ pub async fn execute_run_command(arguments: &str, require_approval: bool) -> Res
     let config = crate::tools::command_manager::CommandConfig::load()?;
 
     // 检查是否需要审批
-    let needs_approval = require_approval || config.needs_approval(&args.command);
-
-    if needs_approval && !is_action_approved("run_command") {
-        // 提取主命令用于显示
-        let main_command = args.command.split_whitespace().next().unwrap_or("");
-
-        let (approved, always, view_details) = prompt_approval(
-            "RunCommand",
-            &args.command.to_string(),
-            Some(&format!(
-                "Command: {}\nMode: {}",
-                main_command,
-                if args.background {
-                    "background"
-                } else {
-                    "foreground"
-                }
-            )),
-        )?;
-
-        if view_details {
-            let continue_operation = ui::show_detailed_content(
-                "RunCommand",
-                &format!("Command: {}", args.command),
-                &format!(
-                    "Full command:\n{}\n\nThis command will be executed in {} mode.",
-                    args.command,
-                    if args.background {
-                        "background"
-                    } else {
-                        "foreground"
-                    }
-                ),
-            )?;
-
-            if !continue_operation {
-                let i18n = get_i18n();
-                return Ok(ToolResult::error(i18n.get("run_command_user_cancelled")));
-            }
-        }
-
-        if !approved {
-            let i18n = get_i18n();
-            return Ok(ToolResult::error(i18n.get("run_command_user_rejected")));
-        }
-
-        if always {
-            approve_action_for_session("run_command");
-        }
-    }
+    let _ = (require_approval, config.needs_approval(&args.command));
 
     if args.background {
         execute_background_command(args, config).await

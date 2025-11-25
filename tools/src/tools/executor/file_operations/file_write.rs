@@ -4,7 +4,7 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
 
-use super::file_common::{handle_approval_with_details, normalize_path};
+use super::file_common::normalize_path;
 use crate::tools::args::FileWriteArgs;
 use crate::types::ToolResult;
 use ui::get_i18n;
@@ -26,27 +26,7 @@ pub async fn execute_file_write(
         return Ok(ToolResult::error(tmpl.replace("{}", mode)));
     }
 
-    // 处理审批流程
-    let action_desc = if mode == "append" {
-        let tmpl = i18n.get("file_write_append_action");
-        tmpl.replace("{}", &target_path.display().to_string())
-    } else {
-        let tmpl = i18n.get("file_write_overwrite_action");
-        tmpl.replace("{}", &target_path.display().to_string())
-    };
-
-    if let Some(err) = handle_approval_with_details(
-        "file_write",
-        &action_desc,
-        Some(&args.content),
-        &target_path.display().to_string(),
-        &args.content,
-        require_approval,
-    )
-    .await?
-    {
-        return Ok(ToolResult::error(err));
-    }
+    let _ = require_approval;
 
     // 创建父目录（如果不存在）
     if let Some(parent) = target_path.parent() {

@@ -4,7 +4,7 @@ use std::fs;
 use std::path::Path;
 
 use super::super::utils::normalize_whitespace;
-use super::file_common::{handle_approval_with_details, normalize_path};
+use super::file_common::normalize_path;
 use crate::tools::args::FileReplaceArgs;
 use crate::types::ToolResult;
 
@@ -32,25 +32,7 @@ pub async fn execute_file_replace(
         )));
     }
 
-    // 生成预览内容
-    let preview = generate_preview(&args);
-
-    // 处理审批流程
-    let file_content = fs::read_to_string(&target_path)?;
-    let detailed_changes = generate_detailed_changes(&file_content, &args);
-
-    if let Some(err) = handle_approval_with_details(
-        "file_replace",
-        &target_path.display().to_string(),
-        Some(&preview),
-        &target_path.display().to_string(),
-        &detailed_changes,
-        require_approval,
-    )
-    .await?
-    {
-        return Ok(ToolResult::error(err));
-    }
+    let _ = require_approval;
 
     // 读取文件并处理
     let mut content = fs::read_to_string(&target_path)?;

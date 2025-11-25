@@ -130,37 +130,7 @@ pub fn get_messages() -> HashMap<String, String> {
     );
     m.insert("setup_saved".to_string(), "配置已保存！".to_string());
 
-    // UI：审批提示与详情
-    m.insert(
-        "approval_title".to_string(),
-        "  ──── 需要审批 ──────────────────".to_string(),
-    );
-    m.insert(
-        "approval_empty_line".to_string(),
-        "                                           ".to_string(),
-    );
-    m.insert(
-        "approval_separator".to_string(),
-        "  ─────────────────────────────────────────".to_string(),
-    );
-    m.insert("approval_action_wants".to_string(), "准备修改".to_string());
-    m.insert(
-        "approval_content_preview".to_string(),
-        "内容预览:".to_string(),
-    );
-    m.insert(
-        "approval_choice_hint".to_string(),
-        "[Y]同意 / [N]拒绝 / [I]详情 / [A]记住 / [R]审查".to_string(),
-    );
-    m.insert(
-        "approval_choice_prompt".to_string(),
-        "请输入选择:".to_string(),
-    );
-    m.insert(
-        "approval_always_approved".to_string(),
-        "本次会话内已设为始终允许".to_string(),
-    );
-    m.insert("approval_rejected".to_string(), "已拒绝".to_string());
+    // UI：审批提示与详情（已不再在运行时使用，仅保留审查相关文案）
     m.insert(
         "approval_review_unavailable".to_string(),
         "当前无法使用审查助手".to_string(),
@@ -297,15 +267,6 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert(
         "file_write_overwrite_output".to_string(),
         "成功写入文件: {}\n大小: {} 字节".to_string(),
-    );
-
-    m.insert(
-        "approval_user_rejected".to_string(),
-        "用户拒绝了该操作".to_string(),
-    );
-    m.insert(
-        "approval_user_cancelled".to_string(),
-        "用户取消了该操作".to_string(),
     );
 
     // Search tool messages

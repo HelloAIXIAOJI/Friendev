@@ -178,40 +178,7 @@ pub fn get_messages() -> HashMap<String, String> {
         "Configuration saved!".to_string(),
     );
 
-    // UI: approval prompt & details
-    m.insert(
-        "approval_title".to_string(),
-        "  ──── Approval Required ──────────────────".to_string(),
-    );
-    m.insert(
-        "approval_empty_line".to_string(),
-        "                                           ".to_string(),
-    );
-    m.insert(
-        "approval_separator".to_string(),
-        "  ─────────────────────────────────────────".to_string(),
-    );
-    m.insert(
-        "approval_action_wants".to_string(),
-        "wants to modify".to_string(),
-    );
-    m.insert(
-        "approval_content_preview".to_string(),
-        "Content preview:".to_string(),
-    );
-    m.insert(
-        "approval_choice_hint".to_string(),
-        "[Y]es / [N]o / [I]nfo / [A]lways / [R]eview".to_string(),
-    );
-    m.insert(
-        "approval_choice_prompt".to_string(),
-        "Your choice:".to_string(),
-    );
-    m.insert(
-        "approval_always_approved".to_string(),
-        "Approved for this session".to_string(),
-    );
-    m.insert("approval_rejected".to_string(), "Rejected".to_string());
+    // UI: approval prompt & details (removed from runtime use; kept only for potential compatibility)
     m.insert(
         "approval_review_unavailable".to_string(),
         "Review helper is not available.".to_string(),
@@ -369,15 +336,6 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert(
         "file_write_overwrite_output".to_string(),
         "Successfully wrote file: {}\nSize: {} bytes".to_string(),
-    );
-
-    m.insert(
-        "approval_user_rejected".to_string(),
-        "User rejected this operation".to_string(),
-    );
-    m.insert(
-        "approval_user_cancelled".to_string(),
-        "User cancelled this operation".to_string(),
     );
 
     // Search tool messages

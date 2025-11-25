@@ -3,9 +3,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use crate::types::ToolResult;
-use crate::types::{approve_action_for_session, is_action_approved};
 use ui::get_i18n;
-use ui::prompt_approval;
 
 /// 规范化路径 - 处理相对路径和绝对路径
 pub fn normalize_path(path_str: &str, working_dir: &Path) -> PathBuf {
@@ -55,84 +53,4 @@ pub fn verify_dir_exists(path: &Path) -> Result<ToolResult> {
     Ok(ToolResult::ok(String::new(), String::new()))
 }
 
-/// 显示审批对话框并返回用户决策
-pub async fn request_approval(
-    tool_name: &str,
-    description: &str,
-    preview: Option<&str>,
-) -> Result<(bool, bool, bool)> {
-    Ok(prompt_approval(tool_name, description, preview)?)
-}
-
-/// 处理审批流程
-#[allow(dead_code)]
-pub async fn handle_approval_flow(
-    tool_id: &str,
-    approval_desc: &str,
-    preview: Option<&str>,
-    require_approval: bool,
-) -> Result<Option<String>> {
-    if !require_approval {
-        return Ok(None);
-    }
-
-    if is_action_approved(tool_id) {
-        return Ok(None);
-    }
-
-    let (approved, always, _view_details) =
-        request_approval(tool_id, approval_desc, preview).await?;
-
-    if !approved {
-        let i18n = get_i18n();
-        return Ok(Some(i18n.get("approval_user_rejected")));
-    }
-
-    if always {
-        approve_action_for_session(tool_id);
-    }
-
-    Ok(None)
-}
-
-/// 处理带详细内容展示的审批流程
-pub async fn handle_approval_with_details(
-    tool_id: &str,
-    approval_desc: &str,
-    preview: Option<&str>,
-    detail_title: &str,
-    detail_content: &str,
-    require_approval: bool,
-) -> Result<Option<String>> {
-    if !require_approval {
-        return Ok(None);
-    }
-
-    if is_action_approved(tool_id) {
-        return Ok(None);
-    }
-
-    let (approved, always, view_details) =
-        request_approval(tool_id, approval_desc, preview).await?;
-
-    // 如果用户选择查看详细信息
-    if view_details {
-        let continue_operation = ui::show_detailed_content(tool_id, detail_title, detail_content)?;
-
-        if !continue_operation {
-            let i18n = get_i18n();
-            return Ok(Some(i18n.get("approval_user_cancelled")));
-        }
-    }
-
-    if !approved {
-        let i18n = get_i18n();
-        return Ok(Some(i18n.get("approval_user_rejected")));
-    }
-
-    if always {
-        approve_action_for_session(tool_id);
-    }
-
-    Ok(None)
-}
+// Approval-related helpers have been removed; tools now execute without interactive approval.
