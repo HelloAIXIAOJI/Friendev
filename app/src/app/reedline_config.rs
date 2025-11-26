@@ -51,11 +51,14 @@ fn add_custom_keybindings(keybindings: &mut Keybindings) {
         ReedlineEvent::Edit(vec![EditCommand::InsertNewline]),
     );
     
-    // Shift+Enter: Insert newline (alternative for terminals that don't support Alt+Enter)
+    // Shift+Enter: Mark for optimization and submit
     keybindings.add_binding(
         KeyModifiers::SHIFT,
         KeyCode::Enter,
-        ReedlineEvent::Edit(vec![EditCommand::InsertNewline]),
+        ReedlineEvent::Multiple(vec![
+            ReedlineEvent::Edit(vec![EditCommand::InsertString("\x01OPTIMIZE\x01".to_string())]),
+            ReedlineEvent::Submit,
+        ]),
     );
     
     // Ctrl+Enter: Insert newline (another alternative)
@@ -84,6 +87,7 @@ pub fn create_prompt() -> FriendevPrompt {
 /// Process reedline signal
 pub enum InputResult {
     Input(String),
+    OptimizePrompt(String),  // Shift+Enter: optimize the current input
     CtrlC,
     CtrlD,
     Error(String),
@@ -92,14 +96,40 @@ pub enum InputResult {
 pub fn process_signal(signal: Signal) -> InputResult {
     match signal {
         Signal::Success(buffer) => {
+            // Check for optimization marker from Shift+Enter
+            if let Some(original) = check_for_optimization(&buffer) {
+                if original.trim().is_empty() {
+                    return InputResult::Input(String::new());
+                }
+                return InputResult::OptimizePrompt(original);
+            }
+            
             let trimmed = buffer.trim();
             if trimmed.is_empty() {
-                InputResult::Input(String::new())
-            } else {
-                InputResult::Input(buffer)
+                return InputResult::Input(String::new());
             }
+            
+            // Check for ! prefix to trigger optimization
+            if trimmed.starts_with('!') && trimmed.len() > 1 {
+                let original = trimmed[1..].trim().to_string();
+                if !original.is_empty() {
+                    return InputResult::OptimizePrompt(original);
+                }
+            }
+            
+            InputResult::Input(buffer)
         }
         Signal::CtrlC => InputResult::CtrlC,
         Signal::CtrlD => InputResult::CtrlD,
     }
+}
+
+/// Check if buffer ends with special optimization marker
+pub fn check_for_optimization(buffer: &str) -> Option<String> {
+    // Internal marker added by custom keybinding
+    if buffer.ends_with("\x01OPTIMIZE\x01") {
+        let original = buffer.trim_end_matches("\x01OPTIMIZE\x01").to_string();
+        return Some(original);
+    }
+    None
 }

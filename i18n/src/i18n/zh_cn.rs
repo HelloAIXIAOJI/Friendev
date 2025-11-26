@@ -96,7 +96,11 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("hint_newline".to_string(), "换行".to_string());
     m.insert(
         "hint_short".to_string(),
-        "Enter 发送  |  Alt+Enter 换行".to_string(),
+        "Enter 发送  |  Alt+Enter 换行  |  Ctrl+Enter 换行".to_string(),
+    );
+    m.insert(
+        "hint_shift_enter".to_string(),
+        "Shift+Enter 或 ! 开头 = AI优化提示词".to_string(),
     );
     m.insert(
         "hint_esc".to_string(),

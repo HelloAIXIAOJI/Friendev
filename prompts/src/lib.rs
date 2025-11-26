@@ -88,6 +88,7 @@ pub fn print_welcome(config: &Config, i18n: &I18n) {
     
     // 快捷键提示
     println!("\n  {} {}", "💡".bright_yellow(), i18n.get("hint_short").dimmed());
+    println!("  {} {}", "✨".bright_yellow(), i18n.get("hint_shift_enter").dimmed());
     println!("  {} {}", "⚠".bright_yellow(), i18n.get("hint_esc").dimmed());
     println!(
         "  {} {}",

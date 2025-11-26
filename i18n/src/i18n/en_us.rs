@@ -126,6 +126,10 @@ pub fn get_messages() -> HashMap<String, String> {
         "Enter = Send  |  Alt+Enter = New Line".to_string(),
     );
     m.insert(
+        "hint_shift_enter".to_string(),
+        "Shift+Enter or ! prefix = Optimize Prompt".to_string(),
+    );
+    m.insert(
         "hint_esc".to_string(),
         "ESC = Stop Generation".to_string(),
     );

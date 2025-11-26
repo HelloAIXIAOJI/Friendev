@@ -1,5 +1,6 @@
 mod command_handler;
 mod message_builder;
+mod prompt_optimizer;
 mod reedline_config;
 mod reedline_prompt;
 mod repl;

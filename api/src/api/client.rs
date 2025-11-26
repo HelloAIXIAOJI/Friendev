@@ -172,6 +172,50 @@ impl ApiClient {
         Ok(Box::new(Box::pin(mapped_stream)))
     }
 
+    /// Non-streaming chat completion (for simple requests like prompt optimization)
+    pub async fn chat_complete(&self, messages: Vec<Message>) -> Result<Message> {
+        let url = format!("{}/chat/completions", self.config.api_url);
+        
+        let request = ChatRequest {
+            model: self.config.current_model.clone(),
+            messages,
+            tools: vec![],  // No tools for simple completion
+            stream: false,
+            max_tokens: Some(1000),  // Limit tokens for optimization
+        };
+        
+        let response = self
+            .client
+            .post(&url)
+            .header("Authorization", format!("Bearer {}", self.config.api_key))
+            .header("Content-Type", "application/json")
+            .json(&request)
+            .send()
+            .await?;
+        
+        if !response.status().is_success() {
+            let status = response.status();
+            let text = response.text().await?;
+            anyhow::bail!("API error {}: {}", status, text);
+        }
+        
+        // Parse response
+        let response_json: serde_json::Value = response.json().await?;
+        
+        let content = response_json["choices"][0]["message"]["content"]
+            .as_str()
+            .unwrap_or("")
+            .to_string();
+        
+        Ok(Message {
+            role: "assistant".to_string(),
+            content,
+            tool_calls: None,
+            tool_call_id: None,
+            name: None,
+        })
+    }
+
     /// List available models
     pub async fn list_models(&self) -> Result<Vec<String>> {
         let url = format!("{}/models", self.config.api_url);

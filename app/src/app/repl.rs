@@ -1,7 +1,9 @@
 use super::command_handler;
+use super::prompt_optimizer;
 use super::reedline_config::{create_prompt, create_reedline, process_signal, InputResult};
 use super::startup::AppState;
 use anyhow::Result;
+use reedline::{EditCommand, Reedline};
 use std::time::{Duration, Instant};
 use ui::get_i18n;
 
@@ -28,6 +30,35 @@ pub async fn run_repl(mut state: AppState) -> Result<()> {
                     if let Err(e) = command_handler::handle_user_input(&buffer, &mut state).await {
                         let i18n = get_i18n();
                         eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), e);
+                    }
+                }
+                InputResult::OptimizePrompt(original) => {
+                    // Reset Ctrl+C counter
+                    last_ctrl_c = None;
+                    
+                    if original.trim().is_empty() {
+                        continue;
+                    }
+                    
+                    // Optimize the prompt
+                    println!("\n\x1b[36m⚙ 正在优化提示词...\x1b[0m");
+                    match prompt_optimizer::optimize_prompt(&original, &state.session, &state.api_client).await {
+                        Ok(optimized) => {
+                            // Display the optimized prompt
+                            println!("\x1b[32m✓ 优化完成\x1b[0m\n");
+                            println!("\x1b[90m原始:\x1b[0m {}", original);
+                            println!("\x1b[90m优化:\x1b[0m \x1b[36m{}\x1b[0m\n", optimized);
+                            
+                            // Pre-fill the input with optimized text
+                            if let Err(e) = prefill_input(&mut line_editor, &optimized) {
+                                let i18n = get_i18n();
+                                eprintln!("\x1b[33m[!] {}:\x1b[0m {}\n", i18n.get("error"), e);
+                            }
+                        }
+                        Err(e) => {
+                            let i18n = get_i18n();
+                            eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), e);
+                        }
                     }
                 }
                 InputResult::CtrlC => {
@@ -65,5 +96,15 @@ pub async fn run_repl(mut state: AppState) -> Result<()> {
         }
     }
 
+    Ok(())
+}
+
+/// Pre-fill the input buffer with text
+fn prefill_input(line_editor: &mut Reedline, text: &str) -> Result<()> {
+    // Use the run_edit_commands API to insert text
+    line_editor.run_edit_commands(&[
+        EditCommand::Clear,
+        EditCommand::InsertString(text.to_string()),
+    ]);
     Ok(())
 }
