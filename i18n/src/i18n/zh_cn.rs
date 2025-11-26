@@ -98,6 +98,18 @@ pub fn get_messages() -> HashMap<String, String> {
         "hint_short".to_string(),
         "Enter 发送  |  Alt+Enter 换行".to_string(),
     );
+    m.insert(
+        "hint_esc".to_string(),
+        "ESC 停止生成".to_string(),
+    );
+    m.insert(
+        "hint_ctrl_c_twice".to_string(),
+        "再按一次 Ctrl+C 退出".to_string(),
+    );
+    m.insert(
+        "hint_ctrl_c_exit".to_string(),
+        "Ctrl+C 两次退出".to_string(),
+    );
 
     // 错误消息
     m.insert("error".to_string(), "错误".to_string());

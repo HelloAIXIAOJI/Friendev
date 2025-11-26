@@ -87,10 +87,12 @@ pub fn print_welcome(config: &Config, i18n: &I18n) {
     println!("{}", "═".repeat(60).bright_black());
     
     // 快捷键提示
+    println!("\n  {} {}", "💡".bright_yellow(), i18n.get("hint_short").dimmed());
+    println!("  {} {}", "⚠".bright_yellow(), i18n.get("hint_esc").dimmed());
     println!(
-        "\n  {} {}",
-        "💡".bright_yellow(),
-        i18n.get("hint_short").dimmed()
+        "  {} {}",
+        "🚪".bright_yellow(),
+        i18n.get("hint_ctrl_c_exit").dimmed()
     );
     println!();
 }

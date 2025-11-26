@@ -1,17 +1,20 @@
 use super::output_formatter;
 use anyhow::Result;
 use api::{StreamChunk, ToolCallAccumulator};
+use crossterm::event::{poll, read, Event, KeyCode};
 use futures::StreamExt;
+use std::time::Duration;
 
-/// Process stream chunks and handle output
+/// Process stream chunks and handle output with ESC key interruption support
 pub async fn handle_stream_chunks(
     stream: impl futures::Stream<Item = Result<StreamChunk>> + Unpin,
-) -> Result<(String, ToolCallAccumulator, bool)> {
+) -> Result<(String, ToolCallAccumulator, bool, bool)> {
     let mut stream = Box::pin(stream);
 
     let mut content = String::new();
     let mut tool_accumulator = ToolCallAccumulator::new();
     let mut has_tool_calls = false;
+    let mut interrupted = false;
 
     let mut is_first_reasoning = true;
     let mut has_reasoning = false;
@@ -19,6 +22,12 @@ pub async fn handle_stream_chunks(
     output_formatter::print_ai_prefix()?;
 
     while let Some(chunk_result) = stream.next().await {
+        // Check for ESC key press (non-blocking)
+        if check_interrupt()? {
+            interrupted = true;
+            println!("\n\n\x1b[33m⚠ 已停止生成\x1b[0m\n");
+            break;
+        }
         match chunk_result? {
             StreamChunk::Content(text) => {
                 output_formatter::print_content(&text, &mut has_reasoning)?;
@@ -57,7 +66,23 @@ pub async fn handle_stream_chunks(
     }
 
     // Ensure color is reset at the end and newline
-    output_formatter::finalize_output(has_reasoning, content.is_empty())?;
+    if !interrupted {
+        output_formatter::finalize_output(has_reasoning, content.is_empty())?;
+    }
 
-    Ok((content, tool_accumulator, has_tool_calls))
+    Ok((content, tool_accumulator, has_tool_calls, interrupted))
+}
+
+/// Check if ESC key is pressed (non-blocking)
+fn check_interrupt() -> Result<bool> {
+    // Poll with a very short timeout to avoid blocking
+    if poll(Duration::from_millis(1))? {
+        if let Event::Key(key_event) = read()? {
+            // Only check for ESC key
+            if key_event.code == KeyCode::Esc {
+                return Ok(true);
+            }
+        }
+    }
+    Ok(false)
 }

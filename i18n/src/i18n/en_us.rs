@@ -125,6 +125,18 @@ pub fn get_messages() -> HashMap<String, String> {
         "hint_short".to_string(),
         "Enter = Send  |  Alt+Enter = New Line".to_string(),
     );
+    m.insert(
+        "hint_esc".to_string(),
+        "ESC = Stop Generation".to_string(),
+    );
+    m.insert(
+        "hint_ctrl_c_twice".to_string(),
+        "Press Ctrl+C again to exit".to_string(),
+    );
+    m.insert(
+        "hint_ctrl_c_exit".to_string(),
+        "Ctrl+C twice = Exit".to_string(),
+    );
 
     // Error messages
     m.insert("error".to_string(), "Error".to_string());

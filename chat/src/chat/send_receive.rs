@@ -19,9 +19,21 @@ pub async fn send_and_receive(
     // Use streaming request with retry
     let stream = client.chat_stream_with_retry(messages).await?;
 
-    // Handle stream chunks
-    let (content, tool_accumulator, has_tool_calls) =
+    // Handle stream chunks (with ESC interruption support)
+    let (content, tool_accumulator, has_tool_calls, interrupted) =
         stream_handler::handle_stream_chunks(stream).await?;
+    
+    // If interrupted, return empty response
+    if interrupted {
+        let message = Message {
+            role: "assistant".to_string(),
+            content: content + "\n[生成已中断]",
+            tool_calls: None,
+            tool_call_id: None,
+            name: None,
+        };
+        return Ok((message, None, HashMap::new()));
+    }
 
     // Get tool calls and UI display components
     let displays = tool_accumulator.get_displays().clone();
