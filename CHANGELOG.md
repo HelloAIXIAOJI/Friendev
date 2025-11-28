@@ -1,18 +1,15 @@
 # Changelog
 - all friendev update changelog on here.
 ---
-## [0.2.3] - 2025-11-28
-
-### Fixed
-- **Multi-line input display issue**: Fixed overlapping/covered display when input area is filled with multi-line content
-  - Affects prompt optimization feature (using `!` prefix or Shift+Enter)
-  - Affects history navigation (using arrow keys to select multi-line history)
-  - Solution: Automatically creates vertical space when needed by detecting cursor position and terminal height
-
----
 ## [0.2.2] - 2025-11-22
-- 加入了 network_get_content 工具，可以让AI通过URL获取到内容。
-
+- 加入了`!`，当在提示词前写`!`，如`!给我写一个排序算法`，则AI会自动优化提示词并填入
+- 加入了ESC快捷键，可以打断AI输出。
+- 更改了 Ctrl+C 的逻辑，需要连续两次按下 Ctrl+C 才会退出
+- 将输入更改为 reedline 以支持多行输入与更多的操作。
+- 增加了/model，可以可视化的切换模型
+- 为AI增加了`network_get_content`工具，现在AI可以通过URL获取网页内容。
+### 更改
+-
 ---
 ## [0.2.1] - 2025-11-22
 - Roll back the codebase to the time before it was refactored into C/S (Only Client), as there are many issues
