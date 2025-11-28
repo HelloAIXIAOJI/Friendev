@@ -1,6 +1,6 @@
 [package]
 name = "friendev"
-version = "0.2.3"
+version = "0.2.2"
 edition = "2021"
 
 [workspace]
@@ -24,50 +24,7 @@ members = [
 [dependencies]
 # 核心依赖
 tokio = { version = "1", features = ["full"] }
-reqwest = { version = "0.11", features = ["json", "stream", "rustls-tls"], default-features = false }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-clap = { version = "4", features = ["derive"] }
-uuid = { version = "1", features = ["v4", "serde"] }
-dirs = "5"
-tokio-stream = "0.1"
-futures = "0.3"
 anyhow = "1.0"
-chrono = { version = "0.4", features = ["serde"] }
-bytes = "1"
-rand = "0.8"
-
-# 终端 UI 框架
-ratatui = "0.26"                      # 现代化 TUI 框架
-crossterm = "0.27"                    # 跨平台终端控制
-tui-textarea = "0.4"                  # 多行文本编辑器组件
-
-# 高级 REPL
-reedline = "0.28"                     # 现代化 readline (Nushell 使用)
-rustyline = "13"                      # 保留作为备选
-
-# 样式美化
-colored = "2.1"                       # 简单颜色输出
-console = "0.15"                      # 跨平台终端增强
-unicode-width = "0.1"                 # 正确处理宽字符
-
-# 进度与交互
-indicatif = "0.17"                    # 进度条/Spinner
-dialoguer = "0.11"                    # 交互式提示
-
-# 代码与表格
-syntect = "5.1"                       # 语法高亮
-comfy-table = "7.1"                   # ASCII 表格
-
-# 工具组件
-# skim = "0.10"                      # 模糊查找器 (类 fzf) - Windows 不兼容
-termimad = "0.28"                     # Markdown 渲染
-scraper = "0.19"                      # HTML解析与选择器
-url = "2.5"                           # URL解析与操作
-regex = "1.10"                        # 正则表达式
-html-escape = "0.2"                   # HTML实体解码
-urlencoding = "2.1"                   # URL编码
-ignore = "0.4"                        # .gitignore 规则正确处理
 agents = { path = "agents" }
 commands = { path = "commands" }
 app = { path = "app" }
