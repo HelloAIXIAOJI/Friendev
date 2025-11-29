@@ -1,10 +1,12 @@
 # Changelog
 - all friendev update changelog on here.
 ---
+修复特定情况吃输入框、已打印内容的问题
+---
 ## [0.2.3] - 2025-11-30
 
 ### New Features
-- **Auto-Approval Mode**: Introduced `--shorekeeper` mode, enabling the AI to automatically review and respond to "Approval Required" prompts.
+- Added --shorekeeper mode: AI assesses, reviews, and approves "Approval Required" based on risk, replacing manual approval, making it safer than ally (yolo).
 - **Alias Support**: Added `--yolo` as an alias for `--ally`
 ---
 ## [0.2.2] - 2025-11-30

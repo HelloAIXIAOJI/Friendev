@@ -44,11 +44,6 @@ pub async fn run_repl(mut state: AppState) -> Result<()> {
                     println!("\n\x1b[36m⚙ 正在优化提示词...\x1b[0m");
                     match prompt_optimizer::optimize_prompt(&original, &state.session, &state.api_client).await {
                         Ok(optimized) => {
-                            // Display the optimized prompt
-                            println!("\x1b[32m✓ 优化完成\x1b[0m\n");
-                            println!("\x1b[90m原始:\x1b[0m {}", original);
-                            println!("\x1b[90m优化:\x1b[0m \x1b[36m{}\x1b[0m\n", optimized);
-                            
                             // Pre-fill the input with optimized text
                             if let Err(e) = prefill_input(&mut line_editor, &optimized) {
                                 let i18n = get_i18n();
@@ -101,39 +96,18 @@ pub async fn run_repl(mut state: AppState) -> Result<()> {
 
 /// Pre-fill the input buffer with text
 fn prefill_input(line_editor: &mut Reedline, text: &str) -> Result<()> {
-    use crossterm::{terminal, cursor};
-    use std::io::{self, Write};
-    
-    // Count newlines in the text to estimate required space
+    // If text is multi-line, print dynamic newlines to force scroll and ensure space.
+    // We calculate the number of lines and add 5 extra for buffer.
     let newline_count = text.matches('\n').count();
-    
-    // If multi-line content, ensure we have enough vertical space
     if newline_count > 0 {
-        // Get terminal size
-        let (_, height) = terminal::size().unwrap_or((80, 24));
-        
-        // Get current cursor position (if possible)
-        if let Ok((_, current_y)) = cursor::position() {
-            // Calculate needed space (lines in text + minimal buffer)
-            // Only add 1 line buffer to avoid excessive whitespace
-            let needed_lines = (newline_count + 1) as u16;
-            let available_lines = height.saturating_sub(current_y).saturating_sub(1);
-            
-            // If not enough space, print minimal newlines to make room
-            if available_lines < needed_lines {
-                let extra_lines = needed_lines - available_lines;
-                for _ in 0..extra_lines {
-                    println!();
-                }
-                io::stdout().flush().ok();
-            }
-        }
+        print!("{}", "\n".repeat(newline_count + 5));
     }
-    
+
     // Use the run_edit_commands API to insert text
     line_editor.run_edit_commands(&[
         EditCommand::Clear,
         EditCommand::InsertString(text.to_string()),
+        EditCommand::MoveToStart, // Ensure cursor is at the start
     ]);
     
     Ok(())
