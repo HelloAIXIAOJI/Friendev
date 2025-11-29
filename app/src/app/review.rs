@@ -30,7 +30,7 @@ pub fn install_review_handler(api_client: ApiClient, config: Config) {
         });
 
         match rx.recv() {
-            Ok(Ok(())) => Ok(()),
+            Ok(Ok(approved)) => Ok(approved),
             Ok(Err(err)) => Err(io::Error::new(io::ErrorKind::Other, err.to_string())),
             Err(recv_err) => Err(io::Error::new(io::ErrorKind::Other, recv_err.to_string())),
         }
@@ -41,7 +41,7 @@ async fn run_review(
     client: &ApiClient,
     _config: &Config,
     request: &OwnedReviewRequest,
-) -> Result<()> {
+) -> Result<bool> {
     let i18n = ui::get_i18n();
 
     println!(
@@ -123,6 +123,7 @@ async fn run_review(
             }
 
             println!();
+            Ok(outcome.approval)
         }
         Err(err) => {
             println!(
@@ -130,10 +131,11 @@ async fn run_review(
                 i18n.get("approval_review_parse_error").replace("{}", &err)
             );
             println!("  {} {}", i18n.get("approval_review_raw"), raw_output);
+            // On parse error, safe default is false? Or error?
+            // Let's return error to trigger fallback or rejection
+            anyhow::bail!("Failed to parse review output")
         }
     }
-
-    Ok(())
 }
 
 fn format_preview(preview: Option<&str>, i18n: &I18n) -> (String, bool) {

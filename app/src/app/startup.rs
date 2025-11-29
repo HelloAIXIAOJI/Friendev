@@ -6,6 +6,7 @@ use history::ChatSession;
 use i18n::I18n;
 use prompts;
 use std::env;
+use ui;
 
 /// Application startup state
 pub struct AppState {
@@ -18,8 +19,19 @@ pub struct AppState {
 
 /// Initialize the application
 pub async fn initialize_app() -> Result<AppState> {
-    // Check for --ally or --yolo flag
-    let auto_approve = env::args().any(|arg| arg == "--ally" || arg == "--yolo");
+    // Check for smart approval flags
+    let smart_approve = env::args().any(|arg| 
+        arg == "--shorekeeper" || 
+        arg == "--ally-but-i-dont-fully-trust" || 
+        arg == "--ew"
+    );
+
+    if smart_approve {
+        ui::set_smart_approval_mode(true);
+    }
+
+    // Check for --ally or --yolo flag (disabled if smart approval is active)
+    let auto_approve = !smart_approve && env::args().any(|arg| arg == "--ally" || arg == "--yolo");
 
     // Check for --setup flag to force setup
     let force_setup = env::args().any(|arg| arg == "--setup");

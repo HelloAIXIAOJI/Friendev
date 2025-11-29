@@ -2,13 +2,15 @@ use colored::Colorize;
 use dialoguer::{theme::ColorfulTheme, Select};
 use std::io::{self};
 use std::sync::OnceLock;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use super::get_i18n;
 use i18n::I18n;
 
-type ReviewHandler = dyn Fn(&ReviewRequest) -> io::Result<()> + Send + Sync + 'static;
+type ReviewHandler = dyn Fn(&ReviewRequest) -> io::Result<bool> + Send + Sync + 'static;
 
 static REVIEW_HANDLER: OnceLock<Box<ReviewHandler>> = OnceLock::new();
+static SMART_APPROVAL_MODE: AtomicBool = AtomicBool::new(false);
 
 /// Review request
 pub struct ReviewRequest<'a> {
@@ -20,9 +22,14 @@ pub struct ReviewRequest<'a> {
 /// Register review handler
 pub fn set_review_handler<F>(handler: F)
 where
-    F: Fn(&ReviewRequest) -> io::Result<()> + Send + Sync + 'static,
+    F: Fn(&ReviewRequest) -> io::Result<bool> + Send + Sync + 'static,
 {
     let _ = REVIEW_HANDLER.set(Box::new(handler));
+}
+
+/// Set smart approval mode
+pub fn set_smart_approval_mode(enabled: bool) {
+    SMART_APPROVAL_MODE.store(enabled, Ordering::Relaxed);
 }
 
 /// User approval prompt
@@ -33,6 +40,33 @@ pub fn prompt_approval(
     content_preview: Option<&str>,
 ) -> io::Result<(bool, bool, bool)> {
     use std::path::Path;
+
+    // Check for Smart Approval Mode
+    if SMART_APPROVAL_MODE.load(Ordering::Relaxed) {
+        if let Some(handler) = REVIEW_HANDLER.get() {
+            let request = ReviewRequest {
+                action,
+                subject: file_path,
+                preview: content_preview,
+            };
+            
+            // In smart mode, we delegate to the handler immediately
+            println!("\n{}", get_i18n().get("approval_review_wait").yellow());
+            match handler(&request) {
+                Ok(true) => return Ok((true, false, false)),
+                Ok(false) => {
+                    println!("{}", get_i18n().get("approval_rejected").red());
+                    return Ok((false, false, false));
+                }
+                Err(e) => {
+                    println!("{} {}", "Review Error:".red(), e);
+                    // If review fails, fall back to manual interaction?
+                    // Or reject? Let's fall back to manual interaction for safety.
+                    println!("Falling back to manual approval...");
+                }
+            }
+        }
+    }
 
     let file_name = Path::new(file_path)
         .file_name()
