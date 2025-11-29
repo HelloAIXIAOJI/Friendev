@@ -8,8 +8,6 @@
 - 将输入更改为 reedline 以支持多行输入与更多的操作。
 - 增加了/model，可以可视化的切换模型
 - 为AI增加了`network_get_content`工具，现在AI可以通过URL获取网页内容。
-### 更改
--
 ---
 ## [0.2.1] - 2025-11-22
 - Roll back the codebase to the time before it was refactored into C/S (Only Client), as there are many issues
