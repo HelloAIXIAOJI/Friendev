@@ -8,5 +8,5 @@ colored = "2.1"
 
 config = { path = "../config" }
 i18n = { path = "../i18n" }
-agents = { path = "../agents" }
+agents = { path = "../agents_md_file" }
 tools = { path = "../tools" }

@@ -6,7 +6,7 @@ edition = "2021"
 [workspace]
 members = [
     ".",
-    "agents",
+    "agents_md_file",
     "commands",
     "api",
     "app",
@@ -25,7 +25,7 @@ members = [
 # 核心依赖
 tokio = { version = "1", features = ["full"] }
 anyhow = "1.0"
-agents = { path = "agents" }
+agents = { path = "agents_md_file" }
 commands = { path = "commands" }
 app = { path = "app" }
 api = { path = "api" }
