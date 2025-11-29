@@ -179,7 +179,17 @@ pub fn get_messages() -> HashMap<String, String> {
     );
     m.insert("setup_saved".to_string(), "配置已保存！".to_string());
 
-    // UI：审批提示与详情（已不再在运行时使用，仅保留审查相关文案）
+    // Approval UI
+    m.insert("approval_title".to_string(), "需要审批".to_string());
+    m.insert("approval_action_wants".to_string(), "请求执行".to_string());
+    m.insert("approval_content_preview".to_string(), "内容预览".to_string());
+    m.insert("approval_always_approved".to_string(), "本会话总是批准".to_string());
+    m.insert("approval_rejected".to_string(), "操作已拒绝".to_string());
+    m.insert("approval_opt_approve".to_string(), "批准".to_string());
+    m.insert("approval_opt_always".to_string(), "总是批准 (本会话)".to_string());
+    m.insert("approval_opt_details".to_string(), "查看详情 / 审查".to_string());
+    m.insert("approval_opt_reject".to_string(), "拒绝".to_string());
+
     m.insert(
         "approval_review_unavailable".to_string(),
         "当前无法使用审查助手".to_string(),

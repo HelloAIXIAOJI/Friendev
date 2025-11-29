@@ -227,7 +227,17 @@ pub fn get_messages() -> HashMap<String, String> {
         "Configuration saved!".to_string(),
     );
 
-    // UI: approval prompt & details (removed from runtime use; kept only for potential compatibility)
+    // Approval UI
+    m.insert("approval_title".to_string(), "Approval Required".to_string());
+    m.insert("approval_action_wants".to_string(), "wants to execute".to_string());
+    m.insert("approval_content_preview".to_string(), "Content Preview".to_string());
+    m.insert("approval_always_approved".to_string(), "Always approved for this session".to_string());
+    m.insert("approval_rejected".to_string(), "Operation rejected".to_string());
+    m.insert("approval_opt_approve".to_string(), "Approve".to_string());
+    m.insert("approval_opt_always".to_string(), "Approve Always (Session)".to_string());
+    m.insert("approval_opt_details".to_string(), "View Details / Review".to_string());
+    m.insert("approval_opt_reject".to_string(), "Reject".to_string());
+
     m.insert(
         "approval_review_unavailable".to_string(),
         "Review helper is not available.".to_string(),

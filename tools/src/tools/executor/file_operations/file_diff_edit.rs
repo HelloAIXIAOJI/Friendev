@@ -30,10 +30,9 @@ pub async fn execute_file_diff_edit(
         )));
     }
 
-    let _ = require_approval;
-
     // 读取文件
     let content = fs::read_to_string(&target_path)?;
+    let original_content = content.clone();
     let mut lines: Vec<String> = content.lines().map(|s| s.to_string()).collect();
 
     // 检测换行符风格
@@ -74,6 +73,18 @@ pub async fn execute_file_diff_edit(
         lines = new_lines;
     }
 
+    if require_approval {
+        let details = generate_detailed_changes(&original_content, &args);
+        if !super::file_common::check_file_action_approval(
+            "file_diff_edit",
+            &target_path,
+            Some(&details),
+        )? {
+            let i18n = ui::get_i18n();
+            return Ok(ToolResult::error(i18n.get("approval_rejected")));
+        }
+    }
+
     // 重建文件内容
     let new_content = lines.join("\n");
     let final_content = if uses_crlf {
@@ -84,9 +95,8 @@ pub async fn execute_file_diff_edit(
 
     fs::write(&target_path, &final_content)?;
 
-    // 核心：直接从文件读取实际内容，并提取 ±3 行上下文
-    let actual_content = fs::read_to_string(&target_path)?;
-    let actual_lines: Vec<&str> = actual_content.lines().collect();
+    // 核心：直接从内容生成上下文，不再重新读取文件
+    let actual_lines: Vec<&str> = final_content.lines().collect();
 
     // 生成 diff_merge_result：合并所有修改范围的上下文
     let diff_merge_result = generate_diff_result(&actual_lines, &modified_ranges);
@@ -135,18 +145,45 @@ fn generate_preview(args: &FileDiffEditArgs) -> String {
 
 fn generate_detailed_changes(file_content: &str, args: &FileDiffEditArgs) -> String {
     let mut detailed_changes = String::new();
-    detailed_changes.push_str("\n=== 当前文件内容 ===\n");
-    detailed_changes.push_str(file_content);
-    detailed_changes.push_str("\n\n=== 计划进行的更改 ===\n");
+    let lines: Vec<&str> = file_content.lines().collect();
 
     for (i, hunk) in args.hunks.iter().enumerate() {
-        detailed_changes.push_str(&format!("\nHunk #{}\n", i + 1));
-        detailed_changes.push_str(&format!("  行号: {}\n", hunk.start_line));
-        detailed_changes.push_str(&format!("  原行数: {}\n", hunk.num_lines));
-        detailed_changes.push_str("  新内容:\n");
-        for line in hunk.new_content.lines() {
-            detailed_changes.push_str(&format!("    {}\n", line));
+        detailed_changes.push_str(&format!("@@ Hunk #{} @@\n", i + 1));
+        
+        let start_line = hunk.start_line;
+        let num_lines = hunk.num_lines;
+        let original_start_idx = if start_line > 0 { start_line - 1 } else { 0 };
+        
+        // Context before (3 lines)
+        let context_start = if original_start_idx >= 3 { original_start_idx - 3 } else { 0 };
+        for idx in context_start..original_start_idx {
+            if idx < lines.len() {
+                detailed_changes.push_str(&format!(" {}\n", lines[idx]));
+            }
         }
+
+        // Removed lines
+        for idx in 0..num_lines {
+            let curr_idx = original_start_idx + idx;
+            if curr_idx < lines.len() {
+                detailed_changes.push_str(&format!("-{}\n", lines[curr_idx]));
+            }
+        }
+
+        // Added lines
+        for line in hunk.new_content.lines() {
+            detailed_changes.push_str(&format!("+{}\n", line));
+        }
+        
+        // Context after (3 lines)
+        let end_idx = original_start_idx + num_lines;
+        for idx in end_idx..(end_idx + 3) {
+            if idx < lines.len() {
+                detailed_changes.push_str(&format!(" {}\n", lines[idx]));
+            }
+        }
+        
+        detailed_changes.push_str("\n");
     }
 
     detailed_changes

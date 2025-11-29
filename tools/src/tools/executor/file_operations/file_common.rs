@@ -53,4 +53,44 @@ pub fn verify_dir_exists(path: &Path) -> Result<ToolResult> {
     Ok(ToolResult::ok(String::new(), String::new()))
 }
 
-// Approval-related helpers have been removed; tools now execute without interactive approval.
+/// Check if file action is approved
+pub fn check_file_action_approval(
+    action: &str,
+    path: &Path,
+    preview: Option<&str>,
+) -> Result<bool> {
+    use crate::types::{approve_action_for_session, is_action_approved};
+    use ui::prompt_approval;
+
+    if is_action_approved(action) {
+        return Ok(true);
+    }
+
+    let (approved, always, view_details) = prompt_approval(
+        action,
+        &path.display().to_string(),
+        preview,
+    )?;
+
+    if view_details {
+        let continue_op = ui::show_detailed_content(
+            action,
+            &path.display().to_string(),
+            preview.unwrap_or("(No preview available)"),
+        )?;
+        if !continue_op {
+            return Ok(false);
+        }
+        return Ok(true);
+    }
+
+    if !approved {
+        return Ok(false);
+    }
+
+    if always {
+        approve_action_for_session(action);
+    }
+
+    Ok(true)
+}

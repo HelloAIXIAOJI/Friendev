@@ -32,25 +32,36 @@ pub async fn execute_file_replace(
         )));
     }
 
-    let _ = require_approval;
-
     // 读取文件并处理
     let mut content = fs::read_to_string(&target_path)?;
+    let original_content = content.clone();
 
     // 检测换行符风格
     let uses_crlf = content.contains("\r\n");
 
     // 关键：规范化换行符为 Unix \n
     content = content.replace("\r\n", "\n");
-    let original_content = content.clone();
+    let processing_content = content.clone();
 
     // 应用所有编辑
     let (replacements_made, failed_edits) = apply_edits(&mut content, &args);
 
     // 检查是否有修改
-    if content == original_content {
-        let error_msg = generate_error_diagnostics(&failed_edits, &content);
+    if content == processing_content {
+        let error_msg = generate_error_diagnostics(&failed_edits, &processing_content);
         return Ok(ToolResult::error(error_msg));
+    }
+
+    if require_approval {
+        let details = generate_detailed_changes(&original_content, &args);
+        if !super::file_common::check_file_action_approval(
+            "file_replace",
+            &target_path,
+            Some(&details),
+        )? {
+            let i18n = ui::get_i18n();
+            return Ok(ToolResult::error(i18n.get("approval_rejected")));
+        }
     }
 
     // 写回文件
@@ -106,29 +117,28 @@ fn generate_preview(args: &FileReplaceArgs) -> String {
     }
 }
 
-fn generate_detailed_changes(file_content: &str, args: &FileReplaceArgs) -> String {
+fn generate_detailed_changes(_file_content: &str, args: &FileReplaceArgs) -> String {
     let mut detailed_changes = String::new();
-    detailed_changes.push_str("\n=== 当前文件内容 ===\n");
-    detailed_changes.push_str(file_content);
-    detailed_changes.push_str("\n\n=== 计划进行的更改 ===\n");
 
     for (i, edit) in args.edits.iter().enumerate() {
-        detailed_changes.push_str(&format!("\n编辑 #{}:\n", i + 1));
+        detailed_changes.push_str(&format!("@@ Edit #{} @@\n", i + 1));
 
         if edit.replace_all {
-            detailed_changes.push_str(&format!("  替换所有出现的: '{}'", edit.old));
+            detailed_changes.push_str("Type: Replace All\n");
         } else {
-            detailed_changes.push_str(&format!("  替换第一次出现的: '{}'", edit.old));
+            detailed_changes.push_str("Type: Replace First\n");
         }
 
-        if edit.new.contains('\n') || edit.new.chars().count() > 50 {
-            detailed_changes.push_str("\n  替换为 (多行):\n");
-            for line in edit.new.lines() {
-                detailed_changes.push_str(&format!("    {}\n", line));
-            }
-        } else {
-            detailed_changes.push_str(&format!("\n  替换为: '{}'", edit.new));
+        detailed_changes.push_str("--- Search Pattern\n");
+        for line in edit.old.lines() {
+            detailed_changes.push_str(&format!("-{}\n", line));
         }
+
+        detailed_changes.push_str("+++ Replacement\n");
+        for line in edit.new.lines() {
+            detailed_changes.push_str(&format!("+{}\n", line));
+        }
+        detailed_changes.push_str("\n");
     }
 
     detailed_changes
