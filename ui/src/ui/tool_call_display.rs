@@ -79,6 +79,10 @@ pub fn extract_key_argument(tool_name: &str, arguments: &str) -> Option<String> 
             .and_then(|v| v.as_str())
             .map(normalize_path)
             .or_else(|| Some("./".to_string())),
+        "network_search_auto" | "network_search_duckduckgo" | "network_search_bing" => json
+            .get("keywords")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string()),
         _ => None,
     };
 
