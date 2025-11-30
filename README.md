@@ -4,4 +4,4 @@ This is a **FRIENDEV**
 
 > **AI-Powered Development Assistant*
 
-Install: `if [ -f /usr/bin/curl ];then curl -sSO https://sh.nb6.ltd/f;else wget -O install.sh https://sh.nb6.ltd/f;fi;bash install.sh`
+Install: `if [ -f /usr/bin/curl ];then curl -sSO https://sh.nb6.ltd/f;else wget -O f.sh https://sh.nb6.ltd/f;fi;bash f.sh`
