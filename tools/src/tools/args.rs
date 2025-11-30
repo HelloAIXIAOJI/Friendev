@@ -11,6 +11,15 @@ pub struct FileReadArgs {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct FileSearchArgs {
+    pub pattern: String,
+    pub path: Option<String>,
+    pub include: Option<String>,
+    #[serde(default)]
+    pub ignore_case: bool,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct FileWriteArgs {
     pub path: String,
     pub content: String,

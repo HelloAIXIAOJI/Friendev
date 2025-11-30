@@ -19,6 +19,7 @@ pub async fn execute_tool(
     match name {
         "file_list" => file_operations::execute_file_list(arguments, working_dir).await,
         "file_read" => file_operations::execute_file_read(arguments, working_dir).await,
+        "file_search" => file_operations::execute_file_search(arguments, working_dir).await,
         "file_write" => {
             file_operations::execute_file_write(arguments, working_dir, require_approval).await
         }

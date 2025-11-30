@@ -117,6 +117,36 @@ pub fn get_available_tools() -> Vec<Tool> {
         Tool {
             tool_type: "function".to_string(),
             function: ToolFunction {
+                name: "file_search".to_string(),
+                description: "Search for a pattern in files recursively, respecting .gitignore. Similar to grep/ripgrep.".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {
+                        "pattern": {
+                            "type": "string",
+                            "description": "Regex pattern to search for"
+                        },
+                        "path": {
+                            "type": "string",
+                            "description": "Root directory to search in (defaults to current directory)"
+                        },
+                        "include": {
+                            "type": "string",
+                            "description": "Glob pattern to include files (e.g., '*.rs')"
+                        },
+                        "ignore_case": {
+                            "type": "boolean",
+                            "description": "Case insensitive search",
+                            "default": false
+                        }
+                    },
+                    "required": ["pattern"]
+                }),
+            },
+        },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
                 name: "network_search_auto".to_string(),
                 description: "Search the web with automatic fallback: tries DuckDuckGo first, then Bing if DuckDuckGo fails. Returns title, URL, and snippet for each result.".to_string(),
                 parameters: json!({
