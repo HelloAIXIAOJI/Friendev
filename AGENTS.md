@@ -2,15 +2,15 @@
 
 ## Overview
 
-Friendev is an AI-powered development assistant built in Rust. It provides an interactive REPL environment with prompt optimization, multi-line input support, and various development tools for AI-assisted programming tasks.
+Friendev is an AI-powered development assistant written in Rust. It provides an interactive REPL interface for AI-powered coding assistance, file management, and development workflows. The project is structured as a multi-crate workspace with modules for API integration, UI, commands, configuration, and various development tools.
 
 ## Dev Environment
 
 ### Prerequisites
-- Rust 1.70+ (edition 2021)
-- Cargo package manager
+- Rust 1.70+ (stable)
+- Cargo (Rust package manager)
 - Git
-- Cross-compilation tools (for building multiple targets)
+- Cross-compilation tools (for building on multiple platforms)
 
 ### Setup Steps
 ```bash
@@ -25,43 +25,40 @@ cargo build --release
 cargo run --release
 ```
 
-### Version Requirements
-- Rust: 1.70+
-- Cargo: Latest stable
-- tokio: 1.0 with full features
-- reedline: 0.28
-- crossterm: 0.27
+### Version Information
+- **Rust**: Edition 2021
+- **Cargo**: Latest stable version
+- **Target**: Multi-platform support (Windows, Linux, macOS, Android, FreeBSD, etc.)
 
 ## Project Structure
 
 ```
 friendev/
-├── agents_md_file/     # AGENTS.md file generation and analysis
-├── api/               # API client and integration
+├── agents_md_file/     # AGENTS.md generation and management
+├── api/               # API client and network communication
 ├── app/               # Main application logic and REPL
-├── chat/              # Chat functionality
-├── commands/          # Command handling system
+├── chat/              # Chat session management
+├── commands/          # Command implementations
 ├── config/            # Configuration management
-├── history/           # Session history management
+├── history/           # Chat history persistence
 ├── i18n/              # Internationalization support
 ├── prompts/           # Prompt templates and optimization
-├── search_tool/       # Web search capabilities
-├── security/          # Security and authentication
-├── src/               # Legacy source code (being migrated)
-├── tools/             # AI tools and utilities
-├── tui/               # Terminal UI components
-└── ui/                # UI components and i18n integration
+├── search_tool/       # Web search functionality
+├── security/          # Security and approval mechanisms
+├── src/               # Root source (main entry point)
+├── target/            # Build artifacts
+├── tools/             # Development tools and utilities
+└── ui/                # User interface components
 ```
 
 ### Key Components
-- **app**: Main application entry point and REPL loop
-- **commands**: Command processing and execution
-- **api**: External API integrations (OpenAI, etc.)
-- **config**: Configuration management
-- **history**: Session persistence and history
-- **i18n**: Multi-language support
-- **tools**: AI-powered development tools
-- **ui**: User interface components
+
+- **app/**: Core application logic containing REPL loop, startup sequence, and terminal UI
+- **config/**: Configuration management with persistence and interactive setup
+- **api/**: HTTP client for AI API communication with streaming support
+- **commands/**: Built-in commands like `/model`, `/history`, `/agents.md`
+- **ui/**: Terminal UI components with colored output and progress indicators
+- **tools/**: File editing, network access, and system command execution capabilities
 
 ## Build & Compilation
 
@@ -71,34 +68,24 @@ friendev/
 cargo build --release
 
 # Build for specific target
-cargo build --release --target <target-triple>
+cargo build --release --target x86_64-unknown-linux-gnu
 
-# Build all workspace members
-cargo build --workspace --release
-
-# Run tests
-cargo test
-
-# Check code
-cargo check
+# Cross-compilation (requires cross tool)
+cargo install cross --locked
+cross build --release --target x86_64-unknown-linux-musl
 ```
 
 ### Output Locations
-- Release binaries: `target/release/`
-- Debug binaries: `target/debug/`
-- Documentation: `target/doc/`
+- **Default**: `target/release/friendev` (Linux/macOS) or `target/release/friendev.exe` (Windows)
+- **Cross-compilation**: `target/<target>/release/friendev`
 
-### Cross-compilation
-```bash
-# Install cross
-cargo install cross
-
-# Build for Linux
-cross build --release --target x86_64-unknown-linux-gnu
-
-# Build for Windows
-cross build --release --target x86_64-pc-windows-msvc
-```
+### Multi-Platform Support
+The project supports compilation for multiple platforms including:
+- Windows (x86_64, i686, aarch64)
+- Linux (x86_64, i686, aarch64, armv7, riscv64, powerpc64le, s390x)
+- macOS (x86_64, aarch64)
+- Android (aarch64, armv7, x86_64, i686)
+- FreeBSD (x86_64, i686)
 
 ## Testing
 
@@ -107,202 +94,223 @@ cross build --release --target x86_64-pc-windows-msvc
 # Run all tests
 cargo test
 
-# Run tests with coverage
-cargo test -- --nocapture
-
-# Run specific test
-cargo test <test_name>
+# Run tests with verbose output
+cargo test -- --verbose
 
 # Run tests for specific crate
-cargo test -p <crate_name>
+cargo test -p app
 ```
 
 ### Test Patterns
-- Unit tests in `tests/` directories
-- Integration tests in `tests/` directories
-- Doctest examples in source files
+- Unit tests for individual modules
+- Integration tests for API communication
+- UI component tests using crossterm
+- Configuration and persistence tests
 
-### Test Coverage
-- Coverage reports: `cargo llvm-cov --lcov --output-path coverage.lcov`
-- Minimum coverage: 80% (enforced in CI)
+### Coverage
+Test coverage is maintained for critical components:
+- Configuration management
+- API client functionality
+- File editing operations
+- Command parsing and execution
 
 ## Code Style & Standards
 
-### Formatting
+### Linting Rules
 ```bash
-# Format all code
+# Check code style
+cargo fmt -- --check
+
+# Format code
 cargo fmt
 
-# Check formatting without applying
-cargo fmt -- --check
-```
-
-### Linting
-```bash
 # Run clippy lints
-cargo clippy
-
-# Run clippy with warnings treated as errors
 cargo clippy -- -D warnings
 ```
 
-### Conventions
-- Rust edition 2021
-- Async/await pattern for all I/O operations
-- Error handling with `anyhow::Result`
-- Structured logging with tracing
-- Type-safe configuration with serde
+### Formatting Conventions
+- Rust standard formatting with `cargo fmt`
+- Clippy warnings treated as errors (`-D warnings`)
+- Consistent error handling with `anyhow::Result`
+- Async/await patterns using `tokio`
+
+### Naming Conventions
+- Snake_case for functions and variables
+- PascalCase for types and structs
+- SCREAMING_SNAKE_CASE for constants
+- Clear, descriptive names for public APIs
 
 ## Running the Application
 
 ### Start Command
 ```bash
-# Development mode
-cargo run
-
-# Release mode
+# Basic startup
 cargo run --release
 
-# With specific configuration
-FRIENDEV_CONFIG_PATH=/path/to/config.toml cargo run
+# With auto-approval (bypasses approval prompts)
+cargo run --release -- --ally
+
+# With smart approval mode (AI reviews approval prompts)
+cargo run --release -- --shorekeeper
+
+# Force setup configuration
+cargo run --release -- --setup
 ```
 
 ### Environment Variables
-- `FRIENDEV_CONFIG_PATH`: Path to configuration file
-- `FRIENDEV_API_KEY`: API key for AI services
-- `FRIENDEV_MODEL`: Default AI model
-- `RUST_LOG`: Logging level (debug, info, warn, error)
+- `RUST_BACKTRACE=1`: Enable detailed backtraces
+- `RUST_LOG=debug`: Enable debug logging
+- `CARGO_TERM_COLOR=always`: Force colored output
 
 ### Configuration
-Configuration file location: `~/.friendev/config.toml`
-```toml
-[api]
-model = "gpt-3.5-turbo"
-api_key = "your-api-key-here"
-base_url = "https://api.openai.com/v1"
+Configuration is stored in `~/.friendev/config.json` and includes:
+- AI model settings
+- UI language preferences
+- API endpoint configuration
+- Session management settings
 
-[ui]
-language = "en"
-theme = "dark"
-
-[tools]
-auto_approve = false
-```
+### Command Line Options
+- `--ally` / `--yolo`: Auto-approve all prompts
+- `--shorekeeper`: Smart approval mode (AI reviews prompts)
+- `--setup`: Force interactive setup
+- `--help`: Show help information
 
 ## API & Dependencies
 
 ### External Dependencies
-- **tokio**: Async runtime
-- **reqwest**: HTTP client
-- **serde**: Serialization/deserialization
-- **reedline**: Line editor
-- **crossterm**: Terminal manipulation
-- **anyhow**: Error handling
-- **uuid**: UUID generation
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| tokio | 1.x | Async runtime |
+| reqwest | 0.11 | HTTP client |
+| serde | 1.0 | JSON serialization |
+| crossterm | 0.27 | Terminal UI |
+| reedline | 0.28 | Line editor |
+| anyhow | 1.0 | Error handling |
+| uuid | 1.0 | UUID generation |
+
+### Internal Dependencies
+The project uses a workspace structure with internal dependencies:
+- `agents` → AGENTS.md management
+- `app` → Main application logic
+- `api` → HTTP client
+- `config` → Configuration management
+- `ui` → Terminal UI components
+- `commands` → Built-in commands
+- `chat` → Session management
+- `history` → History persistence
+- `i18n` → Internationalization
+- `prompts` → Prompt templates
+- `security` → Security features
+- `tools` → Development utilities
 
 ### Version Constraints
+All internal dependencies use path dependencies with version constraints:
 ```toml
 [dependencies]
-tokio = { version = "1", features = ["full"] }
-reqwest = { version = "0.11", features = ["json", "stream", "rustls-tls"] }
-serde = { version = "1.0", features = ["derive"] }
-reedline = "0.28"
-crossterm = "0.27"
-anyhow = "1.0"
-uuid = { version = "1", features = ["v4"] }
+api = { path = "../api", version = "0.1.0" }
+config = { path = "../config", version = "0.1.0" }
+# ... etc
 ```
-
-### Workspace Dependencies
-- All crates are part of a workspace
-- Inter-crate dependencies use relative paths
-- Version consistency enforced across all crates
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### Build Failures
+**Build Failures**
 ```bash
-# Clear cargo cache
+# Update Rust toolchain
+rustup update stable
+
+# Clean build artifacts
 cargo clean
 
-# Update dependencies
-cargo update
-
-# Check Rust toolchain
-rustup update
-rustup show
+# Check for missing dependencies
+cargo check --all
 ```
 
-#### API Connection Issues
-- Verify API key configuration
-- Check network connectivity
-- Validate API endpoint URLs
-- Review rate limits and quotas
+**Configuration Issues**
+```bash
+# Reset configuration
+rm -rf ~/.friendev/
+cargo run --release -- --setup
+```
 
-#### Terminal Issues
-- Ensure terminal supports UTF-8
-- Check terminal capabilities for reedline
-- Verify terminal size for multi-line input
+**API Connection Problems**
+- Check network connectivity
+- Verify API endpoint configuration
+- Ensure proper authentication setup
+- Check firewall/proxy settings
+
+**Terminal UI Issues**
+- Ensure terminal supports ANSI colors
+- Check terminal size and encoding
+- Verify crossterm compatibility
 
 ### Debug Mode
 ```bash
 # Enable debug logging
-RUST_LOG=debug cargo run
+RUST_LOG=debug cargo run --release
 
-# Enable trace logging
-RUST_LOG=trace cargo run
+# Enable backtraces
+RUST_BACKTRACE=1 cargo run --release
 ```
 
-### Performance Issues
-- Monitor memory usage with `cargo watch`
-- Profile with `cargo flamegraph`
-- Check for memory leaks in long-running sessions
+### Error Codes
+- `Error::ConfigLoad`: Configuration file corruption
+- `Error::ApiConnection`: Network/API issues
+- `Error::PermissionDenied`: File system permission issues
+- `Error::InvalidInput`: User input validation failure
 
 ## Contributing
 
 ### Git Workflow
 ```bash
-# Create feature branch
-git checkout -b feature/your-feature-name
-
-# Make changes and commit
+# Feature branch workflow
+git checkout -b feature/new-feature
 git commit -m "feat: add new feature"
+git push origin feature/new-feature
 
-# Push to remote
-git push origin feature/your-feature-name
-
-# Create pull request
-gh pr create --title "feat: add new feature" --body "Description of changes"
+# Pull request process
+git checkout main
+git pull origin main
+git checkout -b feature/bugfix
+# ... make changes ...
+git commit -m "fix: resolve issue #123"
+git push origin feature/bugfix
 ```
 
 ### Commit Message Format
+Conventional Commits standard:
 ```
 <type>(<scope>): <description>
 
 [body]
 
-[footer]
+<footer>
 ```
 
-### Types
+Types:
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
-- `style`: Code style changes
+- `style`: Code formatting
 - `refactor`: Code refactoring
-- `test`: Test changes
+- `test`: Test additions/modifications
 - `chore`: Build process or auxiliary tool changes
 
-### PR Guidelines
-- Include tests for new features
-- Update documentation if needed
-- Ensure all checks pass
-- Review and approve changes
-- Squash commits before merging
+### Pull Request Guidelines
+1. Include tests for new functionality
+2. Update documentation as needed
+3. Ensure all checks pass
+4. Follow existing code style
+5. Provide clear description of changes
+6. Link to relevant issues
 
-### Code Review
-- All PRs require at least one approval
-- Address all review comments
-- Keep PRs focused and small
-- Update changelog for significant changes
+### Development Workflow
+1. Create feature branch from `main`
+2. Make changes and write tests
+3. Run `cargo test` and `cargo clippy`
+4. Commit changes with conventional commit message
+5. Push branch and create pull request
+6. Address review comments
+7. Merge after approval
