@@ -1,7 +1,14 @@
 # Changelog
 - all friendev update changelog on here.
 ---
-修复特定情况吃输入框、已打印内容的问题
+## [0.2.4] - In Development
+
+### Bug Fixes
+- Fixed an issue where the multi-line input box and already-printed content were incorrectly overwritten under certain conditions.
+
+### New Features
+- **File Search Capability**: Added `file_search` tool, enabling the AI to search across local files.
+- **Search Query Visibility**: Enhanced the three network search components to display the actual search terms used, allowing users to see exactly what the AI is querying.
 ---
 ## [0.2.3] - 2025-11-30
 
