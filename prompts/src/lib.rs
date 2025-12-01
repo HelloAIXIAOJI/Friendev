@@ -8,42 +8,12 @@ use i18n::I18n;
 pub fn print_welcome(config: &Config, i18n: &I18n) {
     // ASCII Art Logo
     println!();
-    println!(
-        "{}",
-        "███████╗██████╗ ██╗███████╗███╗   ██╗██████╗ ███████╗██╗   ██╗"
-            .bright_cyan()
-            .bold()
-    );
-    println!(
-        "{}",
-        "██╔════╝██╔══██╗██║██╔════╝████╗  ██║██╔══██╗██╔════╝██║   ██║"
-            .bright_cyan()
-            .bold()
-    );
-    println!(
-        "{}",
-        "█████╗  ██████╔╝██║█████╗  ██╔██╗ ██║██║  ██║█████╗  ██║   ██║"
-            .bright_cyan()
-            .bold()
-    );
-    println!(
-        "{}",
-        "██╔══╝  ██╔══██╗██║██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ╚██╗ ██╔╝"
-            .bright_cyan()
-            .bold()
-    );
-    println!(
-        "{}",
-        "██║     ██║  ██║██║███████╗██║ ╚████║██████╔╝███████╗ ╚████╔╝"
-            .bright_cyan()
-            .bold()
-    );
-    println!(
-        "{}",
-        "╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝  ╚═══╝"
-            .bright_cyan()
-            .bold()
-    );
+    println!("{}","███████╗██████╗ ██╗███████╗███╗   ██╗██████╗ ███████╗██╗   ██╗".bright_cyan().bold());
+    println!("{}","██╔════╝██╔══██╗██║██╔════╝████╗  ██║██╔══██╗██╔════╝██║   ██║".bright_cyan().bold());
+    println!("{}","█████╗  ██████╔╝██║█████╗  ██╔██╗ ██║██║  ██║█████╗  ██║   ██║".bright_cyan().bold());
+    println!("{}","██╔══╝  ██╔══██╗██║██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ╚██╗ ██╔╝".bright_cyan().bold());
+    println!("{}","██║     ██║  ██║██║███████╗██║ ╚████║██████╔╝███████╗ ╚████╔╝".bright_cyan().bold());
+    println!("{}","╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝  ╚═══╝".bright_cyan().bold());
     println!("{}\n", i18n.get("welcome_subtitle").dimmed());
 
     // 系统信息 - 紧凑布局
@@ -75,8 +45,8 @@ pub fn print_welcome(config: &Config, i18n: &I18n) {
     println!(
         "  {} {:20} {}",
         ">".bright_black(),
-        "/model list".cyan(),
-        i18n.get("cmd_model_list").dimmed()
+        "/model".cyan(),
+        i18n.get("cmd_model_interactive").dimmed()
     );
     println!(
         "  {} {:20} {}",

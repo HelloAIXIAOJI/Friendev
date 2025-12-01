@@ -632,5 +632,10 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("file_replace_not_found".to_string(), "文件中未找到搜索字符串".to_string());
     m.insert("file_replace_success".to_string(), "应用了 {} 个编辑，共 {} 次替换，文件：{1}".to_string());
 
+    m.insert(
+        "cmd_model_interactive".to_string(),
+        "交互式模型选择器".to_string(),
+    );
+
     m
 }

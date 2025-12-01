@@ -715,5 +715,10 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("file_replace_not_found".to_string(), "Search string not found in file".to_string());
     m.insert("file_replace_success".to_string(), "Applied {} edits, total {} replacements in {1}".to_string());
 
+    m.insert(
+        "cmd_model_interactive".to_string(),
+        "Interactive model selector".to_string(),
+    );
+
     m
 }
