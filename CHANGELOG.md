@@ -1,7 +1,7 @@
 # Changelog
 - all friendev update changelog on here.
 ---
-## [0.2.4] - In Development
+## [0.2.4] - 2025-12-01
 
 ### Bug Fixes
 - Fixed an issue where the multi-line input box and already-printed content were incorrectly overwritten under certain conditions.
