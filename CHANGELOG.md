@@ -8,7 +8,7 @@
 
 ### New Features
 - **File Search Capability**: Added `file_search` tool, enabling the AI to search across local files.
-- **Search Query Visibility**: Enhanced the three network search components to display the actual search terms used, allowing users to see exactly what the AI is querying.
+- **Search Query Visibility**: Enhanced the three network search components to display the actual search terms used, allowing users to see exactly what the AI is querying.(By @LikeEpieiKeia216 on #1)
 ---
 ## [0.2.3] - 2025-11-30
 
