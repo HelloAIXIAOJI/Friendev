@@ -1,6 +1,11 @@
 # Changelog
 - all friendev update changelog on here.
 ---
+## [0.2.5] - in dev
+### Added
+- **Intelligent Code Outline**: Added `file_outline` tool powered by Tree-sitter to extract symbol definitions (functions, classes, etc.) from source files.
+  - Supported languages: Rust, Python, JavaScript, TypeScript, Go, Java, C/C++, C#, PHP, Ruby.
+---
 ## [0.2.4] - 2025-12-01
 
 ### Bug Fixes

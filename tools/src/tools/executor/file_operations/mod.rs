@@ -8,6 +8,7 @@ mod file_diff_edit;
 mod file_list;
 mod file_read;
 mod file_search;
+mod file_outline;
 mod file_replace;
 mod file_write;
 
@@ -21,6 +22,10 @@ pub async fn execute_file_read(arguments: &str, working_dir: &Path) -> Result<To
 
 pub async fn execute_file_search(arguments: &str, working_dir: &Path) -> Result<ToolResult> {
     file_search::execute_file_search(arguments, working_dir).await
+}
+
+pub async fn execute_file_outline(arguments: &str, working_dir: &Path) -> Result<ToolResult> {
+    file_outline::execute_file_outline(arguments, working_dir).await
 }
 
 pub async fn execute_file_write(

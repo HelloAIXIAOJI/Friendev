@@ -147,6 +147,23 @@ pub fn get_available_tools() -> Vec<Tool> {
         Tool {
             tool_type: "function".to_string(),
             function: ToolFunction {
+                name: "file_outline".to_string(),
+                description: "Extract symbol definitions (functions, classes, structs, etc.) from a file using Tree-sitter. Supports Rust, Python, JS/TS, Go, Java, C/C++, C#, PHP, Ruby.".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "type": "string",
+                            "description": "Path to the file to outline"
+                        }
+                    },
+                    "required": ["path"]
+                }),
+            },
+        },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
                 name: "network_search_auto".to_string(),
                 description: "Search the web with automatic fallback: tries DuckDuckGo first, then Bing if DuckDuckGo fails. Returns title, URL, and snippet for each result.".to_string(),
                 parameters: json!({

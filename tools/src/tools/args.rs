@@ -20,6 +20,11 @@ pub struct FileSearchArgs {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct FileOutlineArgs {
+    pub path: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct FileWriteArgs {
     pub path: String,
     pub content: String,
