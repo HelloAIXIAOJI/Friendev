@@ -50,7 +50,7 @@ pub async fn handle_command(
             runcommand::handle_run_command_command(&parts, &i18n)?;
         }
         Some(&"/index") => {
-            index::handle_index_command(parts[1..].to_vec()).await?;
+            index::handle_index_command(parts[1..].to_vec(), &i18n).await?;
         }
         _ => {
             println!(

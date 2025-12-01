@@ -5,6 +5,16 @@
 ### Added
 - **Intelligent Code Outline**: Added `file_outline` tool powered by Tree-sitter to extract symbol definitions (functions, classes, etc.) from source files.
   - Supported languages: Rust, Python, JavaScript, TypeScript, Go, Java, C/C++, C#, PHP, Ruby.
+- **Intelligent Code Indexing**: Introduced a SQLite-based code outline indexing system (`.friendev/index/outline.db`) for instant symbol search.
+- **New Commands**: Added `/index outline` (incremental) and `/index outline all` (full) commands with progress bars and stats.
+- **New Tools**:
+  - `file_search_by_outline`: Query symbol definitions (functions, classes) instantly from the local index.
+  - `index_file`: Manually update the index for specific files.
+- **Automatic Indexing**: Integrated auto-hooks to update the index whenever files are modified via `file_write` `file_diff_edit` or `file_replace`.
+- **Startup Diagnostics**: Added a smart check to warn users if the code index is stale (based on git commit history).
+- **i18n Support**: Full internationalization for all new indexing features and search diagnostics (EN/CN).
+### Fix
+- Fixed the unexpected `1111` on the language
 ---
 ## [0.2.4] - 2025-12-01
 

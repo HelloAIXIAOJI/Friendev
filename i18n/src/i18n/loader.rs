@@ -21,7 +21,6 @@ macro_rules! define_languages {
 // Define all supported languages here (single source of truth)
 define_languages!(
     "enus" => en_us::get_messages(),
-    "1111" => en_us::get_messages(),
     "zhcn" => zh_cn::get_messages()
 );
 

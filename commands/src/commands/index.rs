@@ -5,12 +5,8 @@ use std::time::Instant;
 use tools::tools::indexer::Indexer;
 use tools::tools::executor::parser;
 use i18n::I18n;
-use config::Config;
 
-pub async fn handle_index_command(args: Vec<&str>) -> Result<()> {
-    let config = Config::load()?.unwrap_or_else(|| Config::default());
-    let i18n = I18n::new(&config.ui_language);
-
+pub async fn handle_index_command(args: Vec<&str>, i18n: &I18n) -> Result<()> {
     if args.is_empty() {
         println!("{}", i18n.get("index_usage_header").yellow());
         println!("{}", i18n.get("index_usage_outline"));

@@ -4,6 +4,7 @@ use std::path::Path;
 
 use super::file_common::normalize_path;
 use crate::tools::args::FileDiffEditArgs;
+use crate::tools::indexer::Indexer;
 use crate::types::ToolResult;
 
 pub async fn execute_file_diff_edit(
@@ -18,14 +19,14 @@ pub async fn execute_file_diff_edit(
     // 验证文件存在
     if !target_path.exists() {
         return Ok(ToolResult::error(format!(
-            "文件不存在: {}",
+            "File does not exist: {}",
             target_path.display()
         )));
     }
 
     if !target_path.is_file() {
         return Ok(ToolResult::error(format!(
-            "不是文件: {}",
+            "Not a file: {}",
             target_path.display()
         )));
     }
@@ -47,7 +48,7 @@ pub async fn execute_file_diff_edit(
 
     for hunk in hunks.iter() {
         if hunk.start_line == 0 {
-            return Ok(ToolResult::error("行号必须从1开始".to_string()));
+            return Ok(ToolResult::error("Line numbers must start from 1".to_string()));
         }
 
         let start_idx = hunk.start_line - 1;
@@ -55,7 +56,7 @@ pub async fn execute_file_diff_edit(
 
         if start_idx > lines.len() {
             return Ok(ToolResult::error(format!(
-                "行号超出范围: {}，文件总行数: {}",
+                "Line number out of range: {}, total lines in file: {}",
                 hunk.start_line,
                 lines.len()
             )));
@@ -95,15 +96,20 @@ pub async fn execute_file_diff_edit(
 
     fs::write(&target_path, &final_content)?;
 
+    // Auto-hook: Update outline index
+    if let Ok(indexer) = Indexer::new(working_dir) {
+        let _ = indexer.index_file(&target_path, working_dir);
+    }
+
     // 核心：直接从内容生成上下文，不再重新读取文件
     let actual_lines: Vec<&str> = final_content.lines().collect();
 
     // 生成 diff_merge_result：合并所有修改范围的上下文
     let diff_merge_result = generate_diff_result(&actual_lines, &modified_ranges);
 
-    let brief = format!("应用了 {} 个 hunk", args.hunks.len());
+    let brief = format!("Applied {} hunks", args.hunks.len());
     let output = format!(
-        "文件已更新: {}\n应用了 {} 个 diff hunk\n\n{}",
+        "File updated: {}\nApplied {} diff hunks\n\n{}",
         target_path.display(),
         args.hunks.len(),
         diff_merge_result
