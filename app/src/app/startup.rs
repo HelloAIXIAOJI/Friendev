@@ -80,6 +80,9 @@ pub async fn initialize_app() -> Result<AppState> {
     // Install review handler for approval prompts
     review::install_review_handler(api_client.clone(), config.clone());
 
+    // Check outline index freshness
+    check_outline_freshness(&working_dir, &i18n);
+
     // Print welcome message
     prompts::print_welcome(&config, &i18n);
 
@@ -90,4 +93,43 @@ pub async fn initialize_app() -> Result<AppState> {
         api_client,
         auto_approve,
     })
+}
+
+fn check_outline_freshness(working_dir: &std::path::Path, i18n: &I18n) {
+    // Simple check: if .friendev/index/outline.db exists, check git commits.
+    // If not exists or > 15 commits diff, warn user.
+    use tools::tools::indexer::Indexer;
+    use std::process::Command;
+    use colored::Colorize;
+
+    if let Ok(indexer) = Indexer::new(working_dir) {
+        if let Ok(Some(last_hash)) = indexer.get_last_commit() {
+            // Check git log count
+            let output = Command::new("git")
+                .args(["rev-list", "--count", "HEAD", &format!("^{}", last_hash)])
+                .current_dir(working_dir)
+                .output();
+            
+            if let Ok(output) = output {
+                if output.status.success() {
+                    let count_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                    if let Ok(count) = count_str.parse::<usize>() {
+                        if count >= 15 {
+                            println!("{}", i18n.get("index_suggest_title").replace("{}", &count.to_string()).yellow());
+                            println!("{}", i18n.get("index_suggest_action").yellow());
+                            println!();
+                        }
+                    }
+                }
+            }
+        } else {
+            // No last hash, maybe never indexed or first run.
+            // Check if it's a git repo
+            if working_dir.join(".git").exists() {
+                 // Suggest indexing for the first time
+                 println!("{}", i18n.get("index_tip_title").blue());
+                 println!();
+            }
+        }
+    }
 }

@@ -603,5 +603,34 @@ pub fn get_messages() -> HashMap<String, String> {
         "修复工具 JSON 失败".to_string(),
     );
 
+    // Indexing
+    m.insert("index_suggest_title".to_string(), "建议：您的代码库自上次索引以来已有显著变更（{} 次提交）。".to_string());
+    m.insert("index_suggest_action".to_string(), "运行 '/index outline' 更新代码大纲，以获得更佳的搜索结果。".to_string());
+    m.insert("index_tip_title".to_string(), "提示：运行 '/index outline all' 构建代码大纲索引，加快搜索速度。".to_string());
+    m.insert("index_usage_header".to_string(), "用法: /index <子命令>".to_string());
+    m.insert("index_usage_outline".to_string(), "  outline       - 增量索引项目大纲".to_string());
+    m.insert("index_usage_outline_all".to_string(), "  outline all   - 全量重建项目大纲索引".to_string());
+    m.insert("index_start_full".to_string(), "🔍 开始全量代码大纲索引...".to_string());
+    m.insert("index_start_incremental".to_string(), "🔍 开始增量代码大纲索引...".to_string());
+    m.insert("index_no_files".to_string(), "⚠️  未找到支持的源文件。".to_string());
+    m.insert("index_found_files".to_string(), "📝 找到 {} 个支持的文件。".to_string());
+    m.insert("index_complete".to_string(), "✨ 索引完成，耗时 {:.2?}".to_string());
+    m.insert("index_stat_processed".to_string(), "   - 已处理: {}".to_string());
+    m.insert("index_stat_indexed".to_string(), "   - 已索引:   {}".to_string());
+    m.insert("index_stat_failed".to_string(), "   - 失败:    {}".to_string());
+    m.insert("index_unknown_subcommand".to_string(), "未知子命令: {}".to_string());
+
+    // File Replace Diagnostics
+    m.insert("replace_diag_not_found".to_string(), "未找到要替换的字符串。诊断信息：".to_string());
+    m.insert("replace_diag_edit_num".to_string(), "编辑 #{}:".to_string());
+    m.insert("replace_diag_len".to_string(), "  搜索字符串长度: {} 字符".to_string());
+    m.insert("replace_diag_preview".to_string(), "  搜索字符串 (前100字符): {}".to_string());
+    m.insert("replace_diag_has_newline".to_string(), "  包含换行符: {}".to_string());
+    m.insert("replace_diag_has_crlf".to_string(), "  包含 \\r\\n: {}".to_string());
+    m.insert("replace_diag_similar".to_string(), "  文件中发现相似内容（可能是空格/换行符差异）:".to_string());
+    m.insert("replace_diag_hints".to_string(), "提示：检查以下可能的问题:\n  1. 行结束符差异 (Windows \\r\\n vs Unix \\n)\n  2. 前后有额外空格\n  3. 缩进使用了不同的制表符或空格\n  4. 特殊字符编码差异".to_string());
+    m.insert("file_replace_not_found".to_string(), "文件中未找到搜索字符串".to_string());
+    m.insert("file_replace_success".to_string(), "应用了 {} 个编辑，共 {} 次替换，文件：{1}".to_string());
+
     m
 }

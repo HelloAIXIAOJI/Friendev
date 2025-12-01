@@ -686,5 +686,34 @@ pub fn get_messages() -> HashMap<String, String> {
         "Failed to fix JSON for tool".to_string(),
     );
 
+    // Indexing
+    m.insert("index_suggest_title".to_string(), "Suggest: Your codebase has changed significantly ({} commits) since the last index.".to_string());
+    m.insert("index_suggest_action".to_string(), "Run '/index outline' to update the code outline for better search results.".to_string());
+    m.insert("index_tip_title".to_string(), "Tip: Run '/index outline all' to build a code outline index for faster searches.".to_string());
+    m.insert("index_usage_header".to_string(), "Usage: /index <subcommand>".to_string());
+    m.insert("index_usage_outline".to_string(), "  outline       - Incrementally index the project outline".to_string());
+    m.insert("index_usage_outline_all".to_string(), "  outline all   - Fully re-index the project outline".to_string());
+    m.insert("index_start_full".to_string(), "🔍 Starting Full Code Outline Indexing...".to_string());
+    m.insert("index_start_incremental".to_string(), "🔍 Starting Incremental Code Outline Indexing...".to_string());
+    m.insert("index_no_files".to_string(), "⚠️  No supported source files found.".to_string());
+    m.insert("index_found_files".to_string(), "📝 Found {} supported files.".to_string());
+    m.insert("index_complete".to_string(), "✨ Indexing completed in {:.2?}".to_string());
+    m.insert("index_stat_processed".to_string(), "   - Processed: {}".to_string());
+    m.insert("index_stat_indexed".to_string(), "   - Indexed:   {}".to_string());
+    m.insert("index_stat_failed".to_string(), "   - Failed:    {}".to_string());
+    m.insert("index_unknown_subcommand".to_string(), "Unknown subcommand: {}".to_string());
+
+    // File Replace Diagnostics
+    m.insert("replace_diag_not_found".to_string(), "String to replace not found. Diagnostics:".to_string());
+    m.insert("replace_diag_edit_num".to_string(), "Edit #{}:".to_string());
+    m.insert("replace_diag_len".to_string(), "  Search string length: {} chars".to_string());
+    m.insert("replace_diag_preview".to_string(), "  Search string (first 100 chars): {}".to_string());
+    m.insert("replace_diag_has_newline".to_string(), "  Contains newline: {}".to_string());
+    m.insert("replace_diag_has_crlf".to_string(), "  Contains \\r\\n: {}".to_string());
+    m.insert("replace_diag_similar".to_string(), "  Found similar content in file (possible whitespace/newline mismatch):".to_string());
+    m.insert("replace_diag_hints".to_string(), "Hints: Check for:\n  1. Line ending differences (Windows \\r\\n vs Unix \\n)\n  2. Extra whitespace\n  3. Tab/Space indentation differences\n  4. Special character encoding".to_string());
+    m.insert("file_replace_not_found".to_string(), "Search string not found in file".to_string());
+    m.insert("file_replace_success".to_string(), "Applied {} edits, total {} replacements in {1}".to_string());
+
     m
 }

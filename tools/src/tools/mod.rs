@@ -4,6 +4,7 @@ pub mod definitions;
 pub mod executor;
 pub mod types;
 pub mod utils;
+pub mod indexer;
 
 pub use self::definitions::get_available_tools;
 pub use command_manager::CommandConfig;

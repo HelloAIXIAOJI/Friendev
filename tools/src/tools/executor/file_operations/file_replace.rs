@@ -6,6 +6,7 @@ use std::path::Path;
 use super::super::utils::normalize_whitespace;
 use super::file_common::normalize_path;
 use crate::tools::args::FileReplaceArgs;
+use crate::tools::indexer::Indexer;
 use crate::types::ToolResult;
 
 pub async fn execute_file_replace(
@@ -72,17 +73,30 @@ pub async fn execute_file_replace(
     };
     fs::write(&target_path, &final_content)?;
 
-    let brief = format!(
-        "应用了 {} 个编辑，{} 个替换",
-        args.edits.len(),
-        replacements_made
-    );
-    let output = format!(
-        "文件已更新: {}\n应用了 {} 个编辑\n共进行了 {} 个替换",
-        target_path.display(),
-        args.edits.len(),
-        replacements_made
-    );
+    // Auto-hook: Update outline index
+    if let Ok(indexer) = Indexer::new(working_dir) {
+        let _ = indexer.index_file(&target_path, working_dir);
+    }
+
+    let i18n = ui::get_i18n();
+    let brief_tmpl = i18n.get("file_replace_success");
+    // Note: replace keys: {} for edits count, {} for replacements count (positional replacement depends on string order)
+    // The key is: "Applied {} edits, total {} replacements in {1}" which is a bit mixed.
+    // Let's assume standard positional replacement or .replace chaining.
+    // Brief template: "Applied {} edits, total {} replacements in {1}"
+    // We need to be careful about argument order.
+    // Let's use direct .replace for placeholders if they are unique, or positional if supported.
+    // Rust's String.replace matches all occurrences.
+    // For "Applied {} edits...", first {} is edits, second {} is replacements.
+    // But .replace("{}", ...) will replace ALL {} with first arg.
+    // We need replacen.
+    
+    let brief = brief_tmpl
+        .replacen("{}", &args.edits.len().to_string(), 1)
+        .replacen("{}", &replacements_made.to_string(), 1)
+        .replace("{1}", &target_path.display().to_string());
+
+    let output = brief.clone(); // Use same message for detailed output for now, or create a separate key if needed.
 
     Ok(ToolResult::ok(brief, output))
 }
@@ -252,24 +266,26 @@ fn apply_string_edit(
 }
 
 fn generate_error_diagnostics(failed_edits: &[(usize, String)], content: &str) -> String {
-    let mut error_msg = String::from("未找到要替换的字符串。诊断信息：\n");
+    let i18n = ui::get_i18n();
+    let mut error_msg = i18n.get("replace_diag_not_found");
+    error_msg.push('\n');
 
     for (idx, search_str) in failed_edits.iter() {
-        error_msg.push_str(&format!("\n编辑 #{}:\n", idx + 1));
+        error_msg.push_str(&format!("\n{}\n", i18n.get("replace_diag_edit_num").replace("{}", &(idx + 1).to_string())));
         error_msg.push_str(&format!(
-            "  搜索字符串长度: {} 字符\n",
-            search_str.chars().count()
+            "  {}\n",
+            i18n.get("replace_diag_len").replace("{}", &search_str.chars().count().to_string())
         ));
         error_msg.push_str(&format!(
-            "  搜索字符串 (前100字符): {}\n",
-            if search_str.chars().count() > 100 {
+            "  {}\n",
+            i18n.get("replace_diag_preview").replace("{}", &if search_str.chars().count() > 100 {
                 search_str.chars().take(100).collect::<String>()
             } else {
                 search_str.clone()
-            }
+            })
         ));
-        error_msg.push_str(&format!("  包含换行符: {}\n", search_str.contains('\n')));
-        error_msg.push_str(&format!("  包含 \\r\\n: {}\n", search_str.contains("\r\n")));
+        error_msg.push_str(&format!("  {}\n", i18n.get("replace_diag_has_newline").replace("{}", &search_str.contains('\n').to_string())));
+        error_msg.push_str(&format!("  {}\n", i18n.get("replace_diag_has_crlf").replace("{}", &search_str.contains("\r\n").to_string())));
 
         // 尝试找相似的内容作为建议
         let mut suggestions = Vec::new();
@@ -280,18 +296,15 @@ fn generate_error_diagnostics(failed_edits: &[(usize, String)], content: &str) -
         }
 
         if !suggestions.is_empty() && suggestions.len() <= 3 {
-            error_msg.push_str("  文件中发现相似内容（可能是空格/换行符差异）:\n");
+            error_msg.push_str(&format!("  {}\n", i18n.get("replace_diag_similar")));
             for sugg in suggestions.iter().take(3) {
                 error_msg.push_str(&format!("    {}\n", sugg));
             }
         }
     }
 
-    error_msg.push_str("\n提示：检查以下可能的问题:\n");
-    error_msg.push_str("  1. 行结束符差异 (Windows \\r\\n vs Unix \\n)\n");
-    error_msg.push_str("  2. 前后有额外空格\n");
-    error_msg.push_str("  3. 缩进使用了不同的制表符或空格\n");
-    error_msg.push_str("  4. 特殊字符编码差异\n");
+    error_msg.push_str(&format!("\n{}\n", i18n.get("replace_diag_hints")));
 
     error_msg
 }
+

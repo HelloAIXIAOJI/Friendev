@@ -6,6 +6,7 @@ use std::path::Path;
 
 use super::file_common::normalize_path;
 use crate::tools::args::FileWriteArgs;
+use crate::tools::indexer::Indexer;
 use crate::types::ToolResult;
 use ui::get_i18n;
 
@@ -44,11 +45,20 @@ pub async fn execute_file_write(
     }
 
     // 根据模式写入或追加
-    if mode == "append" {
+    let result = if mode == "append" {
         execute_append_mode(&target_path, &args.content)
     } else {
         execute_overwrite_mode(&target_path, &args.content)
+    };
+
+    // Auto-hook: Update outline index if write was successful
+    if result.is_ok() {
+        if let Ok(indexer) = Indexer::new(working_dir) {
+            let _ = indexer.index_file(&target_path, working_dir);
+        }
     }
+
+    result
 }
 
 fn execute_append_mode(target_path: &Path, content: &str) -> Result<ToolResult> {

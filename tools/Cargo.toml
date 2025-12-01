@@ -29,6 +29,7 @@ tree-sitter-c = "0.20"
 tree-sitter-c-sharp = "0.20"
 tree-sitter-php = "0.20"
 tree-sitter-ruby = "0.20"
+rusqlite = { version = "0.30", features = ["bundled"] }
 
 search_tool = { path = "../search_tool" }
 ui = { path = "../ui" }

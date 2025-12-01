@@ -164,6 +164,40 @@ pub fn get_available_tools() -> Vec<Tool> {
         Tool {
             tool_type: "function".to_string(),
             function: ToolFunction {
+                name: "file_search_by_outline".to_string(),
+                description: "Search for symbol definitions in the local database. Fast but results depend on index freshness. Use /index outline to update.".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {
+                        "pattern": {
+                            "type": "string",
+                            "description": "Pattern to search for (SQL LIKE syntax, e.g., 'process%')"
+                        }
+                    },
+                    "required": ["pattern"]
+                }),
+            },
+        },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
+                name: "index_file".to_string(),
+                description: "Update the outline index for a specific file. Use this after creating new files to keep the index fresh.".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "type": "string",
+                            "description": "Path to the file to index"
+                        }
+                    },
+                    "required": ["path"]
+                }),
+            },
+        },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
                 name: "network_search_auto".to_string(),
                 description: "Search the web with automatic fallback: tries DuckDuckGo first, then Bing if DuckDuckGo fails. Returns title, URL, and snippet for each result.".to_string(),
                 parameters: json!({

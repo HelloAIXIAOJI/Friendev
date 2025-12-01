@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::types::ToolResult;
 
-mod file_common;
+pub mod file_common;
 mod file_diff_edit;
 mod file_list;
 mod file_read;

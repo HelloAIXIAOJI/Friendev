@@ -4,6 +4,7 @@ mod history;
 mod language;
 mod model;
 mod runcommand;
+mod index;
 
 use anyhow::Result;
 
@@ -47,6 +48,9 @@ pub async fn handle_command(
         }
         Some(&"/runcommand") => {
             runcommand::handle_run_command_command(&parts, &i18n)?;
+        }
+        Some(&"/index") => {
+            index::handle_index_command(parts[1..].to_vec()).await?;
         }
         _ => {
             println!(

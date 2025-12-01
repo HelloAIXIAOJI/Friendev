@@ -14,3 +14,6 @@ i18n = { path = "../i18n" }
 tools = { path = "../tools" }
 ui = { path = "../ui" }
 uuid = { version = "1", features = ["v4"] }
+walkdir = "2.4"
+ignore = "0.4"
+indicatif = "0.17"

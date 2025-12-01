@@ -9,6 +9,7 @@ pub mod file_operations;
 pub mod network_operations;
 pub mod search_operations;
 mod utils;
+pub mod parser;
 
 pub async fn execute_tool(
     name: &str,
@@ -21,6 +22,10 @@ pub async fn execute_tool(
         "file_read" => file_operations::execute_file_read(arguments, working_dir).await,
         "file_search" => file_operations::execute_file_search(arguments, working_dir).await,
         "file_outline" => file_operations::execute_file_outline(arguments, working_dir).await,
+        "file_search_by_outline" => {
+            search_operations::execute_file_search_by_outline(arguments, working_dir).await
+        }
+        "index_file" => search_operations::execute_index_file(arguments, working_dir).await,
         "file_write" => {
             file_operations::execute_file_write(arguments, working_dir, require_approval).await
         }
