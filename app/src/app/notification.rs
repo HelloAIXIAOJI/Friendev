@@ -1,6 +1,5 @@
 use notify_rust::Notification;
 use anyhow::Result;
-use std::process::Command;
 
 /// 发送AI完成输出的系统通知
 pub async fn notify_ai_completed() -> Result<()> {
@@ -13,60 +12,38 @@ pub async fn notify_ai_completed() -> Result<()> {
     })
     .await?;
 
-    play_completion_sound().await;
+    play_error_sound().await;
     
     Ok(())
 }
 
-/// 播放完成提示音
-async fn play_completion_sound() {
-    let _ = tokio::task::spawn_blocking(|| {
-        let sound_path = get_sound_path();
-        
-        #[cfg(target_os = "windows")]
-        {
-            let _ = Command::new("powershell")
-                .args(&[
-                    "-NoProfile",
-                    "-Command",
-                    &format!("(New-Object System.Media.SoundPlayer '{}').PlaySync()", sound_path),
-                ])
-                .output();
-        }
-        
-        #[cfg(target_os = "macos")]
-        {
-            let _ = Command::new("afplay")
-                .arg(&sound_path)
-                .output();
-        }
-        
-        #[cfg(target_os = "linux")]
-        {
-            let _ = Command::new("ffplay")
-                .args(&["-nodisp", "-autoexit", &sound_path])
-                .output();
-        }
+/// 播放系统Err音效
+async fn play_error_sound() {
+    tokio::task::spawn_blocking(|| {
+        play_native_sound();
     })
-    .await;
+    .await.ok();
 }
 
-/// 获取声音文件路径
-fn get_sound_path() -> String {
-    #[cfg(debug_assertions)]
-    {
-        "app/resources/sounds/completion.mp3".to_string()
-    }
-    #[cfg(not(debug_assertions))]
-    {
-        let exe_dir = std::env::current_exe()
-            .ok()
-            .and_then(|p| p.parent().map(|p| p.to_path_buf()))
-            .unwrap_or_default();
-        exe_dir.join("../resources/sounds/completion.mp3")
-            .to_string_lossy()
-            .to_string()
-    }
+#[cfg(target_os = "windows")]
+fn play_native_sound() {
+    use std::process::Command;
+    use std::os::windows::process::CommandExt;
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+    let _ = Command::new("powershell")
+        .args(["-c", "[System.Media.SystemSounds]::Hand.Play()"])
+        .creation_flags(CREATE_NO_WINDOW)
+        .output();
+}
+
+#[cfg(not(target_os = "windows"))]
+fn play_native_sound() {
+    // 简单的终端响铃作为跨平台回退
+    // Simple terminal bell as cross-platform fallback
+    use std::io::Write;
+    let _ = std::io::stdout().write_all(b"\x07");
+    let _ = std::io::stdout().flush();
 }
 
 /// 发送通用通知
