@@ -1,6 +1,10 @@
 # Changelog
 - all friendev update changelog on here.
 ---
+## [0.2.6] - 2025-12-02
+### Change
+- **Welcome screen Change**: The original welcome screen, which prompted with '/model list', has been changed to '/model'.
+---
 ## [0.2.5] - 2025-12-02
 ### Added
 - **Intelligent Code Outline**: Added `file_outline` tool powered by Tree-sitter to extract symbol definitions (functions, classes, etc.) from source files.
