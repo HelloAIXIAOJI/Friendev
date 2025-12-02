@@ -637,5 +637,11 @@ pub fn get_messages() -> HashMap<String, String> {
         "交互式模型选择器".to_string(),
     );
 
+    // Notification messages
+    m.insert(
+        "notify_ai_completed_body".to_string(),
+        "已完成输出，请返回查看。".to_string(),
+    );
+
     m
 }

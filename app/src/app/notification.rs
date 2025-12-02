@@ -1,12 +1,16 @@
 use notify_rust::Notification;
 use anyhow::Result;
+use ui::get_i18n;
 
 /// 发送AI完成输出的系统通知
 pub async fn notify_ai_completed() -> Result<()> {
-    tokio::task::spawn_blocking(|| {
+    let i18n = get_i18n();
+    let body = i18n.get("notify_ai_completed_body");
+
+    tokio::task::spawn_blocking(move || {
         let _ = Notification::new()
             .summary("Friendev")
-            .body("已完成输出，请返回查看。")
+            .body(&body)
             .timeout(notify_rust::Timeout::Milliseconds(5000))
             .show();
     })
