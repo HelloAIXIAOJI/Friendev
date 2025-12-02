@@ -24,3 +24,4 @@ tools = { path = "../tools" }
 ui = { path = "../ui" }
 reedline = "0.28"
 colored = "2.1"
+notify-rust = "4.9"
