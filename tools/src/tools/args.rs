@@ -8,6 +8,8 @@ pub struct FileListArgs {
 #[derive(Debug, Deserialize)]
 pub struct FileReadArgs {
     pub path: String,
+    pub start_line: Option<usize>,
+    pub end_line: Option<usize>,
 }
 
 #[derive(Debug, Deserialize)]
