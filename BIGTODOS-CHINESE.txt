@@ -1,13 +1,7 @@
 1.添加范围查看文件
-2.添加TodoTools or taskTools
+2.添加TodoTools
 ---
-主 History 用 Todo List 规划 并主要功能为自己做，
-遇到其中某一项特别难搞的 Todo，主History的AI就调用 Task 并附带 Todo 信息与提示词交由新的子 History Ai Agent，此History无Task权利，但有Todo。
-完成后，子History调用“Task_Back_to_main”Tool或者直接结束，然后总结AI将子History总结（上下文压缩机制）
-然后子History被销毁 or 只读归档，回到主History继续工作
-子History与在data/friendev/subhistory，其结构类似主 History
-不打算实现background
-此外，为了保证统一logic，主History与子History将会统一为一次请求AI就保存一次，比如Tool调用一次会算一次请求然后保存
+Task以后再说
 ---
 3.**已改为第19**
 4.添加 ProjectMemoryTools
