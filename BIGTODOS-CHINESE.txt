@@ -1,6 +1,6 @@
 1.添加范围查看文件
 2.添加TodoTools or taskTools
-3.添加 CLAUDE.md 与 GEMINI.md 适配
+3.**已改为第19**
 4.添加 MemoryTools
 5.添加 上下文压缩机制
 6.添加 Checkpoint 机制
@@ -8,7 +8,7 @@
 8.添加 duet 模式
 9.添加 Yinlin Agent （代码库调查AGENT）
 10.MCP
-11.outline支持LSP
+11.LSP集成
 12.支持图片
 13.完成某些操作后自动运行某些东西
 14.Friendev Plugin
@@ -16,8 +16,13 @@
 16.添加GitTools
 17.支持更改守岸人模型
 18.借鉴并优化Labor Market
-19.自定义 上下文MD文件名
+19.自定义上下文MD文件名（可多个，默认AGENTS.md、FDV.md、CLAUDE.md 与 GEMINI.md）
 20.本电脑记忆
 21.更改网络代理
+22.联动VSCode
+23.暴露接口为MCP
+24.结束时播放提示音
+25.Web UI
+26.Github API
 
 想到什么写什么
