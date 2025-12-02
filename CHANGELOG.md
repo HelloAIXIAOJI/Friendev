@@ -5,6 +5,10 @@
 ### Change
 - **Welcome screen Change**: The original welcome screen, which prompted with '/model list', has been changed to '/model'.
 - **System Notification**: Added a new notification system that sends a desktop notification and plays a sound alert when AI tasks are completed.
+- **Enhanced `file_read` Tool**: Added support for reading specific line ranges.
+  - New optional parameters: `start_line` and `end_line`.
+  - Useful for reading large files in chunks to save tokens.
+  - Displays `(Lines X-Y)` header when a range is selected.
 ---
 ## [0.2.5] - 2025-12-02
 ### Added
