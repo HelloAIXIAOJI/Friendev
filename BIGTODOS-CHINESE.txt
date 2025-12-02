@@ -1,4 +1,4 @@
-1.添加范围查看文件
+Done.添加范围查看文件
 2.添加TodoTools or taskTools
 3.**已改为第19**
 4.添加 MemoryTools
