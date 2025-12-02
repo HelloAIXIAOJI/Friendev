@@ -1,4 +1,5 @@
 use super::message_builder;
+use super::notification;
 use super::startup::AppState;
 use anyhow::Result;
 use api;
@@ -87,6 +88,7 @@ async fn handle_agents_md_command(state: &mut AppState) -> Result<()> {
 async fn process_chat_loop(state: &mut AppState) -> Result<()> {
     let mut messages =
         message_builder::build_messages_with_agents_md(&state.session, &state.config)?;
+    let mut success = false;
 
     loop {
         match chat::send_and_receive(&state.api_client, messages.clone(), &state.session).await {
@@ -115,6 +117,7 @@ async fn process_chat_loop(state: &mut AppState) -> Result<()> {
                     continue;
                 }
 
+                success = true;
                 break;
             }
             Err(e) => {
@@ -128,5 +131,11 @@ async fn process_chat_loop(state: &mut AppState) -> Result<()> {
             }
         }
     }
+
+    // Send notification if AI completed successfully
+    if success {
+        let _ = notification::notify_ai_completed().await;
+    }
+
     Ok(())
 }

@@ -720,5 +720,11 @@ pub fn get_messages() -> HashMap<String, String> {
         "Interactive model selector".to_string(),
     );
 
+    // Notification messages
+    m.insert(
+        "notify_ai_completed_body".to_string(),
+        "Output completed, please check back.".to_string(),
+    );
+
     m
 }
