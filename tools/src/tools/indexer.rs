@@ -2,7 +2,7 @@ use anyhow::Result;
 use rusqlite::{params, Connection, OptionalExtension};
 use std::path::Path;
 
-use crate::tools::executor::parser;
+use crate::tools::executor::file_operations::file_outline::{self, SymbolSource};
 
 pub struct Indexer {
     db_path: std::path::PathBuf,
@@ -57,12 +57,12 @@ impl Indexer {
         Ok(())
     }
 
-    pub fn index_file(&self, path: &Path, project_root: &Path) -> Result<()> {
+    pub async fn index_file(&self, path: &Path, project_root: &Path, use_tree_sitter: bool, use_lsp: bool) -> Result<String> {
         let relative_path = path.strip_prefix(project_root).unwrap_or(path);
         let relative_path_str = relative_path.to_string_lossy().to_string();
 
         // 1. Parse file
-        let symbols = parser::extract_symbols(path)?;
+        let (symbols, source) = file_outline::get_symbols_with_source(path, use_tree_sitter, use_lsp).await?;
 
         // 2. Update DB
         let mut conn = self.get_connection()?;
@@ -108,7 +108,14 @@ impl Indexer {
         drop(stmt);
 
         tx.commit()?;
-        Ok(())
+        
+        let source_str = match source {
+            Some(SymbolSource::TreeSitter) => "use tree-sitter",
+            Some(SymbolSource::Lsp) => "use LSP",
+            None => "no symbols",
+        };
+        
+        Ok(source_str.to_string())
     }
 
     pub fn search_symbols(&self, pattern: &str) -> Result<Vec<(String, String, String, usize)>> {
