@@ -1,6 +1,5 @@
 Done.添加范围查看文件
-2.添加TodoTools or taskTools
-3.**已改为第19**
+2.添加TodoTools
 4.添加 MemoryTools
 5.添加 上下文压缩机制
 6.添加 Checkpoint 机制
