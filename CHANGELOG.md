@@ -16,6 +16,7 @@
   - Added --ts and --lsp flags to /index commands
   - Added LSP configuration documentation
 - **Separate Shorekeeper model configuration**: Add the /model sk command to support setting up Shorekeeper models independently.
+- **Added Jury mode (--jury)**: Introduces a three-model independent jury mechanism, requiring a 2/3 majority vote to execute sensitive operations.
 ---
 ## [0.2.5] - 2025-12-02
 ### Added
