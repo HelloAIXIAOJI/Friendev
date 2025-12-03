@@ -9,6 +9,12 @@
   - New optional parameters: `start_line` and `end_line`.
   - Useful for reading large files in chunks to save tokens.
   - Displays `(Lines X-Y)` header when a range is selected.
+- **Add LSP support for outline and index**(Other Branch)
+  - Added LSP client implementation using async-lsp-client
+  - Refactored file outline and indexer to prioritize Tree-sitter with LSP fallback
+  - Added configuration support for custom LSP servers via lsp.json
+  - Added --ts and --lsp flags to /index commands
+  - Added LSP configuration documentation
 ---
 ## [0.2.5] - 2025-12-02
 ### Added
