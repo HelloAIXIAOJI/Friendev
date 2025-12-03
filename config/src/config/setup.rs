@@ -54,6 +54,7 @@ pub fn initialize_config() -> Result<Config> {
         ai_language,
         max_retries: defaults::default_max_retries(),
         retry_delay_ms: defaults::default_retry_delay_ms(),
+        shorekeeper_model: None,
     };
 
     persistence::save_config(&config)?;
