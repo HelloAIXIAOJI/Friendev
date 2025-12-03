@@ -16,8 +16,25 @@ const MAX_PREVIEW_CHARS: usize = 4000;
 
 pub fn install_review_handler(api_client: ApiClient, config: Config) {
     ui::set_review_handler(move |request: &ReviewRequest| {
-        let client = api_client.clone();
-        let cfg = config.clone();
+        // Try to load fresh config to respect runtime changes
+        let (client, config_to_use) = match Config::load() {
+            Ok(Some(loaded_config)) => {
+                if let Some(sk_model) = &loaded_config.shorekeeper_model {
+                    // Use shorekeeper specific model
+                    let mut sk_cfg = loaded_config.clone();
+                    sk_cfg.current_model = sk_model.clone();
+                    (ApiClient::new(sk_cfg), loaded_config)
+                } else {
+                    // Use current main model (freshly loaded)
+                    (ApiClient::new(loaded_config.clone()), loaded_config)
+                }
+            }
+            _ => {
+                // Fallback to initial state
+                (api_client.clone(), config.clone())
+            }
+        };
+
         let handle = Handle::current();
         let owned_request = OwnedReviewRequest::from(request);
 
@@ -25,7 +42,7 @@ pub fn install_review_handler(api_client: ApiClient, config: Config) {
 
         thread::spawn(move || {
             let result =
-                handle.block_on(async move { run_review(&client, &cfg, &owned_request).await });
+                handle.block_on(async move { run_review(&client, &config_to_use, &owned_request).await });
             let _ = tx.send(result);
         });
 
