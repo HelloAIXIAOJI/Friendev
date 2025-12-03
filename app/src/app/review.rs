@@ -12,6 +12,7 @@ use std::sync::mpsc;
 use std::thread;
 use tokio::runtime::Handle;
 use ui::{self, ReviewRequest, Spinner};
+use colored::Colorize;
 const MAX_PREVIEW_CHARS: usize = 4000;
 
 pub fn install_review_handler(api_client: ApiClient, config: Config) {
@@ -42,7 +43,13 @@ pub fn install_review_handler(api_client: ApiClient, config: Config) {
 
         thread::spawn(move || {
             let result =
-                handle.block_on(async move { run_review(&client, &config_to_use, &owned_request).await });
+                handle.block_on(async move { 
+                    if owned_request.is_jury {
+                        run_jury_review(&client, &config_to_use, &owned_request).await
+                    } else {
+                        run_review(&client, &config_to_use, &owned_request).await 
+                    }
+                });
             let _ = tx.send(result);
         });
 
@@ -52,6 +59,144 @@ pub fn install_review_handler(api_client: ApiClient, config: Config) {
             Err(recv_err) => Err(io::Error::new(io::ErrorKind::Other, recv_err.to_string())),
         }
     });
+}
+
+use futures::future::join_all;
+
+async fn run_jury_review(
+    client: &ApiClient,
+    config: &Config,
+    request: &OwnedReviewRequest,
+) -> Result<bool> {
+    let i18n = ui::get_i18n();
+
+    println!(
+        "\n  {} {}",
+        "•",
+        i18n.get("approval_jury_request")
+            .replace("{}", &request.action)
+    );
+
+    let mut spinner = Spinner::new();
+    spinner.render(&i18n.get("approval_jury_wait"));
+
+    let working_dir = env::current_dir().unwrap_or_else(|_| env::temp_dir());
+    let session = ChatSession::new(working_dir);
+
+    let (preview, truncated) = format_preview(request.preview.as_deref(), &i18n);
+
+    let system_prompt = "You are a member of Friendev's safety jury. Reply strictly as a minified JSON object with two keys: \"details\" (string describing the analysis in the same language as the user request) and \"approval\" (boolean, true if the action should proceed, false if it should be rejected). Do not output markdown, code fences, additional keys, or commentary. Never call tools.".to_string();
+
+    let user_prompt = format!(
+        "Evaluate whether the pending action should proceed.\nAction Type: {}\nTarget: {}\nContext Preview{}:\n{}\n\nBase your decision solely on this information. Prioritize security, data-loss, compliance, and stability risks. If information is insufficient, explain the uncertainty in \"details\" and set \"approval\" to false.",
+        request.action,
+        request.subject,
+        if truncated { " (truncated)" } else { "" },
+        preview
+    );
+
+    let message = Message {
+        role: "user".to_string(),
+        content: user_prompt.clone(),
+        tool_calls: None,
+        tool_call_id: None,
+        name: None,
+    };
+
+    let system_msg = Message {
+        role: "system".to_string(),
+        content: system_prompt.clone(),
+        tool_calls: None,
+        tool_call_id: None,
+        name: None,
+    };
+
+    // Spawn 3 parallel reviews
+    let mut futures = Vec::new();
+    for _ in 0..3 {
+        let client = client.clone();
+        let session = session.clone(); // ChatSession is lightweight to clone? Actually it has fields, but we need it for api call context.
+        // Actually we can reuse session but api client handles chat history locally? 
+        // No, api client sends messages vector. We just need to send same messages.
+        
+        let msgs = vec![system_msg.clone(), message.clone()];
+        
+        futures.push(tokio::spawn(async move {
+            chat::send_and_receive(&client, msgs, &session).await
+        }));
+    }
+
+    let results = join_all(futures).await;
+
+    let mut votes_for = 0;
+    let mut votes_against = 0;
+    let mut details_list = Vec::new();
+
+    for (idx, join_res) in results.into_iter().enumerate() {
+        match join_res {
+            Ok(Ok((response, _, _))) => {
+                match parse_review_output(response.content.trim()) {
+                    Ok(outcome) => {
+                        if outcome.approval {
+                            votes_for += 1;
+                        } else {
+                            votes_against += 1;
+                        }
+                        details_list.push((idx + 1, outcome));
+                    }
+                    Err(_) => {
+                         // Parse error counts as abstain/fail? Or vote against for safety?
+                         // Let's count as against.
+                         votes_against += 1;
+                         details_list.push((idx + 1, ReviewOutcome { approval: false, details: "Failed to parse response".to_string() }));
+                    }
+                }
+            }
+            Ok(Err(_)) | Err(_) => {
+                votes_against += 1;
+                details_list.push((idx + 1, ReviewOutcome { approval: false, details: "Request failed".to_string() }));
+            }
+        }
+    }
+
+    println!(
+        "\r  {} {} ({}/{})                                          ",
+        if votes_for >= 2 { "✓" } else { "✗" },
+        i18n.get("approval_jury_done"),
+        votes_for,
+        votes_for + votes_against
+    );
+
+    println!();
+    
+    let passed = votes_for >= 2;
+
+    println!("{}", i18n.get("approval_jury_result"));
+    println!(
+        "  {} {} ({})",
+        i18n.get("approval_review_decision"),
+        if passed {
+            i18n.get("approval_review_decision_yes")
+        } else {
+            i18n.get("approval_review_decision_no")
+        },
+        format!("{}/3", votes_for)
+    );
+
+    println!("  {}", i18n.get("approval_jury_details"));
+
+    for (juror, outcome) in details_list {
+        let icon = if outcome.approval { "✓".green() } else { "✗".red() };
+        println!("    {}: Juror #{}", icon, juror);
+        for line in outcome.details.trim().lines() {
+             if !line.trim().is_empty() {
+                 println!("       {}", line.trim());
+             }
+        }
+    }
+    println!();
+
+    Ok(passed)
 }
 
 async fn run_review(
@@ -180,10 +325,12 @@ struct ReviewOutcome {
     approval: bool,
 }
 
+#[derive(Clone)]
 struct OwnedReviewRequest {
     action: String,
     subject: String,
     preview: Option<String>,
+    is_jury: bool,
 }
 
 impl OwnedReviewRequest {
@@ -192,6 +339,7 @@ impl OwnedReviewRequest {
             action: request.action.to_string(),
             subject: request.subject.to_string(),
             preview: request.preview.map(|s| s.to_string()),
+            is_jury: request.is_jury,
         }
     }
 }
