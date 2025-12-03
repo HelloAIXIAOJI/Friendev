@@ -22,6 +22,10 @@ pub struct FileSearchArgs {
 #[derive(Debug, Deserialize)]
 pub struct FileOutlineArgs {
     pub path: String,
+    #[serde(default)]
+    pub use_tree_sitter: bool,
+    #[serde(default)]
+    pub use_lsp: bool,
 }
 
 #[derive(Debug, Deserialize)]

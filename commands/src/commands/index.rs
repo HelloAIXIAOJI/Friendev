@@ -16,7 +16,25 @@ pub async fn handle_index_command(args: Vec<&str>, i18n: &I18n) -> Result<()> {
 
     match args[0] {
         "outline" => {
-            let full_rebuild = args.get(1).map(|s| *s == "all").unwrap_or(false);
+            let mut full_rebuild = false;
+            
+            for arg in &args[1..] {
+                if *arg == "all" {
+                    full_rebuild = true;
+                }
+            }
+            
+            // Parse flags properly
+            let has_ts_flag = args.iter().any(|&a| a == "--ts");
+            let has_lsp_flag = args.iter().any(|&a| a == "--lsp");
+            
+            let (use_tree_sitter, use_lsp) = if has_ts_flag || has_lsp_flag {
+                (has_ts_flag, has_lsp_flag)
+            } else {
+                // Default both on
+                (true, true)
+            };
+
             let start_msg_key = if full_rebuild { "index_start_full" } else { "index_start_incremental" };
             
             println!("{}", i18n.get(start_msg_key).cyan().bold());
@@ -68,12 +86,17 @@ pub async fn handle_index_command(args: Vec<&str>, i18n: &I18n) -> Result<()> {
             let mut error_count = 0;
             
             for path in files_to_process {
-                pb.set_message(format!("{}", path.file_name().unwrap_or_default().to_string_lossy()));
+                let file_name = path.file_name().unwrap_or_default().to_string_lossy();
                 
-                if let Err(_) = indexer.index_file(&path, &current_dir) {
-                    error_count += 1;
-                } else {
-                    success_count += 1;
+                match indexer.index_file(&path, &current_dir, use_tree_sitter, use_lsp).await {
+                    Ok(source) => {
+                        success_count += 1;
+                        pb.set_message(format!("{} [{}]", file_name, source));
+                    },
+                    Err(_) => {
+                        error_count += 1;
+                        pb.set_message(format!("{} [failed]", file_name));
+                    }
                 }
                 pb.inc(1);
             }

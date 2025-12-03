@@ -10,6 +10,7 @@ pub mod network_operations;
 pub mod search_operations;
 mod utils;
 pub mod parser;
+pub mod lsp_client;
 
 pub async fn execute_tool(
     name: &str,
