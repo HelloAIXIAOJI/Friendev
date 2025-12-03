@@ -11,12 +11,14 @@ type ReviewHandler = dyn Fn(&ReviewRequest) -> io::Result<bool> + Send + Sync + 
 
 static REVIEW_HANDLER: OnceLock<Box<ReviewHandler>> = OnceLock::new();
 static SMART_APPROVAL_MODE: AtomicBool = AtomicBool::new(false);
+static JURY_MODE: AtomicBool = AtomicBool::new(false);
 
 /// Review request
 pub struct ReviewRequest<'a> {
     pub action: &'a str,
     pub subject: &'a str,
     pub preview: Option<&'a str>,
+    pub is_jury: bool,
 }
 
 /// Register review handler
@@ -32,6 +34,11 @@ pub fn set_smart_approval_mode(enabled: bool) {
     SMART_APPROVAL_MODE.store(enabled, Ordering::Relaxed);
 }
 
+/// Set jury mode
+pub fn set_jury_mode(enabled: bool) {
+    JURY_MODE.store(enabled, Ordering::Relaxed);
+}
+
 /// User approval prompt
 /// Returns (approved, always, view_details)
 pub fn prompt_approval(
@@ -41,17 +48,26 @@ pub fn prompt_approval(
 ) -> io::Result<(bool, bool, bool)> {
     use std::path::Path;
 
-    // Check for Smart Approval Mode
-    if SMART_APPROVAL_MODE.load(Ordering::Relaxed) {
+    let is_smart_mode = SMART_APPROVAL_MODE.load(Ordering::Relaxed);
+    let is_jury_mode = JURY_MODE.load(Ordering::Relaxed);
+
+    // Check for Smart Approval or Jury Mode
+    if is_smart_mode || is_jury_mode {
         if let Some(handler) = REVIEW_HANDLER.get() {
             let request = ReviewRequest {
                 action,
                 subject: file_path,
                 preview: content_preview,
+                is_jury: is_jury_mode,
             };
             
-            // In smart mode, we delegate to the handler immediately
-            println!("\n{}", get_i18n().get("approval_review_wait").yellow());
+            // In smart/jury mode, we delegate to the handler immediately
+            if is_jury_mode {
+                println!("\n{}", get_i18n().get("approval_jury_wait").yellow());
+            } else {
+                println!("\n{}", get_i18n().get("approval_review_wait").yellow());
+            }
+
             match handler(&request) {
                 Ok(true) => return Ok((true, false, false)),
                 Ok(false) => {
@@ -60,8 +76,6 @@ pub fn prompt_approval(
                 }
                 Err(e) => {
                     println!("{} {}", "Review Error:".red(), e);
-                    // If review fails, fall back to manual interaction?
-                    // Or reject? Let's fall back to manual interaction for safety.
                     println!("Falling back to manual approval...");
                 }
             }
@@ -133,6 +147,7 @@ pub fn prompt_approval(
                         action,
                         subject: file_path,
                         preview: content_preview,
+                        is_jury: false, // Manual request is always single review
                     };
                     
                     // Try to run review

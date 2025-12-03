@@ -1,9 +1,9 @@
 Done.添加范围查看文件
-2.添加TodoTools
+2.添加 TodoTools
 4.添加 MemoryTools
 5.添加 上下文压缩机制
 6.添加 Checkpoint 机制
-7.添加 jury 模式
+ING.添加 jury 模式
 8.添加 duet 模式
 9.添加 Yinlin Agent （代码库调查AGENT）
 10.MCP
@@ -13,7 +13,7 @@ Done.添加范围查看文件
 14.Friendev Plugin
 15.内置 GoogleAPI、AnthropicAPI to OpenAI API 中间件
 16.添加GitTools
-17.支持更改守岸人模型
+Done.支持更改守岸人模型
 18.借鉴并优化Labor Market
 19.自定义上下文MD文件名（可多个，默认AGENTS.md、FDV.md、CLAUDE.md 与 GEMINI.md）
 20.本电脑记忆

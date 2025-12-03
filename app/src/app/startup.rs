@@ -26,12 +26,17 @@ pub async fn initialize_app() -> Result<AppState> {
         arg == "--ew"
     );
 
+    // Check for jury mode flag
+    let jury_mode = env::args().any(|arg| arg == "--jury");
+
     if smart_approve {
         ui::set_smart_approval_mode(true);
+    } else if jury_mode {
+        ui::set_jury_mode(true);
     }
 
-    // Check for --ally or --yolo flag (disabled if smart approval is active)
-    let auto_approve = !smart_approve && env::args().any(|arg| arg == "--ally" || arg == "--yolo");
+    // Check for --ally or --yolo flag (disabled if smart approval or jury is active)
+    let auto_approve = !smart_approve && !jury_mode && env::args().any(|arg| arg == "--ally" || arg == "--yolo");
 
     // Check for --setup flag to force setup
     let force_setup = env::args().any(|arg| arg == "--setup");
