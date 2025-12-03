@@ -3,7 +3,7 @@ Done.添加范围查看文件
 4.添加 MemoryTools
 5.添加 上下文压缩机制
 6.添加 Checkpoint 机制
-7.添加 jury 模式
+ING.添加 jury 模式
 8.添加 duet 模式
 9.添加 Yinlin Agent （代码库调查AGENT）
 10.MCP
