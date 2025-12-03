@@ -15,6 +15,7 @@
   - Added configuration support for custom LSP servers via lsp.json
   - Added --ts and --lsp flags to /index commands
   - Added LSP configuration documentation
+- **Separate Shorekeeper model configuration**: Add the /model sk command to support setting up Shorekeeper models independently.
 ---
 ## [0.2.5] - 2025-12-02
 ### Added

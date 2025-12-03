@@ -50,4 +50,9 @@ impl Config {
     pub fn update_ai_language(&mut self, language: String) -> Result<()> {
         updates::update_ai_language(self, language)
     }
+
+    /// Update the Shorekeeper (Smart Approval) model
+    pub fn update_shorekeeper_model(&mut self, model: String) -> Result<()> {
+        updates::update_shorekeeper_model(self, model)
+    }
 }

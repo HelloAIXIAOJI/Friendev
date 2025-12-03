@@ -15,4 +15,5 @@ pub struct Config {
     pub max_retries: u32,
     #[serde(default = "defaults::default_retry_delay_ms")]
     pub retry_delay_ms: u64,
+    pub shorekeeper_model: Option<String>,
 }
