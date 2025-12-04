@@ -16,7 +16,7 @@ pub async fn execute_run_command(arguments: &str, require_approval: bool) -> Res
     if let Ok(cwd) = env::current_dir() {
          let hook_ctx = HookContext::new(cwd)
              .with_env("FRIENDEV_COMMAND", &args.command);
-         if let Err(e) = execute_hook(HookType::PreCommand, &hook_ctx) {
+         if let Err(e) = execute_hook(HookType::PreCommand, &hook_ctx, None).await {
              eprintln!("\n\x1b[33m[!] PreCommand Hook Error: {}\x1b[0m\n", e);
          }
     }
@@ -78,7 +78,7 @@ pub async fn execute_run_command(arguments: &str, require_approval: bool) -> Res
              let hook_ctx = HookContext::new(cwd)
                  .with_env("FRIENDEV_COMMAND", &args.command)
                  .with_env("FRIENDEV_BG", "true");
-             let _ = execute_hook(HookType::PostCommand, &hook_ctx);
+             let _ = execute_hook(HookType::PostCommand, &hook_ctx, None).await;
         }
         result
     } else {
@@ -88,7 +88,7 @@ pub async fn execute_run_command(arguments: &str, require_approval: bool) -> Res
              let hook_ctx = HookContext::new(cwd)
                  .with_env("FRIENDEV_COMMAND", &args.command)
                  .with_env("FRIENDEV_BG", "false");
-             let _ = execute_hook(HookType::PostCommand, &hook_ctx);
+             let _ = execute_hook(HookType::PostCommand, &hook_ctx, None).await;
         }
         result
     }

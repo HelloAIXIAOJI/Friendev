@@ -6,6 +6,7 @@ use std::fs;
 use std::collections::HashMap;
 use colored::Colorize;
 use mlua::prelude::*;
+use futures_util::future::BoxFuture;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "snake_case")]
@@ -36,9 +37,11 @@ pub struct HookStepConfig {
     #[serde(default)]
     pub lua: Option<String>, // 内联 Lua 代码
     #[serde(default)]
-    pub uses: Option<String>, // 引用 Lua 脚本文件 (类似 uses: ./scripts/audit.lua)
+    pub command: Option<String>, // Friendev Slash Command
     #[serde(default)]
-    pub shell: Option<String>, // 显式指定 shell (e.g. "bash", "pwsh", "cmd")
+    pub uses: Option<String>, // 引用 Lua 脚本文件
+    #[serde(default)]
+    pub shell: Option<String>, // 显式指定 shell
     #[serde(default)]
     pub env: HashMap<String, String>, // 步骤特定的环境变量
     #[serde(default = "default_true")]
@@ -91,7 +94,13 @@ impl HookContext {
     }
 }
 
-pub fn execute_hook(hook_type: HookType, context: &HookContext) -> Result<()> {
+pub type FriendevCommandRunner = dyn Fn(&str) -> BoxFuture<'static, Result<()>> + Send + Sync;
+
+pub async fn execute_hook(
+    hook_type: HookType, 
+    context: &HookContext,
+    command_runner: Option<&FriendevCommandRunner>,
+) -> Result<()> {
     let hook_config_path = context.working_dir.join(".friendev").join("hooks.json");
     
     if !hook_config_path.exists() {
@@ -124,7 +133,7 @@ pub fn execute_hook(hook_type: HookType, context: &HookContext) -> Result<()> {
             println!("{}", format!("Running {:?} hooks...", hook_type).bright_black());
             
             for (idx, step) in steps.iter().enumerate() {
-                if let Err(e) = execute_step(step, context, idx) {
+                if let Err(e) = execute_step(step, context, idx, command_runner).await {
                     eprintln!("{}", format!("Hook step failed: {}", e).red());
                 }
             }
@@ -134,7 +143,12 @@ pub fn execute_hook(hook_type: HookType, context: &HookContext) -> Result<()> {
     Ok(())
 }
 
-fn execute_step(step: &HookStep, context: &HookContext, idx: usize) -> Result<()> {
+async fn execute_step(
+    step: &HookStep, 
+    context: &HookContext, 
+    idx: usize,
+    command_runner: Option<&FriendevCommandRunner>,
+) -> Result<()> {
     match step {
         HookStep::Simple(cmd_str) => {
             // Legacy/Simple support: try to guess if it looks like a file or shell command
@@ -184,8 +198,18 @@ fn execute_step(step: &HookStep, context: &HookContext, idx: usize) -> Result<()
                 } else {
                     anyhow::bail!("Script file not found: {}", script_path);
                 }
-            } else if let Some(cmd) = &config.run {
-                execute_shell_command(cmd, config.shell.as_deref(), context, &config.env)?;
+            } else if let Some(cmd) = &config.command {
+                if let Some(runner) = command_runner {
+                    println!("{}", format!("    Executing Friendev command: {}", cmd).bright_black());
+                    if let Err(e) = runner(cmd).await {
+                        if !config.continue_on_error {
+                            return Err(e);
+                        }
+                        eprintln!("{}", format!("    Command failed (continue_on_error=true): {}", e).yellow());
+                    }
+                } else {
+                    eprintln!("{}", "    Warning: Friendev commands are not supported in this hook context.".yellow());
+                }
             }
         }
     }

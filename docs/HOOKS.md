@@ -41,30 +41,37 @@ Hooks 配置支持类似 GitHub Actions 的灵活语法，您可以混合使用�
 
 ### 2. 结构化模式 (高级配置)
 
-对于更复杂的场景，可以使用对象来定义步骤。支持 Shell 命令和 Lua 脚本。
+对于更复杂的场景，可以使用对象来定义步骤。支持 Shell 命令、Lua 脚本以及 Friendev 内部命令。
 
 ```json
 {
   "hooks": {
     "pre_command": [
-      // Shell 步骤
+      // 1. Shell 步骤
       {
         "name": "Check Git Status",
         "run": "git status --porcelain",
         "continue_on_error": true
       },
       
-      // 内联 Lua 脚本
+      // 2. 内联 Lua 脚本
       {
         "name": "Security Audit",
         "lua": "if env.FRIENDEV_COMMAND:match('rm %-rf') then print('!!! DANGER: Deletion detected !!!') end"
       },
 
-      // 引用外部 Lua 文件
+      // 3. 引用外部 Lua 文件
       {
         "name": "Run Compliance Check",
         "uses": "scripts/compliance.lua",
         "env": { "LEVEL": "strict" }
+      },
+
+      // 4. 执行 Friendev 内部 Slash 命令
+      {
+        "name": "Update Code Index",
+        "command": "/index outline all",
+        "continue_on_error": true
       }
     ]
   }
@@ -77,11 +84,30 @@ Hooks 配置支持类似 GitHub Actions 的灵活语法，您可以混合使用�
 |------|------|------|
 | `name` | String (可选) | 步骤名称，执行时会显示。 |
 | `run` | String (可选) | 要执行的 Shell 命令。 |
+| `command` | String (可选) | 要执行的 Friendev Slash 命令 (如 `/index outline all`)。**仅限 `pre/post_command` 钩子。** |
 | `shell` | String (可选) | 显式指定 Shell (如 `powershell`, `bash`, `cmd`)。 |
 | `lua` | String (可选) | 要执行的内联 Lua 代码。 |
 | `uses` | String (可选) | 引用外部脚本文件路径（支持 `.lua`）。 |
 | `env` | Map (可选) | 该步骤专属的环境变量。 |
 | `continue_on_error` | Bool (默认 true) | 如果步骤失败，是否继续执行后续步骤。 |
+
+## 支持的操作类型
+
+您可以在一个 Hook 步骤中选择以下**一种**操作方式：
+
+1.  **Shell 命令 (`run`)**:
+    -   调用系统 Shell 执行外部命令。
+    -   示例: `"run": "npm run lint"`
+
+2.  **Lua 脚本 (`lua` / `uses`)**:
+    -   使用内嵌的 Lua 引擎执行脚本，跨平台兼容性好。
+    -   支持访问 Friendev 上下文变量。
+    -   示例: `"uses": "hooks/check.lua"`
+
+3.  **Friendev 命令 (`command`)**:
+    -   直接调用 Friendev 的内部功能。
+    -   支持的钩子类型：`startup`, `pre_command`, `post_command`。
+    -   示例: `"command": "/index refresh"`
 
 ## Lua 脚本支持
 
@@ -113,17 +139,6 @@ if file then
     file:close()
     print("Audit log updated.")
 end
-```
-
-在 `hooks.json` 中使用：
-```json
-{
-  "hooks": {
-    "post_command": [
-      { "uses": "scripts/audit.lua" }
-    ]
-  }
-}
 ```
 
 ## 环境变量

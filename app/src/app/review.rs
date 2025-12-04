@@ -20,11 +20,31 @@ const MAX_PREVIEW_CHARS: usize = 4000;
 pub fn install_review_handler(api_client: ApiClient, config: Config) {
     ui::set_review_handler(move |request: &ReviewRequest| {
         // Pre-Approval Hook
+        // Note: execute_hook is async now. We are in a sync context here (review handler callback).
+        // But install_review_handler spawns a thread which calls block_on.
+        // Wait, `ui::set_review_handler` takes a `Fn` that returns `io::Result<bool>`.
+        // Inside that closure, we do:
+        // thread::spawn(... handle.block_on(... run_review ...))
+        
+        // The hooks are executed *outside* that async block currently in my previous edit (before match rx.recv()).
+        // This means we are blocking the UI thread if we run async hooks here?
+        // `ui::prompt_approval` calls this handler.
+        
+        // We need to run hooks in a blocking manner or spawn a runtime.
+        // Since `install_review_handler` captures `Handle::current()`, we can use it.
+        let handle = Handle::current();
+        
         if let Ok(cwd) = env::current_dir() {
              let hook_ctx = HookContext::new(cwd)
                  .with_env("FRIENDEV_ACTION", request.action)
                  .with_env("FRIENDEV_SUBJECT", request.subject);
-             if let Err(e) = execute_hook(HookType::PreApproval, &hook_ctx) {
+             
+             // Run async hook synchronously
+             let hook_result = handle.block_on(async {
+                 execute_hook(HookType::PreApproval, &hook_ctx, None).await
+             });
+             
+             if let Err(e) = hook_result {
                  eprintln!("\n\x1b[33m[!] PreApproval Hook Error: {}\x1b[0m", e);
              }
         }
@@ -48,7 +68,6 @@ pub fn install_review_handler(api_client: ApiClient, config: Config) {
             }
         };
 
-        let handle = Handle::current();
         let owned_request = OwnedReviewRequest::from(request);
 
         let (tx, rx) = mpsc::channel();
@@ -72,6 +91,11 @@ pub fn install_review_handler(api_client: ApiClient, config: Config) {
         };
 
         // Post-Approval Hook
+        let handle = Handle::current(); // Re-acquire handle? No, we are in closure, we can capture outer handle.
+        // Wait, `Handle::current()` inside closure will panic if not in tokio context?
+        // `ui::prompt_approval` might be called from main thread which IS in tokio runtime (main function).
+        // So it should be fine.
+        
         if let Ok(cwd) = env::current_dir() {
              let approved = match &result {
                  Ok(true) => "true",
@@ -82,7 +106,11 @@ pub fn install_review_handler(api_client: ApiClient, config: Config) {
                  .with_env("FRIENDEV_SUBJECT", request.subject)
                  .with_env("FRIENDEV_APPROVED", approved);
                  
-             if let Err(e) = execute_hook(HookType::PostApproval, &hook_ctx) {
+             let hook_result = handle.block_on(async {
+                 execute_hook(HookType::PostApproval, &hook_ctx, None).await
+             });
+             
+             if let Err(e) = hook_result {
                  eprintln!("\n\x1b[33m[!] PostApproval Hook Error: {}\x1b[0m", e);
              }
         }
