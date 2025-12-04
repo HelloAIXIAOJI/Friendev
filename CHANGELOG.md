@@ -17,6 +17,9 @@
   - Added LSP configuration documentation
 - **Separate Shorekeeper model configuration**: Add the /model sk command to support setting up Shorekeeper models independently.
 - **Added Jury mode (--jury)**: Introduces a three-model independent jury mechanism, requiring a 2/3 majority vote to execute sensitive operations.
+- **Hooks Support**: Provides a hooks system that allows you to set up automated execution of custom scripts or commands at specific stages.
+  - A built-in Lua interpreter was introduced.
+  - See `docs\HOOKS.md` for details.
 ---
 ## [0.2.5] - 2025-12-02
 ### Added

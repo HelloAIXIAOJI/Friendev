@@ -84,7 +84,7 @@ Hooks 配置支持类似 GitHub Actions 的灵活语法，您可以混合使用�
 |------|------|------|
 | `name` | String (可选) | 步骤名称，执行时会显示。 |
 | `run` | String (可选) | 要执行的 Shell 命令。 |
-| `command` | String (可选) | 要执行的 Friendev Slash 命令 (如 `/index outline all`)。**仅限 `pre/post_command` 钩子。** |
+| `command` | String (可选) | 要执行的 Friendev Slash 命令 (如 `/index outline all`)。**仅限 `pre_command、post_command、startup` 钩子。** |
 | `shell` | String (可选) | 显式指定 Shell (如 `powershell`, `bash`, `cmd`)。 |
 | `lua` | String (可选) | 要执行的内联 Lua 代码。 |
 | `uses` | String (可选) | 引用外部脚本文件路径（支持 `.lua`）。 |
