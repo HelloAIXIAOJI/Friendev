@@ -7,7 +7,7 @@ use super::super::utils::normalize_whitespace;
 use super::file_common::normalize_path;
 use crate::tools::args::FileReplaceArgs;
 use crate::tools::indexer::Indexer;
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 
 pub async fn execute_file_replace(
     arguments: &str,

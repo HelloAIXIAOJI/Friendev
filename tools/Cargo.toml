@@ -41,6 +41,7 @@ uuid = { version = "1", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
 reqwest = { version = "0.11", features = ["json", "stream", "rustls-tls"], default-features = false }
 futures-util = "0.3"
+mlua = { version = "0.9", features = ["lua54", "vendored", "send"] }
 
 [dev-dependencies]
 httpmock = "0.7"

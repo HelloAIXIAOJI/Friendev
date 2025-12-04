@@ -2,7 +2,7 @@ use anyhow::Result;
 use std::path::Path;
 use std::path::PathBuf;
 
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 use ui::get_i18n;
 
 /// 规范化路径 - 处理相对路径和绝对路径
@@ -59,7 +59,7 @@ pub fn check_file_action_approval(
     path: &Path,
     preview: Option<&str>,
 ) -> Result<bool> {
-    use crate::types::{approve_action_for_session, is_action_approved};
+    use crate::tools::types::{approve_action_for_session, is_action_approved};
     use ui::prompt_approval;
 
     if is_action_approved(action) {

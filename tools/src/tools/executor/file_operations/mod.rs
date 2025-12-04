@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::path::Path;
 
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 
 pub mod file_common;
 mod file_diff_edit;

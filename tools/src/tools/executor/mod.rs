@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::path::Path;
 
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 use ui::get_i18n;
 
 mod command_operations;
