@@ -13,6 +13,15 @@ use ui::get_i18n;
 pub async fn handle_user_input(line: &str, state: &mut AppState) -> Result<()> {
     // Handle commands
     if line.starts_with('/') {
+        // Pre-Command Hook
+        use tools::{HookType, execute_hook, HookContext};
+        let hook_ctx = HookContext::new(state.session.working_directory.clone())
+            .with_env("FRIENDEV_COMMAND", line);
+        
+        if let Err(e) = execute_hook(HookType::PreCommand, &hook_ctx) {
+             eprintln!("\n\x1b[33m[!] PreCommand Hook Error: {}\x1b[0m\n", e);
+        }
+
         // Special handling for /agents.md command
         if line == "/agents.md" {
             handle_agents_md_command(state).await?;
@@ -30,6 +39,12 @@ pub async fn handle_user_input(line: &str, state: &mut AppState) -> Result<()> {
                 eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), e);
             }
         }
+
+        // Post-Command Hook
+        if let Err(e) = execute_hook(HookType::PostCommand, &hook_ctx) {
+             eprintln!("\n\x1b[33m[!] PostCommand Hook Error: {}\x1b[0m\n", e);
+        }
+
         return Ok(());
     }
 

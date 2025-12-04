@@ -6,7 +6,7 @@ use std::path::Path;
 
 use super::file_common::normalize_path;
 use crate::tools::args::FileSearchArgs;
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 
 pub async fn execute_file_search(arguments: &str, working_dir: &Path) -> Result<ToolResult> {
     let args: FileSearchArgs = serde_json::from_str(arguments)?;

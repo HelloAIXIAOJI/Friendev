@@ -13,10 +13,22 @@ use std::thread;
 use tokio::runtime::Handle;
 use ui::{self, ReviewRequest, Spinner};
 use colored::Colorize;
+use tools::{HookType, execute_hook, HookContext};
+
 const MAX_PREVIEW_CHARS: usize = 4000;
 
 pub fn install_review_handler(api_client: ApiClient, config: Config) {
     ui::set_review_handler(move |request: &ReviewRequest| {
+        // Pre-Approval Hook
+        if let Ok(cwd) = env::current_dir() {
+             let hook_ctx = HookContext::new(cwd)
+                 .with_env("FRIENDEV_ACTION", request.action)
+                 .with_env("FRIENDEV_SUBJECT", request.subject);
+             if let Err(e) = execute_hook(HookType::PreApproval, &hook_ctx) {
+                 eprintln!("\n\x1b[33m[!] PreApproval Hook Error: {}\x1b[0m", e);
+             }
+        }
+
         // Try to load fresh config to respect runtime changes
         let (client, config_to_use) = match Config::load() {
             Ok(Some(loaded_config)) => {
@@ -53,11 +65,29 @@ pub fn install_review_handler(api_client: ApiClient, config: Config) {
             let _ = tx.send(result);
         });
 
-        match rx.recv() {
+        let result = match rx.recv() {
             Ok(Ok(approved)) => Ok(approved),
             Ok(Err(err)) => Err(io::Error::new(io::ErrorKind::Other, err.to_string())),
             Err(recv_err) => Err(io::Error::new(io::ErrorKind::Other, recv_err.to_string())),
+        };
+
+        // Post-Approval Hook
+        if let Ok(cwd) = env::current_dir() {
+             let approved = match &result {
+                 Ok(true) => "true",
+                 _ => "false",
+             };
+             let hook_ctx = HookContext::new(cwd)
+                 .with_env("FRIENDEV_ACTION", request.action)
+                 .with_env("FRIENDEV_SUBJECT", request.subject)
+                 .with_env("FRIENDEV_APPROVED", approved);
+                 
+             if let Err(e) = execute_hook(HookType::PostApproval, &hook_ctx) {
+                 eprintln!("\n\x1b[33m[!] PostApproval Hook Error: {}\x1b[0m", e);
+             }
         }
+
+        result
     });
 }
 

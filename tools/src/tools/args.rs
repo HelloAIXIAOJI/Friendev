@@ -90,7 +90,7 @@ pub struct FileDiffEditArgs {
     pub hunks: Vec<DiffHunk>, // 多个 hunk 编辑
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct RunCommandArgs {
     pub command: String,
     #[serde(default)]

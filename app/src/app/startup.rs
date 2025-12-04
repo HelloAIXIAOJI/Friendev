@@ -70,6 +70,13 @@ pub async fn initialize_app() -> Result<AppState> {
         working_dir.display()
     );
 
+    // Execute Startup Hook
+    use tools::{HookType, execute_hook, HookContext};
+    let hook_ctx = HookContext::new(working_dir.clone());
+    if let Err(e) = execute_hook(HookType::Startup, &hook_ctx) {
+        eprintln!("\n\x1b[33m[!] Startup Hook Error: {}\x1b[0m\n", e);
+    }
+
     // Create or load chat session
     let session = ChatSession::new(working_dir.clone());
     session.save()?;
