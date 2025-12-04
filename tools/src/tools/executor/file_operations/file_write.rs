@@ -54,7 +54,7 @@ pub async fn execute_file_write(
     // Auto-hook: Update outline index if write was successful
     if result.is_ok() {
         if let Ok(indexer) = Indexer::new(working_dir) {
-            let _ = indexer.index_file(&target_path, working_dir);
+            let _ = indexer.index_file(&target_path, working_dir, false, false).await;
         }
     }
 

@@ -9,7 +9,7 @@
 *.swp
 *.swo
 .*/
-!.github
+!.github/
 
 # OS
 .DS_Store
@@ -19,5 +19,11 @@ Thumbs.db
 .friendev-test/
 
 *cli
-*docs*
 duck*go_se*1.1
+cr*sh
+
+# .friendev 目录处理
+.friendev/
+!.friendev/
+.friendev/index
+!.friendev/*.json

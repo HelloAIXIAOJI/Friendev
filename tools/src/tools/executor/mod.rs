@@ -11,6 +11,7 @@ pub mod search_operations;
 mod utils;
 pub mod parser;
 mod todo_operations;
+pub mod lsp_client;
 
 pub async fn execute_tool(
     name: &str,
