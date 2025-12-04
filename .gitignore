@@ -21,5 +21,5 @@ Thumbs.db
 *cli
 duck*go_se*1.1
 cr*sh
-!.friendev
-.friendev/*.db
+.friendev/index
+!.friendev/*.json
