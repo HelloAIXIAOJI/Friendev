@@ -11,6 +11,7 @@ pub async fn execute_tool_calls(
     working_dir: &Path,
     displays: &mut std::collections::HashMap<String, ToolCallDisplay>,
     require_approval: bool,
+    session_id: Option<&str>,
 ) -> Vec<Message> {
     let mut results = Vec::new();
 
@@ -45,6 +46,7 @@ pub async fn execute_tool_calls(
             &tc.function.arguments,
             working_dir,
             require_approval,
+            session_id,
         )
         .await
         .unwrap_or_else(|e| {

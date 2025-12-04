@@ -1,0 +1,4 @@
+- **Add todo management tools and command**
+  - Implement `todo_write` and `todo_read` tools for AI task management
+  - Add `/todo` command for users to view current task list
+  - Support status visualization (pending, in_progress, completed)

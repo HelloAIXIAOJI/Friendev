@@ -100,6 +100,7 @@ async fn process_chat_loop(state: &mut AppState) -> Result<()> {
                         &state.session.working_directory,
                         &mut displays,
                         !state.auto_approve, // If --ally is set, no approval needed
+                        Some(&state.session.id.to_string()),
                     )
                     .await;
 

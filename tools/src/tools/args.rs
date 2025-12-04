@@ -1,4 +1,23 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct TodoItem {
+    pub id: String,
+    pub content: String,
+    pub status: String, // "pending" | "in_progress" | "completed"
+    #[serde(default = "default_priority")]
+    pub priority: String, // "high" | "medium" | "low"
+}
+
+fn default_priority() -> String {
+    "medium".to_string()
+}
+
+#[derive(Debug, Deserialize)]
+pub struct TodoWriteArgs {
+    pub todos: Vec<TodoItem>,
+}
+
 
 #[derive(Debug, Deserialize)]
 pub struct FileListArgs {

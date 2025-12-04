@@ -10,12 +10,14 @@ pub mod network_operations;
 pub mod search_operations;
 mod utils;
 pub mod parser;
+mod todo_operations;
 
 pub async fn execute_tool(
     name: &str,
     arguments: &str,
     working_dir: &Path,
     require_approval: bool,
+    session_id: Option<&str>,
 ) -> Result<ToolResult> {
     match name {
         "file_list" => file_operations::execute_file_list(arguments, working_dir).await,
@@ -42,6 +44,8 @@ pub async fn execute_tool(
         "network_search_bing" => search_operations::execute_search_bing(arguments).await,
         "network_get_content" => network_operations::execute_fetch_content(arguments).await,
         "run_command" => command_operations::execute_run_command(arguments, require_approval).await,
+        "todo_write" => todo_operations::execute_todo_write(arguments, working_dir, session_id).await,
+        "todo_read" => todo_operations::execute_todo_read(arguments, working_dir, session_id).await,
         _ => {
             let i18n = get_i18n();
             let tmpl = i18n.get("tool_unknown");

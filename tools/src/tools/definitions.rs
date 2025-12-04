@@ -351,5 +351,60 @@ pub fn get_available_tools() -> Vec<Tool> {
                 }),
             },
         },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
+                name: "todo_write".to_string(),
+                description: "Creates and manages a structured task list for the current coding session. Helps track progress and organize complex tasks.".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {
+                        "todos": {
+                            "type": "array",
+                            "description": "The updated todo list",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "description": "The task description",
+                                        "minLength": 1
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": ["pending", "in_progress", "completed"],
+                                        "description": "Current status of the task"
+                                    },
+                                    "priority": {
+                                        "type": "string",
+                                        "enum": ["high", "medium", "low"],
+                                        "description": "Priority level of the task"
+                                    },
+                                    "id": {
+                                        "type": "string",
+                                        "description": "Unique identifier for the task"
+                                    }
+                                },
+                                "required": ["content", "status", "id"],
+                                "additionalProperties": false
+                            }
+                        }
+                    },
+                    "required": ["todos"]
+                }),
+            },
+        },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
+                name: "todo_read".to_string(),
+                description: "Read the current todo list to check progress and pending tasks.".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }),
+            },
+        },
     ]
 }
