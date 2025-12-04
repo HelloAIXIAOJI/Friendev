@@ -1,5 +1,6 @@
 use anyhow::Result;
 use colored::*;
+use history::ChatSession;
 use serde::Deserialize;
 use std::fs;
 
@@ -14,12 +15,32 @@ struct TodoItem {
     priority: String,
 }
 
-pub fn handle_todo_command(_parts: &[&str], i18n: &I18n) -> Result<()> {
+pub fn handle_todo_command(_parts: &[&str], i18n: &I18n, session: &ChatSession) -> Result<()> {
     let working_dir = std::env::current_dir()?;
-    let todo_file = working_dir.join(".friendev").join("todos.json");
+    
+    // Try session-specific file first
+    let session_file = working_dir
+        .join(".friendev")
+        .join("todos")
+        .join(format!("{}.json", session.id));
+        
+    // Fallback to legacy/default file
+    let default_file = working_dir.join(".friendev").join("todos.json");
+    
+    let todo_file = if session_file.exists() {
+        session_file
+    } else {
+        default_file
+    };
 
     if !todo_file.exists() {
-        println!("\n  {}\n", i18n.get("todo_list_empty").yellow());
+        // Check if we have a translation key, otherwise print raw message
+        let msg = i18n.get("todo_list_empty");
+        if msg == "todo_list_empty" {
+             println!("\n  {}\n", "Todo list is empty.".yellow());
+        } else {
+             println!("\n  {}\n", msg.yellow());
+        }
         return Ok(());
     }
 
@@ -27,13 +48,23 @@ pub fn handle_todo_command(_parts: &[&str], i18n: &I18n) -> Result<()> {
     let todos: Vec<TodoItem> = match serde_json::from_str(&content) {
         Ok(t) => t,
         Err(_) => {
-            println!("\n  {}\n", i18n.get("todo_file_corrupt").red());
+            let msg = i18n.get("todo_file_corrupt");
+            if msg == "todo_file_corrupt" {
+                println!("\n  {}\n", "Todo file is corrupted.".red());
+            } else {
+                println!("\n  {}\n", msg.red());
+            }
             return Ok(());
         }
     };
 
     if todos.is_empty() {
-        println!("\n  {}\n", i18n.get("todo_list_empty").yellow());
+        let msg = i18n.get("todo_list_empty");
+        if msg == "todo_list_empty" {
+             println!("\n  {}\n", "Todo list is empty.".yellow());
+        } else {
+             println!("\n  {}\n", msg.yellow());
+        }
         return Ok(());
     }
 

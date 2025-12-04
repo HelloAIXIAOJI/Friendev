@@ -54,7 +54,7 @@ pub async fn handle_command(
             index::handle_index_command(parts[1..].to_vec(), &i18n).await?;
         }
         Some(&"/todo") => {
-            todo::handle_todo_command(&parts, &i18n)?;
+            todo::handle_todo_command(&parts, &i18n, session)?;
         }
         _ => {
             println!(
