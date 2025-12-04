@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "startup": [
+      {
+        "name": "run",
+        "command": "/index outline all",
+        "continue_on_error": true
+      }
+    ]
+  }
+}
