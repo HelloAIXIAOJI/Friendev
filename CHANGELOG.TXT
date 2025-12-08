@@ -1,4 +1,27 @@
+This file temporarily stores CHANGELOG entries.
+FRIENDEV CHANGELOG
+---
+Feat todo
 - **Add todo management tools and command**
   - Implement `todo_write` and `todo_read` tools for AI task management
   - Add `/todo` command for users to view current task list
   - Support status visualization (pending, in_progress, completed)
+
+Feat MCP
+Features:  
+- Deep MCP Tool Integration  
+  - Dynamic Tool Discovery: Friendev can now automatically discover and register all tools provided by connected MCP servers.  
+  - Namespace Isolation: To prevent naming conflicts, MCP tools are automatically named in the format server/tool.  
+  - AI-Native Support: AI assistants can now "see" and directly call these MCP tools to complete tasks without manual intervention.  
+- Resource Access System (Resources)  
+  - Resource List: Added the mcp_resource_list tool to view all available resources.  
+  - Resource Reading: Added the mcp_resource_read tool to support reading the content of resource URIs.  
+- Interactive Prompt System  
+  - Command: Added the /prompt interactive command.  
+  - Workflow: Implemented a 5-step fully automated workflow: Select Server → Select Prompt → Fill Input Parameters → Execute Prompt → Automatically Send Results to AI.  
+- Added the /mcp Command  
+
+Improvements:  
+- API Execution Layer Refactoring  
+  - Implemented execute_tool_calls_with_mcp, bridging the complete pipeline from AI decision-making to MCP tool execution.  
+- MCP configuration files are now uniformly stored in Friendev's standard configuration directory instead of the MCPCS directory.
