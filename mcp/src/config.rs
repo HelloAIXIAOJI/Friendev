@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use anyhow::Result;
+use config::Config;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
@@ -72,14 +73,14 @@ pub struct McpConfig {
 impl McpConfig {
     pub fn load() -> Result<Self> {
         let mut config = McpConfig::default();
-        let home = dirs::home_dir().ok_or_else(|| anyhow::anyhow!("Could not find home directory"))?;
-        let config_dir = home.join(".mcpcsrs").join("mcps");
+        let friendev_config_dir = Config::config_dir()?;
+        let mcp_config_dir = friendev_config_dir.join("mcps");
 
-        if !config_dir.exists() {
+        if !mcp_config_dir.exists() {
              return Ok(config);
         }
 
-        let entries = std::fs::read_dir(config_dir)?;
+        let entries = std::fs::read_dir(mcp_config_dir)?;
         for entry in entries {
             let entry = entry?;
             let path = entry.path();
@@ -104,14 +105,14 @@ impl McpConfig {
     }
 
     pub fn create_new(name: &str) -> Result<std::path::PathBuf> {
-        let home = dirs::home_dir().ok_or_else(|| anyhow::anyhow!("Could not find home directory"))?;
-        let config_dir = home.join(".mcpcsrs").join("mcps");
+        let friendev_config_dir = Config::config_dir()?;
+        let mcp_config_dir = friendev_config_dir.join("mcps");
 
-        if !config_dir.exists() {
-            std::fs::create_dir_all(&config_dir)?;
+        if !mcp_config_dir.exists() {
+            std::fs::create_dir_all(&mcp_config_dir)?;
         }
 
-        let mut path = config_dir.join(name);
+        let mut path = mcp_config_dir.join(name);
         if path.extension().is_none() {
             path.set_extension("json");
         }
@@ -128,5 +129,11 @@ impl McpConfig {
         std::fs::write(&path, content)?;
 
         Ok(path)
+    }
+
+    /// Get the MCP configuration directory path
+    pub fn config_dir() -> Result<std::path::PathBuf> {
+        let friendev_config_dir = Config::config_dir()?;
+        Ok(friendev_config_dir.join("mcps"))
     }
 }

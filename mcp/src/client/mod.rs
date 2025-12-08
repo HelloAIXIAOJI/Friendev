@@ -1,7 +1,7 @@
 mod manager;
 mod connection;
-mod tools;
-mod resources;
-mod prompts;
+pub mod tools;
+pub mod resources;
+pub mod prompts;
 
 pub use manager::ClientManager;

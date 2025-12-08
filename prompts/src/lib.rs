@@ -148,8 +148,8 @@ pub fn print_help(i18n: &I18n) {
     println!();
 }
 
-pub fn get_system_prompt(language: &str, model: &str, working_dir: &Path) -> String {
-    let tools_description = tools::get_tools_description();
+pub fn get_system_prompt(language: &str, model: &str, working_dir: &Path, mcp_integration: Option<&mcp::McpIntegration>) -> String {
+    let tools_description = tools::get_tools_description_with_mcp(mcp_integration);
 
     // 动态加载 AGENTS.md（如果存在）
     let agents_context = match load_agents_md(working_dir) {

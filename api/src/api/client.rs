@@ -86,6 +86,7 @@ impl ApiClient {
     pub async fn chat_stream_with_retry(
         &self,
         messages: Vec<Message>,
+        mcp_integration: Option<&mcp::McpIntegration>,
     ) -> Result<Box<dyn Stream<Item = Result<StreamChunk>> + Unpin + Send>> {
         let cleaned_messages = Self::clean_messages(&messages);
 
@@ -107,7 +108,7 @@ impl ApiClient {
                 tokio::time::sleep(tokio::time::Duration::from_millis(delay)).await;
             }
 
-            match self.chat_stream(cleaned_messages.clone()).await {
+            match self.chat_stream(cleaned_messages.clone(), mcp_integration).await {
                 Ok(stream) => return Ok(stream),
                 Err(e) => {
                     if attempt == max_retries {
@@ -130,16 +131,17 @@ impl ApiClient {
     }
 
     /// Stream chat completions
-    pub async fn chat_stream(
+    async fn chat_stream(
         &self,
         messages: Vec<Message>,
+        mcp_integration: Option<&mcp::McpIntegration>,
     ) -> Result<Box<dyn Stream<Item = Result<StreamChunk>> + Unpin + Send>> {
         let url = format!("{}/chat/completions", self.config.api_url);
 
         let request = ChatRequest {
             model: self.config.current_model.clone(),
             messages,
-            tools: tools::get_available_tools(),
+            tools: tools::get_available_tools_with_mcp(mcp_integration),
             stream: true,
             max_tokens: None,
         };
@@ -173,13 +175,13 @@ impl ApiClient {
     }
 
     /// Non-streaming chat completion (for simple requests like prompt optimization)
-    pub async fn chat_complete(&self, messages: Vec<Message>) -> Result<Message> {
+    pub async fn chat_complete(&self, messages: Vec<Message>, mcp_integration: Option<&mcp::McpIntegration>) -> Result<Message> {
         let url = format!("{}/chat/completions", self.config.api_url);
         
         let request = ChatRequest {
             model: self.config.current_model.clone(),
             messages,
-            tools: vec![],  // No tools for simple completion
+            tools: tools::get_available_tools_with_mcp(mcp_integration),
             stream: false,
             max_tokens: Some(1000),  // Limit tokens for optimization
         };

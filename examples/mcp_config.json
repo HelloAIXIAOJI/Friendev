@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "transport": "child-process",
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "/tmp"]
+    },
+    "git": {
+      "transport": "child-process", 
+      "command": "uvx",
+      "args": ["mcp-server-git", "--repository", "."]
+    },
+    "github": {
+      "transport": "sse",
+      "url": "https://api.mcp-server.com/github/sse",
+      "auth_token": "your-github-token-here"
+    }
+  }
+}
+
+// NOTE: This file should be placed in:
+// Windows: %APPDATA%\friendev\mcps\
+// Linux/macOS: ~/.config/friendev/mcps/

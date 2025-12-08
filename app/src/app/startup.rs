@@ -4,6 +4,7 @@ use api::ApiClient;
 use config::Config;
 use history::ChatSession;
 use i18n::I18n;
+use mcp::McpIntegration;
 use prompts;
 use std::env;
 use ui;
@@ -14,6 +15,7 @@ pub struct AppState {
     pub i18n: I18n,
     pub session: ChatSession,
     pub api_client: ApiClient,
+    pub mcp_integration: Option<McpIntegration>,
     pub auto_approve: bool,
 }
 
@@ -80,17 +82,42 @@ pub async fn initialize_app() -> Result<AppState> {
     // Install review handler for approval prompts
     review::install_review_handler(api_client.clone(), config.clone());
 
+    // Initialize MCP integration
+    let mcp_integration = match McpIntegration::new().await {
+        Ok(integration) => {
+            println!(
+                "\x1b[32m[OK]\x1b[0m \x1b[2m{}\x1b[0m",
+                i18n.get("mcp_integration_initialized")
+            );
+            Some(integration)
+        }
+        Err(e) => {
+            println!(
+                "\x1b[33m[WARN]\x1b[0m \x1b[2m{}: {}\x1b[0m", 
+                i18n.get("mcp_integration_failed"),
+                e
+            );
+            None
+        }
+    };
+
     // Check outline index freshness
     check_outline_freshness(&working_dir, &i18n);
 
     // Print welcome message
     prompts::print_welcome(&config, &i18n);
 
+    // Display MCP status if available
+    if let Some(ref integration) = mcp_integration {
+        mcp::display_mcp_status_sync_with_i18n(integration, &i18n);
+    }
+
     Ok(AppState {
         config,
         i18n,
         session,
         api_client,
+        mcp_integration,
         auto_approve,
     })
 }

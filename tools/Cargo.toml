@@ -34,6 +34,7 @@ rusqlite = { version = "0.30", features = ["bundled"] }
 search_tool = { path = "../search_tool" }
 ui = { path = "../ui" }
 config = { path = "../config" }
+mcp = { path = "../mcp" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 dirs = "5"

@@ -18,6 +18,7 @@ commands = { path = "../commands" }
 config = { path = "../config" }
 history = { path = "../history" }
 i18n = { path = "../i18n" }
+mcp = { path = "../mcp" }
 prompts = { path = "../prompts" }
 security = { path = "../security" }
 tools = { path = "../tools" }

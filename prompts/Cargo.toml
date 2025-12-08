@@ -9,4 +9,5 @@ colored = "2.1"
 config = { path = "../config" }
 i18n = { path = "../i18n" }
 agents = { path = "../agents_md_file" }
+mcp = { path = "../mcp" }
 tools = { path = "../tools" }

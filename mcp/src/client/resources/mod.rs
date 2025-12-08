@@ -1,7 +1,7 @@
-mod list;
-mod read;
-mod info;
-mod download;
+pub mod list;
+pub mod read;
+pub mod info;
+pub mod download;
 
 pub fn parse_resource_spec(resource_spec: &str) -> (Option<&str>, &str) {
     // 如果包含 :// 说明是 URI，不应该按 / 分割
