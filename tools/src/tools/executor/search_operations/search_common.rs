@@ -1,4 +1,4 @@
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 use ui::get_i18n;
 
 /// Format search results into a readable output

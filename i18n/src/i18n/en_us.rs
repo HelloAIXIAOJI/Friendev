@@ -720,6 +720,12 @@ pub fn get_messages() -> HashMap<String, String> {
         "Interactive model selector".to_string(),
     );
 
+    // Notification messages
+    m.insert(
+        "notify_ai_completed_body".to_string(),
+        "Output completed, please check back.".to_string(),
+    );
+
     // MCP System Messages
     m.insert("mcp_servers".to_string(), "MCP Servers".to_string());
     m.insert("mcp_integration_initialized".to_string(), "MCP integration initialized".to_string());

@@ -9,7 +9,7 @@ use tokio::time::timeout;
 use ui::get_i18n;
 
 use crate::tools::{args::FetchUrlArgs, utils::format_size};
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 
 const DEFAULT_MAX_BYTES: usize = 512 * 1024; // 512 KB
 const MAX_ALLOWED_BYTES: usize = 1024 * 1024; // 1 MB

@@ -1,6 +1,26 @@
 # Changelog
 - all friendev update changelog on here.
 ---
+## [0.2.6] - in dev
+### Change
+- **Welcome screen Change**: The original welcome screen, which prompted with '/model list', has been changed to '/model'.
+- **System Notification**: Added a new notification system that sends a desktop notification and plays a sound alert when AI tasks are completed.
+- **Enhanced `file_read` Tool**: Added support for reading specific line ranges.
+  - New optional parameters: `start_line` and `end_line`.
+  - Useful for reading large files in chunks to save tokens.
+  - Displays `(Lines X-Y)` header when a range is selected.
+- **Add LSP support for outline and index**(Other Branch)
+  - Added LSP client implementation using async-lsp-client
+  - Refactored file outline and indexer to prioritize Tree-sitter with LSP fallback
+  - Added configuration support for custom LSP servers via lsp.json
+  - Added --ts and --lsp flags to /index commands
+  - Added LSP configuration documentation
+- **Separate Shorekeeper model configuration**: Add the /model sk command to support setting up Shorekeeper models independently.
+- **Added Jury mode (--jury)**: Introduces a three-model independent jury mechanism, requiring a 2/3 majority vote to execute sensitive operations.
+- **Hooks Support**: Provides a hooks system that allows you to set up automated execution of custom scripts or commands at specific stages.
+  - A built-in Lua interpreter was introduced.
+  - See `docs\HOOKS.md` for details.
+---
 ## [0.2.5] - 2025-12-02
 ### Added
 - **Intelligent Code Outline**: Added `file_outline` tool powered by Tree-sitter to extract symbol definitions (functions, classes, etc.) from source files.

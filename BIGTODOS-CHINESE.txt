@@ -1,4 +1,4 @@
-1.添加范围查看文件
+Done.添加范围查看文件
 Done.添加TodoTools
 3.**已改为第19**
 4.添加 ProjectMemoryTools
@@ -7,24 +7,24 @@ Done.添加TodoTools
 发给上下文AI进行压缩
 ---
 6.添加 Checkpoint 机制
-7.添加 jury 模式
+Done.添加 jury 模式
 8.添加 duet 模式
 9.添加 Yinlin Agent （代码库调查AGENT）
 Done.MCP
 Done.LSP集成
 12.支持图片
-13.Hooks
+DONE.HOOKS
 14.Friendev Plugin
 15.内置 GoogleAPI、AnthropicAPI to OpenAI API 中间件
 16.添加GitTools
-17.支持更改守岸人模型
+Done.支持更改守岸人模型
 18.借鉴并优化Labor Market
 19.自定义上下文MD文件名（可多个，默认AGENTS.md、FDV.md、CLAUDE.md 与 GEMINI.md）
 20.本电脑记忆
 21.更改网络代理
 22.联动VSCode
 23.暴露接口为MCP
-24.结束时播放提示音
+Done.结束时播放提示音
 25.Web UI
 26.Github API
 

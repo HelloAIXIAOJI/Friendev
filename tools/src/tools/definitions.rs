@@ -69,13 +69,21 @@ pub fn get_builtin_tools() -> Vec<Tool> {
             tool_type: "function".to_string(),
             function: ToolFunction {
                 name: "file_read".to_string(),
-                description: "Read the content of a file".to_string(),
+                description: "Read the content of a file. Supports optional line range reading (1-indexed).".to_string(),
                 parameters: json!({
                     "type": "object",
                     "properties": {
                         "path": {
                             "type": "string",
                             "description": "File path to read"
+                        },
+                        "start_line": {
+                            "type": "integer",
+                            "description": "Start line number (optional, 1-indexed)"
+                        },
+                        "end_line": {
+                            "type": "integer",
+                            "description": "End line number (optional, 1-indexed)"
                         }
                     },
                     "required": ["path"]

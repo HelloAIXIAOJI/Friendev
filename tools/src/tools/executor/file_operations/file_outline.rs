@@ -6,7 +6,7 @@ use super::super::parser;
 use super::super::lsp_client::LspClient;
 use super::file_common::normalize_path;
 use crate::tools::args::FileOutlineArgs;
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 
 fn get_lsp_command(ext: &str) -> Option<(String, Vec<String>)> {
     // Load config to check for custom LSP servers

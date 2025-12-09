@@ -5,7 +5,7 @@ use std::path::Path;
 use super::file_common::normalize_path;
 use crate::tools::args::FileDiffEditArgs;
 use crate::tools::indexer::Indexer;
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 
 pub async fn execute_file_diff_edit(
     arguments: &str,

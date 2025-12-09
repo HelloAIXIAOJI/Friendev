@@ -4,7 +4,7 @@ use std::path::Path;
 use crate::tools::args::{FileSearchByOutlineArgs, IndexFileArgs};
 use crate::tools::indexer::Indexer;
 use crate::tools::executor::file_operations::file_common::normalize_path;
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 
 pub async fn execute_file_search_by_outline(arguments: &str, working_dir: &Path) -> Result<ToolResult> {
     let args: FileSearchByOutlineArgs = serde_json::from_str(arguments)?;

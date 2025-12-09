@@ -27,6 +27,8 @@ pub struct FileListArgs {
 #[derive(Debug, Deserialize)]
 pub struct FileReadArgs {
     pub path: String,
+    pub start_line: Option<usize>,
+    pub end_line: Option<usize>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -111,7 +113,7 @@ pub struct FileDiffEditArgs {
     pub hunks: Vec<DiffHunk>, // 多个 hunk 编辑
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct RunCommandArgs {
     pub command: String,
     #[serde(default)]

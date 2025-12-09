@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 use crate::tools::args::RunCommandArgs;
-use crate::types::{approve_action_for_session, is_action_approved, ToolResult};
+use crate::tools::types::{approve_action_for_session, is_action_approved, ToolResult};
 use ui::{get_i18n, prompt_approval};
 
 pub async fn execute_run_command(arguments: &str, require_approval: bool) -> Result<ToolResult> {
@@ -9,6 +9,17 @@ pub async fn execute_run_command(arguments: &str, require_approval: bool) -> Res
 
     // 加载命令配置
     let config = crate::tools::command_manager::CommandConfig::load()?;
+    
+    // Hook integration
+    use crate::hooks::{HookType, execute_hook, HookContext};
+    use std::env;
+    if let Ok(cwd) = env::current_dir() {
+         let hook_ctx = HookContext::new(cwd)
+             .with_env("FRIENDEV_COMMAND", &args.command);
+         if let Err(e) = execute_hook(HookType::PreCommand, &hook_ctx, None).await {
+             eprintln!("\n\x1b[33m[!] PreCommand Hook Error: {}\x1b[0m\n", e);
+         }
+    }
 
     // 检查是否需要审批
     let needs_approval = require_approval || config.needs_approval(&args.command);
@@ -61,9 +72,25 @@ pub async fn execute_run_command(arguments: &str, require_approval: bool) -> Res
     }
 
     if args.background {
-        execute_background_command(args, config).await
+        let result = execute_background_command(args.clone(), config).await;
+        // Post-Hook for background command (executed immediately after spawn)
+        if let Ok(cwd) = env::current_dir() {
+             let hook_ctx = HookContext::new(cwd)
+                 .with_env("FRIENDEV_COMMAND", &args.command)
+                 .with_env("FRIENDEV_BG", "true");
+             let _ = execute_hook(HookType::PostCommand, &hook_ctx, None).await;
+        }
+        result
     } else {
-        execute_foreground_command(args).await
+        let result = execute_foreground_command(args.clone()).await;
+        // Post-Hook for foreground command
+        if let Ok(cwd) = env::current_dir() {
+             let hook_ctx = HookContext::new(cwd)
+                 .with_env("FRIENDEV_COMMAND", &args.command)
+                 .with_env("FRIENDEV_BG", "false");
+             let _ = execute_hook(HookType::PostCommand, &hook_ctx, None).await;
+        }
+        result
     }
 }
 
