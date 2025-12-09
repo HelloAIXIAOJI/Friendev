@@ -637,5 +637,105 @@ pub fn get_messages() -> HashMap<String, String> {
         "交互式模型选择器".to_string(),
     );
 
+    // MCP 系统消息
+    m.insert("mcp_servers".to_string(), "MCP 服务器".to_string());
+    m.insert("mcp_integration_initialized".to_string(), "MCP 集成已初始化".to_string());
+    m.insert("mcp_integration_failed".to_string(), "MCP 集成失败".to_string());
+    m.insert("mcp_not_available".to_string(), "MCP 集成不可用".to_string());
+    m.insert("mcp_no_servers".to_string(), "未配置 MCP 服务器".to_string());
+    m.insert("mcp_server_loading".to_string(), "加载中...".to_string());
+    m.insert("mcp_connected".to_string(), "已连接".to_string());
+    m.insert("mcp_failed_connect".to_string(), "连接失败".to_string());
+
+    // MCP 命令
+    m.insert("mcp_status".to_string(), "显示 MCP 服务器状态".to_string());
+    m.insert("mcp_tools".to_string(), "列出所有可用工具".to_string());
+    m.insert("mcp_tools_server".to_string(), "列出指定服务器的工具".to_string());
+    m.insert("mcp_resources".to_string(), "列出所有可用资源".to_string());
+    m.insert("mcp_resources_server".to_string(), "列出指定服务器的资源".to_string());
+    m.insert("mcp_call_tool".to_string(), "调用工具".to_string());
+    m.insert("mcp_read_resource".to_string(), "读取资源".to_string());
+    m.insert("mcp_help".to_string(), "显示 MCP 帮助".to_string());
+
+    // MCP 状态消息
+    m.insert("mcp_available_tools".to_string(), "可用的 MCP 工具".to_string());
+    m.insert("mcp_no_tools".to_string(), "无可用工具".to_string());
+    m.insert("mcp_tools_for_server".to_string(), "服务器工具".to_string());
+    m.insert("mcp_server_not_found".to_string(), "服务器未找到".to_string());
+    m.insert("mcp_failed_get_tools".to_string(), "获取工具失败".to_string());
+    m.insert("mcp_calling_tool".to_string(), "正在调用工具".to_string());
+    m.insert("mcp_tool_result".to_string(), "结果".to_string());
+    m.insert("mcp_tool_failed".to_string(), "工具调用失败".to_string());
+    m.insert("mcp_reading_resource".to_string(), "正在读取资源".to_string());
+    m.insert("mcp_resource_content".to_string(), "资源内容".to_string());
+    m.insert("mcp_resource_failed".to_string(), "资源读取失败".to_string());
+
+    // MCP 提示系统
+    m.insert("prompt_interactive_flow".to_string(), "交互式提示流程".to_string());
+    m.insert("prompt_available_servers".to_string(), "可用的 MCP 服务器".to_string());
+    m.insert("prompt_select_server".to_string(), "选择服务器 ({}-{}) 或 'q' 退出".to_string());
+    m.insert("prompt_selected_server".to_string(), "已选择".to_string());
+    m.insert("prompt_using_server".to_string(), "使用服务器".to_string());
+    m.insert("prompt_getting_prompts".to_string(), "从以下服务器获取提示".to_string());
+    m.insert("prompt_failed_get_prompts".to_string(), "获取提示失败".to_string());
+    m.insert("prompt_no_prompts".to_string(), "服务器无可用提示".to_string());
+    m.insert("prompt_using_prompt".to_string(), "使用提示".to_string());
+    m.insert("prompt_available_prompts".to_string(), "可用提示".to_string());
+    m.insert("prompt_select_prompt".to_string(), "选择提示 ({}-{}) 或 'q' 退出".to_string());
+    m.insert("prompt_selected_prompt".to_string(), "已选择".to_string());
+    m.insert("prompt_executing".to_string(), "正在执行提示".to_string());
+    m.insert("prompt_collecting_args".to_string(), "收集参数".to_string());
+    m.insert("prompt_no_args_required".to_string(), "无需参数".to_string());
+    m.insert("prompt_arg_required".to_string(), "此参数为必填项".to_string());
+    m.insert("prompt_result".to_string(), "提示结果".to_string());
+    m.insert("prompt_completed".to_string(), "提示执行完成".to_string());
+    m.insert("prompt_invalid_choice".to_string(), "无效选择，请输入".to_string());
+
+    // MCP 帮助消息
+    m.insert("mcp_commands_help".to_string(), "MCP 命令".to_string());
+    m.insert("mcp_examples".to_string(), "示例".to_string());
+    m.insert("prompt_command_help".to_string(), "提示命令帮助".to_string());
+    m.insert("prompt_flow".to_string(), "流程".to_string());
+    m.insert("prompt_features".to_string(), "功能特性".to_string());
+    m.insert("prompt_note".to_string(), "注意".to_string());
+    m.insert("prompt_mcp_compliant".to_string(), "所有提示及其参数均由 MCP 服务器定义。".to_string());
+    m.insert("prompt_no_hardcoded".to_string(), "无硬编码提示类型 - 一切均动态发现。".to_string());
+
+    // MCP 错误消息
+    m.insert("mcp_tool_error".to_string(), "MCP 工具错误".to_string());
+    m.insert("mcp_resource_error".to_string(), "MCP 资源错误".to_string());
+    m.insert("mcp_invalid_uri_format".to_string(), "无效的 MCP URI 格式，请使用：mcp://server/resource".to_string());
+    m.insert("mcp_tool_executed".to_string(), "MCP 工具已执行".to_string());
+    m.insert("mcp_unknown_command".to_string(), "未知的 MCP 命令".to_string());
+
+    // MCP 命令使用消息
+    m.insert("mcp_usage_call".to_string(), "用法：mcp call <服务器> <工具> [参数_json]".to_string());
+    m.insert("mcp_usage_read".to_string(), "用法：mcp read <服务器> <uri>".to_string());
+    m.insert("mcp_available_resources".to_string(), "可用的 MCP 资源".to_string());
+    m.insert("mcp_resources_for_server".to_string(), "服务器资源".to_string());
+    m.insert("mcp_resource_not_implemented".to_string(), "资源列表功能尚未实现".to_string());
+    m.insert("mcp_calling_tool_msg".to_string(), "正在服务器 '{}' 上调用工具 '{}'...".to_string());
+    m.insert("mcp_reading_resource_msg".to_string(), "正在从服务器 '{}' 读取资源 '{}'...".to_string());
+
+    // MCP 交互消息
+    m.insert("mcp_no_servers_connected".to_string(), "无已连接的 MCP 服务器".to_string());
+    m.insert("mcp_getting_prompts_from".to_string(), "正在从 '{}' 获取提示...".to_string());
+    m.insert("mcp_invalid_choice_range".to_string(), "无效选择，请输入 1-{} 或 'q'".to_string());
+    m.insert("mcp_collecting_args_for".to_string(), "正在为 '{}' 收集参数".to_string());
+    m.insert("mcp_prompt_result_header".to_string(), "提示结果".to_string());
+    m.insert("mcp_prompt_execution_completed".to_string(), "提示执行已完成".to_string());
+    m.insert("mcp_sending_to_ai".to_string(), "正在发送给AI处理...".to_string());
+    m.insert("mcp_ai_response_header".to_string(), "AI回复".to_string());
+    m.insert("mcp_ai_response_failed".to_string(), "获取AI回复失败".to_string());
+    m.insert("mcp_ai_tool_calls".to_string(), "AI想要执行".to_string());
+    
+    // Prompt selection i18n
+    m.insert("prompt_available_prompts".to_string(), "可用提示".to_string());
+    m.insert("prompt_select_or_quit".to_string(), "选择提示 (1-{}) 或 'q' 退出".to_string());
+    m.insert("prompt_selected".to_string(), "已选择".to_string());
+    m.insert("prompt_executing".to_string(), "正在执行提示".to_string());
+    m.insert("prompt_collecting_args".to_string(), "正在为以下项目收集参数".to_string());
+    m.insert("prompt_result_header".to_string(), "提示结果".to_string());
+
     m
 }

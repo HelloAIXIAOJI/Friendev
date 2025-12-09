@@ -720,5 +720,105 @@ pub fn get_messages() -> HashMap<String, String> {
         "Interactive model selector".to_string(),
     );
 
+    // MCP System Messages
+    m.insert("mcp_servers".to_string(), "MCP Servers".to_string());
+    m.insert("mcp_integration_initialized".to_string(), "MCP integration initialized".to_string());
+    m.insert("mcp_integration_failed".to_string(), "MCP integration failed".to_string());
+    m.insert("mcp_not_available".to_string(), "MCP integration not available".to_string());
+    m.insert("mcp_no_servers".to_string(), "No MCP servers configured".to_string());
+    m.insert("mcp_server_loading".to_string(), "loading...".to_string());
+    m.insert("mcp_connected".to_string(), "Connected".to_string());
+    m.insert("mcp_failed_connect".to_string(), "Failed to connect".to_string());
+
+    // MCP Commands
+    m.insert("mcp_status".to_string(), "Show MCP server status".to_string());
+    m.insert("mcp_tools".to_string(), "List all available tools".to_string());
+    m.insert("mcp_tools_server".to_string(), "List tools for specific server".to_string());
+    m.insert("mcp_resources".to_string(), "List all available resources".to_string());
+    m.insert("mcp_resources_server".to_string(), "List resources for specific server".to_string());
+    m.insert("mcp_call_tool".to_string(), "Call a tool".to_string());
+    m.insert("mcp_read_resource".to_string(), "Read a resource".to_string());
+    m.insert("mcp_help".to_string(), "Show MCP help".to_string());
+
+    // MCP Status Messages
+    m.insert("mcp_available_tools".to_string(), "Available MCP Tools".to_string());
+    m.insert("mcp_no_tools".to_string(), "No tools available".to_string());
+    m.insert("mcp_tools_for_server".to_string(), "Tools for server".to_string());
+    m.insert("mcp_server_not_found".to_string(), "Server not found".to_string());
+    m.insert("mcp_failed_get_tools".to_string(), "Failed to get tools".to_string());
+    m.insert("mcp_calling_tool".to_string(), "Calling tool".to_string());
+    m.insert("mcp_tool_result".to_string(), "Result".to_string());
+    m.insert("mcp_tool_failed".to_string(), "Tool call failed".to_string());
+    m.insert("mcp_reading_resource".to_string(), "Reading resource".to_string());
+    m.insert("mcp_resource_content".to_string(), "Resource content".to_string());
+    m.insert("mcp_resource_failed".to_string(), "Failed to read resource".to_string());
+
+    // MCP Prompt System  
+    m.insert("prompt_interactive_flow".to_string(), "Interactive Prompt Flow".to_string());
+    m.insert("prompt_available_servers".to_string(), "Available MCP servers".to_string());
+    m.insert("prompt_select_server".to_string(), "Select server ({}-{}) or 'q' to quit".to_string());
+    m.insert("prompt_selected_server".to_string(), "Selected".to_string());
+    m.insert("prompt_using_server".to_string(), "Using server".to_string());
+    m.insert("prompt_getting_prompts".to_string(), "Getting prompts from".to_string());
+    m.insert("prompt_failed_get_prompts".to_string(), "Failed to get prompts".to_string());
+    m.insert("prompt_no_prompts".to_string(), "No prompts available from server".to_string());
+    m.insert("prompt_using_prompt".to_string(), "Using prompt".to_string());
+    m.insert("prompt_available_prompts".to_string(), "Available prompts".to_string());
+    m.insert("prompt_select_prompt".to_string(), "Select prompt ({}-{}) or 'q' to quit".to_string());
+    m.insert("prompt_selected_prompt".to_string(), "Selected".to_string());
+    m.insert("prompt_executing".to_string(), "Executing prompt".to_string());
+    m.insert("prompt_collecting_args".to_string(), "Collecting arguments for".to_string());
+    m.insert("prompt_no_args_required".to_string(), "No arguments required".to_string());
+    m.insert("prompt_arg_required".to_string(), "This argument is required".to_string());
+    m.insert("prompt_result".to_string(), "Prompt Result".to_string());
+    m.insert("prompt_completed".to_string(), "Prompt execution completed".to_string());
+    m.insert("prompt_invalid_choice".to_string(), "Invalid choice. Please enter".to_string());
+
+    // MCP Help Messages
+    m.insert("mcp_commands_help".to_string(), "MCP Commands".to_string());
+    m.insert("mcp_examples".to_string(), "Examples".to_string());
+    m.insert("prompt_command_help".to_string(), "Prompt Command Help".to_string());
+    m.insert("prompt_flow".to_string(), "Flow".to_string());
+    m.insert("prompt_features".to_string(), "Features".to_string());
+    m.insert("prompt_note".to_string(), "Note".to_string());
+    m.insert("prompt_mcp_compliant".to_string(), "All prompts and their arguments are defined by the MCP servers.".to_string());
+    m.insert("prompt_no_hardcoded".to_string(), "No hardcoded prompt types - everything is discovered dynamically.".to_string());
+
+    // MCP Error Messages  
+    m.insert("mcp_tool_error".to_string(), "MCP tool error".to_string());
+    m.insert("mcp_resource_error".to_string(), "MCP resource error".to_string());
+    m.insert("mcp_invalid_uri_format".to_string(), "Invalid MCP URI format. Use: mcp://server/resource".to_string());
+    m.insert("mcp_tool_executed".to_string(), "MCP tool executed".to_string());
+    m.insert("mcp_unknown_command".to_string(), "Unknown MCP command".to_string());
+
+    // MCP Command Usage Messages
+    m.insert("mcp_usage_call".to_string(), "Usage: mcp call <server> <tool> [args_json]".to_string());
+    m.insert("mcp_usage_read".to_string(), "Usage: mcp read <server> <uri>".to_string());
+    m.insert("mcp_available_resources".to_string(), "Available MCP Resources".to_string());
+    m.insert("mcp_resources_for_server".to_string(), "Resources for server".to_string());
+    m.insert("mcp_resource_not_implemented".to_string(), "Resource listing not implemented yet".to_string());
+    m.insert("mcp_calling_tool_msg".to_string(), "Calling tool '{}' on server '{}'...".to_string());
+    m.insert("mcp_reading_resource_msg".to_string(), "Reading resource '{}' from server '{}'...".to_string());
+
+    // MCP Interactive Messages  
+    m.insert("mcp_no_servers_connected".to_string(), "No MCP servers connected".to_string());
+    m.insert("mcp_getting_prompts_from".to_string(), "Getting prompts from '{}'...".to_string());
+    m.insert("mcp_invalid_choice_range".to_string(), "Invalid choice. Please enter 1-{} or 'q'".to_string());
+    m.insert("mcp_collecting_args_for".to_string(), "Collecting arguments for '{}'".to_string());
+    m.insert("mcp_prompt_result_header".to_string(), "Prompt Result".to_string());
+    m.insert("mcp_prompt_execution_completed".to_string(), "Prompt execution completed".to_string());
+    m.insert("mcp_sending_to_ai".to_string(), "Sending to AI for processing...".to_string());
+    m.insert("mcp_ai_response_header".to_string(), "AI Response".to_string());
+    m.insert("mcp_ai_response_failed".to_string(), "Failed to get AI response".to_string());
+    m.insert("mcp_ai_tool_calls".to_string(), "AI wants to execute".to_string());
+    
+    // Prompt selection i18n
+    m.insert("prompt_available_prompts".to_string(), "Available prompts".to_string());
+    m.insert("prompt_select_or_quit".to_string(), "Select prompt (1-{}) or 'q' to quit".to_string());
+    m.insert("prompt_selected".to_string(), "Selected".to_string());
+    m.insert("prompt_executing".to_string(), "Executing prompt".to_string());
+    m.insert("prompt_collecting_args".to_string(), "Collecting arguments for".to_string());
+    m.insert("prompt_result_header".to_string(), "Prompt Result".to_string());
+
     m
 }

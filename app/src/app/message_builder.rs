@@ -8,6 +8,7 @@ use prompts;
 pub fn build_messages_with_agents_md(
     session: &ChatSession,
     config: &Config,
+    mcp_integration: Option<&mcp::McpIntegration>,
 ) -> Result<Vec<Message>> {
     let mut messages = vec![Message {
         role: "system".to_string(),
@@ -15,6 +16,7 @@ pub fn build_messages_with_agents_md(
             &config.ai_language,
             &config.current_model,
             &session.working_directory,
+            mcp_integration,
         ),
         tool_calls: None,
         tool_call_id: None,

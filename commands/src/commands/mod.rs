@@ -5,7 +5,9 @@ mod language;
 mod model;
 mod runcommand;
 mod index;
-mod todo;
+pub mod todo;
+pub mod mcp;
+pub mod prompt;
 
 use anyhow::Result;
 
