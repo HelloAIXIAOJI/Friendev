@@ -61,12 +61,15 @@ impl ChatSession {
             .find(|m| m.role == "user")
             .map(|m| {
                 let content = m.content.trim();
-                let char_count = content.chars().count();
+                // Get first line only
+                let first_line = content.lines().next().unwrap_or("").trim();
+                
+                let char_count = first_line.chars().count();
                 if char_count > 50 {
-                    let truncated: String = content.chars().take(47).collect();
+                    let truncated: String = first_line.chars().take(47).collect();
                     format!("{}...", truncated)
                 } else {
-                    content.to_string()
+                    first_line.to_string()
                 }
             })
             .unwrap_or_else(|| i18n.get("history_new_chat_summary"));
