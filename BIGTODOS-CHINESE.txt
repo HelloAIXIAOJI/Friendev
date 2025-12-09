@@ -21,7 +21,7 @@ Done.支持更改守岸人模型
 18.借鉴并优化Labor Market
 19.自定义上下文MD文件名（可多个，默认AGENTS.md、FDV.md、CLAUDE.md 与 GEMINI.md）
 20.本电脑记忆
-21.更改网络代理
+no.更改网络代理(不符合实际)
 22.联动VSCode
 23.暴露接口为MCP
 Done.结束时播放提示音
