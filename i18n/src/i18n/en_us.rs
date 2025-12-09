@@ -165,6 +165,10 @@ pub fn get_messages() -> HashMap<String, String> {
         "cannot_delete_current".to_string(),
         "Cannot delete current session".to_string(),
     );
+    m.insert(
+        "history_save_error".to_string(),
+        "Warning: Failed to save session history: {}".to_string(),
+    );
 
     // Help
     m.insert(

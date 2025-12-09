@@ -208,6 +208,11 @@ async fn process_chat_loop(state: &mut AppState) -> Result<()> {
         match chat::send_and_receive(&state.api_client, messages.clone(), &state.session, state.mcp_integration.as_ref()).await {
             Ok((response_msg, tool_calls, mut displays)) => {
                 state.session.add_message(response_msg);
+                // Save session immediately after receiving AI response
+                if let Err(e) = state.session.save() {
+                    let i18n = get_i18n();
+                    eprintln!("\n\x1b[33m[!] {}\x1b[0m", i18n.get("history_save_error").replace("{}", &e.to_string()));
+                }
 
                 if let Some(calls) = tool_calls {
                     // Execute tool calls (approval based on --ally flag)
@@ -223,6 +228,12 @@ async fn process_chat_loop(state: &mut AppState) -> Result<()> {
 
                     for result in tool_results {
                         state.session.add_message(result);
+                    }
+                    
+                    // Save session immediately after tool execution results are added
+                    if let Err(e) = state.session.save() {
+                        let i18n = get_i18n();
+                        eprintln!("\n\x1b[33m[!] {}\x1b[0m", i18n.get("history_save_error").replace("{}", &e.to_string()));
                     }
 
                     // Continue loop to send tool results to AI

@@ -135,6 +135,10 @@ pub fn get_messages() -> HashMap<String, String> {
         "cannot_delete_current".to_string(),
         "无法删除当前会话".to_string(),
     );
+    m.insert(
+        "history_save_error".to_string(),
+        "警告：保存会话历史失败：{}".to_string(),
+    );
 
     // 帮助
     m.insert("help_title".to_string(), "帮助 - 可用命令".to_string());
