@@ -826,5 +826,11 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("prompt_collecting_args".to_string(), "Collecting arguments for".to_string());
     m.insert("prompt_result_header".to_string(), "Prompt Result".to_string());
 
+    // Send.md command
+    m.insert("send_md_is_dir".to_string(), "send.md exists but is a directory, not a file".to_string());
+    m.insert("send_md_not_found".to_string(), "send.md file does not exist in current directory".to_string());
+    m.insert("send_md_read_error".to_string(), "Failed to read send.md file: {}".to_string());
+    m.insert("send_md_sending".to_string(), "[INFO] Sending send.md file content to AI...".to_string());
+
     m
 }

@@ -193,7 +193,7 @@ async fn handle_agents_md_command(state: &mut AppState) -> Result<()> {
             process_chat_loop(state).await?;
             state.session.save()?;
         }
-        Err(e) => eprintln!("\n\x1b[31m[X] Error:\x1b[0m {}\n", e),
+        Err(e) => eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", state.i18n.get("error"), e),
     }
     Ok(())
 }
@@ -268,12 +268,12 @@ async fn handle_send_file_command(state: &mut AppState) -> Result<()> {
     match send_file_path.metadata() {
         Ok(metadata) => {
             if !metadata.is_file() {
-                eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), "send.md 存在但是是一个目录，不是文件");
+                eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), i18n.get("send_md_is_dir"));
                 return Ok(());
             }
         }
         Err(_) => {
-            eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), "send.md 文件不存在于当前目录");
+            eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), i18n.get("send_md_not_found"));
             return Ok(());
         }
     }
@@ -282,13 +282,13 @@ async fn handle_send_file_command(state: &mut AppState) -> Result<()> {
     let content = match std::fs::read_to_string(&send_file_path) {
         Ok(content) => content,
         Err(e) => {
-            eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), format!("读取send.md文件失败: {}", e));
+            eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), i18n.get("send_md_read_error").replace("{}", &e.to_string()));
             return Ok(());
         }
     };
     
     // Print confirmation
-    println!("\x1b[36m[信息]\x1b[0m 正在发送 send.md 文件内容给 AI...");
+    println!("\x1b[36m{}\x1b[0m", i18n.get("send_md_sending"));
     
     // Create message with file content
     let file_message = Message {

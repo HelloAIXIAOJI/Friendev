@@ -742,5 +742,11 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("prompt_collecting_args".to_string(), "正在为以下项目收集参数".to_string());
     m.insert("prompt_result_header".to_string(), "提示结果".to_string());
 
+    // Send.md command
+    m.insert("send_md_is_dir".to_string(), "send.md 存在但是是一个目录，不是文件".to_string());
+    m.insert("send_md_not_found".to_string(), "send.md 文件不存在于当前目录".to_string());
+    m.insert("send_md_read_error".to_string(), "读取send.md文件失败: {}".to_string());
+    m.insert("send_md_sending".to_string(), "[信息] 正在发送 send.md 文件内容给 AI...".to_string());
+
     m
 }
