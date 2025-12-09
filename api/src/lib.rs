@@ -1,3 +1,3 @@
 pub mod api;
 
-pub use api::{execute_tool_calls, ApiClient, StreamChunk, ToolCallAccumulator};
+pub use api::{execute_tool_calls, execute_tool_calls_with_mcp, ApiClient, StreamChunk, ToolCallAccumulator};

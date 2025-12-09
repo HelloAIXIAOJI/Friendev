@@ -36,7 +36,7 @@ pub async fn optimize_prompt(
     ];
     
     // Call API (non-streaming for simplicity)
-    let response = api_client.chat_complete(messages).await?;
+    let response = api_client.chat_complete(messages, None).await?;
     
     Ok(response.content.trim().to_string())
 }

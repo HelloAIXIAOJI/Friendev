@@ -1,4 +1,23 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct TodoItem {
+    pub id: String,
+    pub content: String,
+    pub status: String, // "pending" | "in_progress" | "completed"
+    #[serde(default = "default_priority")]
+    pub priority: String, // "high" | "medium" | "low"
+}
+
+fn default_priority() -> String {
+    "medium".to_string()
+}
+
+#[derive(Debug, Deserialize)]
+pub struct TodoWriteArgs {
+    pub todos: Vec<TodoItem>,
+}
+
 
 #[derive(Debug, Deserialize)]
 pub struct FileListArgs {
@@ -8,6 +27,8 @@ pub struct FileListArgs {
 #[derive(Debug, Deserialize)]
 pub struct FileReadArgs {
     pub path: String,
+    pub start_line: Option<usize>,
+    pub end_line: Option<usize>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -22,6 +43,10 @@ pub struct FileSearchArgs {
 #[derive(Debug, Deserialize)]
 pub struct FileOutlineArgs {
     pub path: String,
+    #[serde(default)]
+    pub use_tree_sitter: bool,
+    #[serde(default)]
+    pub use_lsp: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -88,7 +113,7 @@ pub struct FileDiffEditArgs {
     pub hunks: Vec<DiffHunk>, // 多个 hunk 编辑
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct RunCommandArgs {
     pub command: String,
     #[serde(default)]

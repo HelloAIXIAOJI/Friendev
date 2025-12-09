@@ -4,7 +4,7 @@ use std::path::Path;
 
 use super::file_common::normalize_path;
 use crate::tools::args::FileListArgs;
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 use ui::get_i18n;
 
 pub async fn execute_file_list(arguments: &str, working_dir: &Path) -> Result<ToolResult> {

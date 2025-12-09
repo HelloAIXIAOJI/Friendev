@@ -18,7 +18,9 @@ pub fn handle_history_command(
             let sessions = ChatSession::list_all()?;
             let filtered_sessions: Vec<_> = sessions
                 .into_iter()
-                .filter(|s| !s.messages.is_empty())
+                .filter(|s| {
+                    !s.messages.is_empty() && s.working_directory == session.working_directory
+                })
                 .collect();
 
             if filtered_sessions.is_empty() {

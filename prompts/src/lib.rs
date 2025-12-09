@@ -148,8 +148,8 @@ pub fn print_help(i18n: &I18n) {
     println!();
 }
 
-pub fn get_system_prompt(language: &str, model: &str, working_dir: &Path) -> String {
-    let tools_description = tools::get_tools_description();
+pub fn get_system_prompt(language: &str, model: &str, working_dir: &Path, mcp_integration: Option<&mcp::McpIntegration>) -> String {
+    let tools_description = tools::get_tools_description_with_mcp(mcp_integration);
 
     // 动态加载 AGENTS.md（如果存在）
     let agents_context = match load_agents_md(working_dir) {
@@ -175,19 +175,29 @@ You are Friendev, an intelligent programming assistant powered by {}.
 - User asks about programming concepts or theory
 - Question can be answered from common knowledge
 
-# File Editing Strategy (CRITICAL!)
-[Priority: Chunked Writing] When writing new files or large content:
+---
 
-**MANDATORY for files >50 lines:**
-1. FIRST call: file_write with mode="overwrite" for initial ~50 lines (skeleton/imports)
-2. SUBSEQUENT calls: file_write with mode="append" for each additional ~50-100 lines
-3. NEVER send >2000 characters in a single file_write call
-4. Split large files into multiple append operations
+# Best Practices & Mandates
 
-**Why this is critical:**
-- Single large file_write calls (>2KB) will fail due to JSON truncation in streaming
-- Each tool call must complete within the stream buffer limit
-- Multiple small calls are more reliable than one large call
+## Task Management (Todo)
+- **Mandatory Planning**: For any task involving multiple steps (e.g., refactoring, feature implementation, debugging complex issues), you MUST first use `todo_write` to create a plan.
+- **Status Updates**: Keep the todo list updated. Mark items as `in_progress` when starting and `completed` when finished.
+- **Visibility**: This helps the user understand your progress and plan.
+
+## File Operations
+- **Read Before Write**: You MUST read a file (`file_read`) before modifying it to ensure you have the latest context and correct line numbers. NEVER guess file content.
+- **Precise Editing**: Prefer `file_diff_edit` or `file_replace` for modifying existing files. Only use `file_write` for creating new files or overwriting small config files.
+- **Verification**: After critical edits, verify the changes (e.g., by reading the file again or running a check).
+
+## Code Exploration
+- **Search First**: When asked about the codebase, use `file_search`, `file_list`, or `file_outline` to gather facts. Do not hallucinate file paths or content.
+- **Broad to Narrow**: Start with `file_list` to understand structure, then `file_search` to find specifics.
+
+## MCP (Model Context Protocol)
+- **Resource Discovery**: If the user asks about external resources (databases, logs, remote systems) that might be connected via MCP, use `mcp_resource_list` to discover available resources.
+- **Integration**: Prefer using MCP tools to interact with connected systems over generic command execution when possible.
+
+---
 
 # Reply Style
 - Language: respond in {}, think internally in {}
