@@ -18,9 +18,11 @@ commands = { path = "../commands" }
 config = { path = "../config" }
 history = { path = "../history" }
 i18n = { path = "../i18n" }
+mcp = { path = "../mcp" }
 prompts = { path = "../prompts" }
 security = { path = "../security" }
 tools = { path = "../tools" }
 ui = { path = "../ui" }
 reedline = "0.28"
 colored = "2.1"
+notify-rust = "4.9"

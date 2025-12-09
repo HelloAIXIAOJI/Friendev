@@ -9,7 +9,7 @@ use i18n::I18n;
 
 // 重新导出主要的公共 API
 pub use approval_prompt::{
-    prompt_approval, set_review_handler, set_smart_approval_mode, show_detailed_content, ReviewRequest,
+    prompt_approval, set_jury_mode, set_review_handler, set_smart_approval_mode, show_detailed_content, ReviewRequest,
 };
 pub use spinner::Spinner;
 pub use tool_call_display::{extract_key_argument, ToolCallDisplay};

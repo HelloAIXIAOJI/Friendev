@@ -11,13 +11,14 @@ pub async fn send_and_receive(
     client: &ApiClient,
     messages: Vec<Message>,
     _session: &ChatSession,
+    mcp_integration: Option<&mcp::McpIntegration>,
 ) -> Result<(
     Message,
     Option<Vec<history::ToolCall>>,
     HashMap<String, ToolCallDisplay>,
 )> {
     // Use streaming request with retry
-    let stream = client.chat_stream_with_retry(messages).await?;
+    let stream = client.chat_stream_with_retry(messages, mcp_integration).await?;
 
     // Handle stream chunks (with ESC interruption support)
     let (content, tool_accumulator, has_tool_calls, interrupted) =

@@ -4,9 +4,12 @@ use api::ApiClient;
 use config::Config;
 use history::ChatSession;
 use i18n::I18n;
+use mcp::McpIntegration;
 use prompts;
 use std::env;
 use ui;
+use futures::future::BoxFuture;
+use commands;
 
 /// Application startup state
 pub struct AppState {
@@ -14,6 +17,7 @@ pub struct AppState {
     pub i18n: I18n,
     pub session: ChatSession,
     pub api_client: ApiClient,
+    pub mcp_integration: Option<McpIntegration>,
     pub auto_approve: bool,
 }
 
@@ -26,12 +30,17 @@ pub async fn initialize_app() -> Result<AppState> {
         arg == "--ew"
     );
 
+    // Check for jury mode flag
+    let jury_mode = env::args().any(|arg| arg == "--jury");
+
     if smart_approve {
         ui::set_smart_approval_mode(true);
+    } else if jury_mode {
+        ui::set_jury_mode(true);
     }
 
-    // Check for --ally or --yolo flag (disabled if smart approval is active)
-    let auto_approve = !smart_approve && env::args().any(|arg| arg == "--ally" || arg == "--yolo");
+    // Check for --ally or --yolo flag (disabled if smart approval or jury is active)
+    let auto_approve = !smart_approve && !jury_mode && env::args().any(|arg| arg == "--ally" || arg == "--yolo");
 
     // Check for --setup flag to force setup
     let force_setup = env::args().any(|arg| arg == "--setup");
@@ -80,17 +89,63 @@ pub async fn initialize_app() -> Result<AppState> {
     // Install review handler for approval prompts
     review::install_review_handler(api_client.clone(), config.clone());
 
+      // Initialize MCP integration
+    let mcp_integration = match McpIntegration::new().await {
+        Ok(integration) => {
+            println!(
+                "\x1b[32m[OK]\x1b[0m \x1b[2m{}\x1b[0m",
+                i18n.get("mcp_integration_initialized")
+            );
+            Some(integration)
+        }
+        Err(e) => {
+            println!(
+                "\x1b[33m[WARN]\x1b[0m \x1b[2m{}: {}\x1b[0m", 
+                i18n.get("mcp_integration_failed"),
+                e
+            );
+            None
+        }
+    };
+    use tools::{HookType, execute_hook, HookContext};
+    let hook_ctx = HookContext::new(working_dir.clone());
+    
+    // Create command runner for startup hooks
+    let runner_client = api_client.clone();
+    let runner_config = config.clone();
+    let runner_session = session.clone();
+    
+    let runner = move |cmd: &str| -> BoxFuture<'static, Result<()>> {
+        let cmd_string = cmd.to_string();
+        let mut my_config = runner_config.clone();
+        let mut my_session = runner_session.clone();
+        let mut my_client = runner_client.clone();
+        
+        Box::pin(async move {
+            commands::handle_command(&cmd_string, &mut my_config, &mut my_session, &mut my_client).await
+        })
+    };
+
+    if let Err(e) = execute_hook(HookType::Startup, &hook_ctx, Some(&runner)).await {
+        eprintln!("\n\x1b[33m[!] Startup Hook Error: {}\x1b[0m\n", e);
+    }
     // Check outline index freshness
     check_outline_freshness(&working_dir, &i18n);
 
     // Print welcome message
     prompts::print_welcome(&config, &i18n);
 
+    // Display MCP status if available
+    if let Some(ref integration) = mcp_integration {
+        mcp::display_mcp_status_sync_with_i18n(integration, &i18n);
+    }
+
     Ok(AppState {
         config,
         i18n,
         session,
         api_client,
+        mcp_integration,
         auto_approve,
     })
 }

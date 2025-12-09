@@ -27,3 +27,9 @@ pub fn update_ai_language(config: &mut Config, language: String) -> Result<()> {
     config.ai_language = language;
     persistence::save_config(config)
 }
+
+/// Update the Shorekeeper (Smart Approval) model
+pub fn update_shorekeeper_model(config: &mut Config, model: String) -> Result<()> {
+    config.shorekeeper_model = Some(model);
+    persistence::save_config(config)
+}

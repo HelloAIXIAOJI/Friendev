@@ -17,7 +17,17 @@ pub fn format_size(bytes: u64) -> String {
 
 /// 自动生成工具列表描述，用于系统提示词
 pub fn get_tools_description() -> String {
-    let tools = crate::tools::definitions::get_available_tools();
+    let tools = crate::tools::definitions::get_available_tools_with_mcp(None);
+    format_tools_description(tools)
+}
+
+/// 自动生成工具列表描述，支持MCP集成
+pub fn get_tools_description_with_mcp(mcp_integration: Option<&mcp::McpIntegration>) -> String {
+    let tools = crate::tools::definitions::get_available_tools_with_mcp(mcp_integration);
+    format_tools_description(tools)
+}
+
+fn format_tools_description(tools: Vec<crate::tools::types::Tool>) -> String {
     let mut descriptions = Vec::new();
 
     for tool in tools {

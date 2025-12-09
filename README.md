@@ -6,3 +6,4 @@ This is a **FRIENDEV**
 
 Install: `curl -sS https://sh.nb6.ltd/f | bash`
 q
+1

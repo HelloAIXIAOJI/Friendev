@@ -4,7 +4,7 @@ use std::path::Path;
 use crate::tools::args::{FileSearchByOutlineArgs, IndexFileArgs};
 use crate::tools::indexer::Indexer;
 use crate::tools::executor::file_operations::file_common::normalize_path;
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 
 pub async fn execute_file_search_by_outline(arguments: &str, working_dir: &Path) -> Result<ToolResult> {
     let args: FileSearchByOutlineArgs = serde_json::from_str(arguments)?;
@@ -51,10 +51,11 @@ pub async fn execute_index_file(arguments: &str, working_dir: &Path) -> Result<T
     }
 
     let indexer = Indexer::new(working_dir)?;
-    match indexer.index_file(&path, working_dir) {
-        Ok(_) => Ok(ToolResult::ok(
+    // Default to both enabled for single file index command
+    match indexer.index_file(&path, working_dir, false, false).await {
+        Ok(source) => Ok(ToolResult::ok(
             format!("Successfully indexed {}", path.display()),
-            format!("Updated outline index for {}", path.display())
+            format!("Updated outline index for {} ({})", path.display(), source)
         )),
         Err(e) => Ok(ToolResult::error(format!("Failed to index file: {}", e))),
     }

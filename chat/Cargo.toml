@@ -11,3 +11,4 @@ crossterm = "0.27"
 api = { path = "../api" }
 history = { path = "../history" }
 ui = { path = "../ui" }
+mcp = { path = "../mcp" }

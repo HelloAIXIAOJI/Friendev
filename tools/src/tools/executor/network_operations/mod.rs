@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 
 mod fetch_content;
 

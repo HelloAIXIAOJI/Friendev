@@ -1,14 +1,14 @@
 use anyhow::Result;
 use std::path::Path;
 
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 
 pub mod file_common;
 mod file_diff_edit;
 mod file_list;
 mod file_read;
 mod file_search;
-mod file_outline;
+pub mod file_outline;
 mod file_replace;
 mod file_write;
 

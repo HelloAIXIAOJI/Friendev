@@ -3,7 +3,7 @@ use anyhow::Result;
 use super::super::utils::limit_results;
 use super::search_common::{create_search_error, create_search_result};
 use crate::tools::args::SearchArgs;
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 
 pub async fn execute_search_auto(arguments: &str) -> Result<ToolResult> {
     let args: SearchArgs = serde_json::from_str(arguments)?;

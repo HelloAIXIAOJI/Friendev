@@ -9,7 +9,7 @@
 *.swp
 *.swo
 .*/
-!.github
+!.github/
 
 # OS
 .DS_Store
@@ -18,6 +18,4 @@ Thumbs.db
 # Test configs
 .friendev-test/
 
-*cli
-*docs*
-duck*go_se*1.1
+!.friendev/**/*.json
