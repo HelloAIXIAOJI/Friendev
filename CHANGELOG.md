@@ -36,6 +36,9 @@
   - Implement `todo_write` and `todo_read` tools for AI task management
   - Add `/todo` command for users to view current task list
   - Support status visualization (pending, in_progress, completed)
+- **/send.md**
+  - The `/send.md` command has been added.
+  - After using the `/send.md` command, the system will automatically read the send.md file in the project root directory and then send it to AI.
 ---
 ## [0.2.5] - 2025-12-02
 ### Added
