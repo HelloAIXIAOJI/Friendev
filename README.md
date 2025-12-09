@@ -5,3 +5,4 @@ This is a **FRIENDEV**
 > **AI-Powered Development Assistant*
 
 Install: `curl -sS https://sh.nb6.ltd/f | bash`
+---
