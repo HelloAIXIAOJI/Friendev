@@ -16,6 +16,31 @@ pub struct LspClient {
 
 impl LspClient {
     pub async fn new(cmd: &str, args: &[&str]) -> Result<Self> {
+        // Verify command exists before letting async-lsp-client panic
+        // We try to spawn it with --version (or just check if we can spawn it)
+        // Most LSP servers support --version or --help.
+        // Even if they don't, if the binary exists, spawn should succeed (and maybe exit with error code).
+        // If spawn fails with NotFound, we know it's missing.
+        match std::process::Command::new(cmd)
+            .arg("--version")
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn() 
+        {
+            Ok(mut child) => {
+                let _ = child.kill();
+                let _ = child.wait();
+            },
+            Err(e) => {
+                if e.kind() == std::io::ErrorKind::NotFound {
+                     return Err(anyhow::anyhow!("LSP server binary '{}' not found. Please install it or check your path.", cmd));
+                }
+                // For other errors, we warn but proceed, or fail?
+                // If we can't spawn it here, async-lsp-client will likely panic too.
+                return Err(anyhow::anyhow!("Failed to spawn LSP server '{}': {}", cmd, e));
+            }
+        }
+
         // Collect args to vector of strings to satisfy interface
         let args_vec: Vec<&str> = args.iter().copied().collect();
         let (server, _) = LspServer::new(cmd, args_vec);
