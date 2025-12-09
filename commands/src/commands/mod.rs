@@ -53,6 +53,10 @@ pub async fn handle_command_with_parts(
         Some(&"/history") => {
             history::handle_history_command(&parts, config, session, &i18n)?;
         }
+        Some(&"/new") => {
+            // Alias for /history new
+            history::handle_history_command(&["/history", "new"], config, session, &i18n)?;
+        }
         Some(&"/language") | Some(&"/lang") => {
             language::handle_language_command(&parts, config, &i18n)?;
         }

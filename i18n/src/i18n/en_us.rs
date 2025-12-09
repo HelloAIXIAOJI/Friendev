@@ -112,6 +112,11 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("no_history".to_string(), "No chat history".to_string());
     m.insert("chat_history".to_string(), "Chat History".to_string());
     m.insert("messages".to_string(), "msgs".to_string());
+    m.insert("history_menu_title".to_string(), "Select a session".to_string());
+    m.insert("history_new_session".to_string(), "New Session".to_string());
+    m.insert("history_current_session".to_string(), "(Current)".to_string());
+    m.insert("history_empty".to_string(), "No history found in this directory".to_string());
+    m.insert("session_already_active".to_string(), "Session already active".to_string());
 
     // Tool messages
     m.insert("tool_call".to_string(), "TOOL".to_string());

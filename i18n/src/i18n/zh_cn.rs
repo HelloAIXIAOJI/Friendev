@@ -85,6 +85,11 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("no_history".to_string(), "没有聊天历史".to_string());
     m.insert("chat_history".to_string(), "聊天历史".to_string());
     m.insert("messages".to_string(), "条消息".to_string());
+    m.insert("history_menu_title".to_string(), "选择一个会话".to_string());
+    m.insert("history_new_session".to_string(), "新建会话".to_string());
+    m.insert("history_current_session".to_string(), "(当前)".to_string());
+    m.insert("history_empty".to_string(), "当前目录下没有历史记录".to_string());
+    m.insert("session_already_active".to_string(), "当前会话已激活".to_string());
 
     // 工具消息
     m.insert("tool_call".to_string(), "工具".to_string());
