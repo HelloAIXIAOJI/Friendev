@@ -14,7 +14,7 @@ rmcp = { version = "0.9", features = ["client", "transport-child-process", "tran
 log = "0.4"
 colored = "2"
 base64 = "0.22"
-reqwest = { version = "0.12", features = ["json", "stream"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
 thiserror = "1.0"
 http = "1.0"
 sse-stream = "0.2"
