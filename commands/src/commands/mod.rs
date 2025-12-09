@@ -27,6 +27,16 @@ pub async fn handle_command(
     api_client: &mut ApiClient,
 ) -> Result<()> {
     let parts: Vec<&str> = command.split_whitespace().collect();
+    handle_command_with_parts(&parts, config, session, api_client).await
+}
+
+/// Handle command with full parts array - supports subcommands
+pub async fn handle_command_with_parts(
+    parts: &[&str],
+    config: &mut Config,
+    session: &mut ChatSession,
+    api_client: &mut ApiClient,
+) -> Result<()> {
     let i18n = I18n::new(&config.ui_language);
 
     match parts.first() {
@@ -59,11 +69,18 @@ pub async fn handle_command(
             todo::handle_todo_command(&parts, &i18n, session)?;
         }
         _ => {
-            println!(
-                "\n\x1b[31m[X] {}: {}\x1b[0m\n",
-                i18n.get("unknown_command"),
-                command
-            );
+            if parts.is_empty() {
+                println!(
+                    "\n\x1b[31m[X] {}\x1b[0m\n",
+                    i18n.get("unknown_command")
+                );
+            } else {
+                println!(
+                    "\n\x1b[31m[X] {}: {}\x1b[0m\n",
+                    i18n.get("unknown_command"),
+                    parts.join(" ")
+                );
+            }
         }
     }
 
