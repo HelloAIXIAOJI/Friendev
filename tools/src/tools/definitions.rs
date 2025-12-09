@@ -1,4 +1,4 @@
-use crate::{Tool, ToolFunction};
+use super::{Tool, ToolFunction};
 use serde_json::json;
 use mcp::McpIntegration;
 

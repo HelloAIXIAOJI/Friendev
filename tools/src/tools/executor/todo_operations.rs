@@ -3,7 +3,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use colored::*;
 
-use crate::types::ToolResult;
+use crate::tools::types::ToolResult;
 use crate::tools::args::TodoWriteArgs;
 
 fn get_todo_file_path(working_dir: &Path, session_id: Option<&str>) -> PathBuf {
