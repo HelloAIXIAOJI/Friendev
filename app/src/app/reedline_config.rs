@@ -30,7 +30,8 @@ pub fn create_reedline() -> io::Result<Reedline> {
     let line_editor = Reedline::create()
         .with_edit_mode(Box::new(reedline::Emacs::new(keybindings)))
         .with_completer(completer)
-        .with_menu(ReedlineMenu::EngineCompleter(completion_menu));
+        .with_menu(ReedlineMenu::EngineCompleter(completion_menu))
+        .use_bracketed_paste(true);
     
     Ok(line_editor)
 }

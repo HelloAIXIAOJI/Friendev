@@ -121,6 +121,8 @@ pub async fn handle_user_input(line: &str, state: &mut AppState) -> Result<()> {
         // Special handling for /agents.md command
         if line == "/agents.md" {
             handle_agents_md_command(state).await?;
+        } else if line == "/send.md" {
+            handle_send_file_command(state).await?;
         } else {
             // Other commands
             if let Err(e) = commands::handle_command_with_mcp(
@@ -138,7 +140,6 @@ pub async fn handle_user_input(line: &str, state: &mut AppState) -> Result<()> {
         }
 
         // Post-Command Hook
-        // Same runner logic
         if let Err(e) = execute_hook(HookType::PostCommand, &hook_ctx, Some(&runner)).await {
              eprintln!("\n\x1b[33m[!] PostCommand Hook Error: {}\x1b[0m\n", e);
         }
@@ -200,7 +201,6 @@ async fn handle_agents_md_command(state: &mut AppState) -> Result<()> {
 /// Process chat loop: send message and handle tool calls
 async fn process_chat_loop(state: &mut AppState) -> Result<()> {
     let mut messages =
-
         message_builder::build_messages_with_agents_md(&state.session, &state.config, state.mcp_integration.as_ref())?;
     let mut success = false;
 
@@ -254,5 +254,57 @@ async fn process_chat_loop(state: &mut AppState) -> Result<()> {
         let _ = notification::notify_ai_completed().await;
     }
 
+    Ok(())
+}
+
+/// Handle the /send.md command to read and send send.md file content to AI
+async fn handle_send_file_command(state: &mut AppState) -> Result<()> {
+    let i18n = get_i18n();
+    
+    // Construct the path to send.md in the current working directory
+    let send_file_path = std::path::Path::new(&state.session.working_directory).join("send.md");
+    
+    // Check if path exists and is actually a file (not a directory)
+    match send_file_path.metadata() {
+        Ok(metadata) => {
+            if !metadata.is_file() {
+                eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), "send.md 存在但是是一个目录，不是文件");
+                return Ok(());
+            }
+        }
+        Err(_) => {
+            eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), "send.md 文件不存在于当前目录");
+            return Ok(());
+        }
+    }
+    
+    // Read file content
+    let content = match std::fs::read_to_string(&send_file_path) {
+        Ok(content) => content,
+        Err(e) => {
+            eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("error"), format!("读取send.md文件失败: {}", e));
+            return Ok(());
+        }
+    };
+    
+    // Print confirmation
+    println!("\x1b[36m[信息]\x1b[0m 正在发送 send.md 文件内容给 AI...");
+    
+    // Create message with file content
+    let file_message = Message {
+        role: "user".to_string(),
+        content,
+        tool_calls: None,
+        tool_call_id: None,
+        name: None,
+    };
+    
+    // Add message to session
+    state.session.add_message(file_message);
+    
+    // Process chat and tool calls
+    process_chat_loop(state).await?;
+    state.session.save()?;
+    
     Ok(())
 }
