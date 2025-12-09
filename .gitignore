@@ -17,3 +17,5 @@ Thumbs.db
 
 # Test configs
 .friendev-test/
+
+!.friendev/**/*.json
