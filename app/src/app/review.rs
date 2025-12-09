@@ -180,7 +180,7 @@ async fn run_jury_review(
         let msgs = vec![system_msg.clone(), message.clone()];
         
         futures.push(tokio::spawn(async move {
-            chat::send_and_receive(&client, msgs, &session).await
+            chat::send_and_receive(&client, msgs, &session, None).await
         }));
     }
 

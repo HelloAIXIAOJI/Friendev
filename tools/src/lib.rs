@@ -9,7 +9,8 @@ pub use tools::{
     get_available_tools_with_mcp,  // 来自feat分支
     get_tools_description,
     get_tools_description_with_mcp,  // 来自feat分支
-    definitions::{CommandConfig, Tool, ToolFunction, ToolResult},
+    types::{Tool, ToolFunction, ToolResult},
+    command_manager::CommandConfig,
 };
 
 // Re-export MCP-enabled executor functions
