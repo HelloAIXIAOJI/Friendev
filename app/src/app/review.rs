@@ -305,7 +305,7 @@ async fn run_review(
         name: None,
     });
 
-    let (response, tool_calls, _) = chat::send_and_receive(client, messages, &session).await?;
+    let (response, tool_calls, _) = chat::send_and_receive(client, messages, &session, None).await?;
 
     if tool_calls.is_some() {
         anyhow::bail!(i18n.get("approval_review_tool_error"));

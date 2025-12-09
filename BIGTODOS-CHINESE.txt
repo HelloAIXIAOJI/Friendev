@@ -1,13 +1,17 @@
 Done.添加范围查看文件
-2.添加 TodoTools
-4.添加 MemoryTools
+Done.添加TodoTools
+3.**已改为第19**
+4.添加 ProjectMemoryTools
 5.添加 上下文压缩机制
+---
+发给上下文AI进行压缩
+---
 6.添加 Checkpoint 机制
 Done.添加 jury 模式
 8.添加 duet 模式
 9.添加 Yinlin Agent （代码库调查AGENT）
-10.MCP
-11.LSP集成
+Done.MCP
+Done.LSP集成
 12.支持图片
 DONE.HOOKS
 14.Friendev Plugin

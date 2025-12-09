@@ -51,10 +51,11 @@ pub async fn execute_index_file(arguments: &str, working_dir: &Path) -> Result<T
     }
 
     let indexer = Indexer::new(working_dir)?;
-    match indexer.index_file(&path, working_dir) {
-        Ok(_) => Ok(ToolResult::ok(
+    // Default to both enabled for single file index command
+    match indexer.index_file(&path, working_dir, false, false).await {
+        Ok(source) => Ok(ToolResult::ok(
             format!("Successfully indexed {}", path.display()),
-            format!("Updated outline index for {}", path.display())
+            format!("Updated outline index for {} ({})", path.display(), source)
         )),
         Err(e) => Ok(ToolResult::error(format!("Failed to index file: {}", e))),
     }

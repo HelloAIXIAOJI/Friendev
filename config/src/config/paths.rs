@@ -15,3 +15,8 @@ pub fn config_dir() -> Result<PathBuf> {
 pub fn config_path() -> Result<PathBuf> {
     Ok(config_dir()?.join("config.json"))
 }
+
+/// Get LSP config file path
+pub fn lsp_config_path() -> Result<PathBuf> {
+    Ok(config_dir()?.join("lsp.json"))
+}

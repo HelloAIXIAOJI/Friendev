@@ -11,6 +11,19 @@ pub async fn execute_tool_calls(
     working_dir: &Path,
     displays: &mut std::collections::HashMap<String, ToolCallDisplay>,
     require_approval: bool,
+    session_id: Option<&str>,
+) -> Vec<Message> {
+    execute_tool_calls_with_mcp(tool_calls, working_dir, displays, require_approval, session_id, None).await
+}
+
+/// Execute tool calls with MCP integration
+pub async fn execute_tool_calls_with_mcp(
+    tool_calls: &[ToolCall],
+    working_dir: &Path,
+    displays: &mut std::collections::HashMap<String, ToolCallDisplay>,
+    require_approval: bool,
+    session_id: Option<&str>,
+    mcp_integration: Option<&mcp::McpIntegration>,
 ) -> Vec<Message> {
     let mut results = Vec::new();
 
@@ -40,11 +53,13 @@ pub async fn execute_tool_calls(
             continue;
         }
 
-        let tool_result = tools::execute_tool(
+        let tool_result = tools::execute_tool_with_mcp(
             &tc.function.name,
             &tc.function.arguments,
             working_dir,
             require_approval,
+            session_id,
+            mcp_integration,
         )
         .await
         .unwrap_or_else(|e| {

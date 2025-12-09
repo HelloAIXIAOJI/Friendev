@@ -8,7 +8,7 @@ mod updates;
 use anyhow::Result;
 
 // Re-export public API
-pub use types::Config;
+pub use types::{Config, LspConfig, LspSettings};
 
 impl Config {
     /// Get or create config directory
@@ -24,6 +24,11 @@ impl Config {
     /// Load configuration from disk
     pub fn load() -> Result<Option<Self>> {
         persistence::load_config()
+    }
+
+    /// Load LSP configuration from disk
+    pub fn load_lsp() -> Result<Option<LspSettings>> {
+        persistence::load_lsp_config()
     }
 
     /// Save configuration to disk

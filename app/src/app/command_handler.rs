@@ -123,11 +123,12 @@ pub async fn handle_user_input(line: &str, state: &mut AppState) -> Result<()> {
             handle_agents_md_command(state).await?;
         } else {
             // Other commands
-            if let Err(e) = commands::handle_command(
+            if let Err(e) = commands::handle_command_with_mcp(
                 line,
                 &mut state.config,
                 &mut state.session,
                 &mut state.api_client,
+                state.mcp_integration.as_ref(),
             )
             .await
             {
@@ -199,21 +200,24 @@ async fn handle_agents_md_command(state: &mut AppState) -> Result<()> {
 /// Process chat loop: send message and handle tool calls
 async fn process_chat_loop(state: &mut AppState) -> Result<()> {
     let mut messages =
-        message_builder::build_messages_with_agents_md(&state.session, &state.config)?;
+
+        message_builder::build_messages_with_agents_md(&state.session, &state.config, state.mcp_integration.as_ref())?;
     let mut success = false;
 
     loop {
-        match chat::send_and_receive(&state.api_client, messages.clone(), &state.session).await {
+        match chat::send_and_receive(&state.api_client, messages.clone(), &state.session, state.mcp_integration.as_ref()).await {
             Ok((response_msg, tool_calls, mut displays)) => {
                 state.session.add_message(response_msg);
 
                 if let Some(calls) = tool_calls {
                     // Execute tool calls (approval based on --ally flag)
-                    let tool_results = api::execute_tool_calls(
+                    let tool_results = api::execute_tool_calls_with_mcp(
                         &calls,
                         &state.session.working_directory,
                         &mut displays,
                         !state.auto_approve, // If --ally is set, no approval needed
+                        Some(&state.session.id.to_string()),
+                        state.mcp_integration.as_ref(),
                     )
                     .await;
 
@@ -225,6 +229,7 @@ async fn process_chat_loop(state: &mut AppState) -> Result<()> {
                     messages = message_builder::build_messages_with_agents_md(
                         &state.session,
                         &state.config,
+                        state.mcp_integration.as_ref(),
                     )?;
                     continue;
                 }

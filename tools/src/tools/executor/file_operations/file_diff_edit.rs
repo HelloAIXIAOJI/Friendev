@@ -98,7 +98,7 @@ pub async fn execute_file_diff_edit(
 
     // Auto-hook: Update outline index
     if let Ok(indexer) = Indexer::new(working_dir) {
-        let _ = indexer.index_file(&target_path, working_dir);
+        let _ = indexer.index_file(&target_path, working_dir, false, false).await;
     }
 
     // 核心：直接从内容生成上下文，不再重新读取文件

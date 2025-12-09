@@ -5,6 +5,9 @@ mod language;
 mod model;
 mod runcommand;
 mod index;
+pub mod todo;
+pub mod mcp;
+pub mod prompt;
 
 use anyhow::Result;
 
@@ -51,6 +54,9 @@ pub async fn handle_command(
         }
         Some(&"/index") => {
             index::handle_index_command(parts[1..].to_vec(), &i18n).await?;
+        }
+        Some(&"/todo") => {
+            todo::handle_todo_command(&parts, &i18n, session)?;
         }
         _ => {
             println!(

@@ -33,6 +33,8 @@ rusqlite = { version = "0.30", features = ["bundled"] }
 
 search_tool = { path = "../search_tool" }
 ui = { path = "../ui" }
+config = { path = "../config" }
+mcp = { path = "../mcp" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 dirs = "5"
@@ -42,6 +44,8 @@ chrono = { version = "0.4", features = ["serde"] }
 reqwest = { version = "0.11", features = ["json", "stream", "rustls-tls"], default-features = false }
 futures-util = "0.3"
 mlua = { version = "0.9", features = ["lua54", "vendored", "send"] }
+lsp-types = "0.94"
+async-lsp-client = "0.2.3"
 
 [dev-dependencies]
 httpmock = "0.7"

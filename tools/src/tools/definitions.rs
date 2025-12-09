@@ -1,7 +1,52 @@
 use crate::{Tool, ToolFunction};
 use serde_json::json;
+use mcp::McpIntegration;
 
 pub fn get_available_tools() -> Vec<Tool> {
+    get_builtin_tools()
+}
+
+pub fn get_available_tools_with_mcp(mcp_integration: Option<&McpIntegration>) -> Vec<Tool> {
+    let mut tools = get_builtin_tools();
+    
+    // Add MCP tools if integration is available  
+    if let Some(integration) = mcp_integration {
+        // MCP is initialized, add resource tools
+        tools.extend(get_mcp_resource_tools());
+        
+        // Add dynamic MCP server tools via async call (need to block here or change architecture)
+        // Since this function is sync, we use a block_in_place or runtime handle if available
+        // Or we use the sync/async bridge.
+        // For simplicity in this context, we assume we can block or the caller handles async.
+        // However, this function is sync and called from sync contexts.
+        // We'll use tokio::task::block_in_place if inside a runtime, or handle.block_on
+        
+        // SAFETY: This is a hack to call async from sync. In a real app, propagate async up.
+        // But for now, we'll try to get a handle.
+        if let Ok(handle) = tokio::runtime::Handle::try_current() {
+             let mcp_tools = std::thread::scope(|s| {
+                s.spawn(|| {
+                    handle.block_on(integration.get_server_tools_definitions())
+                }).join().unwrap_or_default()
+            });
+            
+            for tool_def in mcp_tools {
+                tools.push(Tool {
+                    tool_type: "function".to_string(),
+                    function: ToolFunction {
+                        name: tool_def.name,
+                        description: tool_def.description,
+                        parameters: tool_def.parameters,
+                    },
+                });
+            }
+        }
+    }
+    
+    tools
+}
+
+pub fn get_builtin_tools() -> Vec<Tool> {
     vec![
         Tool {
             tool_type: "function".to_string(),
@@ -356,6 +401,104 @@ pub fn get_available_tools() -> Vec<Tool> {
                         }
                     },
                     "required": ["command"]
+                }),
+            },
+        },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
+                name: "todo_write".to_string(),
+                description: "Creates and manages a structured task list for the current coding session. Helps track progress and organize complex tasks.".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {
+                        "todos": {
+                            "type": "array",
+                            "description": "The updated todo list",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "description": "The task description",
+                                        "minLength": 1
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": ["pending", "in_progress", "completed"],
+                                        "description": "Current status of the task"
+                                    },
+                                    "priority": {
+                                        "type": "string",
+                                        "enum": ["high", "medium", "low"],
+                                        "description": "Priority level of the task"
+                                    },
+                                    "id": {
+                                        "type": "string",
+                                        "description": "Unique identifier for the task"
+                                    }
+                                },
+                                "required": ["content", "status", "id"],
+                                "additionalProperties": false
+                            }
+                        }
+                    },
+                    "required": ["todos"]
+                }),
+            },
+        },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
+                name: "todo_read".to_string(),
+                description: "Read the current todo list to check progress and pending tasks.".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }),
+            },
+        },
+    ]
+}
+
+pub fn get_mcp_resource_tools() -> Vec<Tool> {
+    vec![
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
+                name: "mcp_resource_read".to_string(),
+                description: "Read content from an MCP resource URI. Supports various resource types like text://, file://, memory://, etc.".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {
+                        "resource_uri": {
+                            "type": "string",
+                            "description": "The MCP resource URI to read (e.g., text://hello, file:///path/to/file, memory://key)"
+                        },
+                        "mcp_server": {
+                            "type": "string",
+                            "description": "Optional MCP server name. If not specified, searches all connected servers"
+                        }
+                    },
+                    "required": ["resource_uri"]
+                }),
+            },
+        },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
+                name: "mcp_resource_list".to_string(),
+                description: "List all available MCP resources from connected servers".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {
+                        "mcp_server": {
+                            "type": "string",
+                            "description": "Optional MCP server name. If not specified, lists resources from all connected servers"
+                        }
+                    },
+                    "required": []
                 }),
             },
         },
