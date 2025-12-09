@@ -6,7 +6,7 @@ use config::Config;
 use history::ChatSession;
 use mcp::McpIntegration;
 
-pub use commands::{handle_agents_md_command, print_help};
+pub use commands::{handle_agents_md_command, print_help, handle_command_with_parts};
 
 /// Handle commands that start with /
 pub async fn handle_command(
@@ -50,5 +50,5 @@ pub async fn handle_command_with_mcp(
 
     // Handle other commands using the old signature
     let parts: Vec<&str> = input.split_whitespace().collect();
-    commands::handle_command(&parts[0], config, session, api_client).await
+    commands::handle_command_with_parts(&parts, config, session, api_client).await
 }
