@@ -20,6 +20,22 @@
 - **Hooks Support**: Provides a hooks system that allows you to set up automated execution of custom scripts or commands at specific stages.
   - A built-in Lua interpreter was introduced.
   - See `docs\HOOKS.md` for details.
+- **MCP**
+  - Deep MCP Tool Integration  
+    - Dynamic Tool Discovery: Friendev can now automatically discover and register all tools provided by connected MCP servers.  
+    - Namespace Isolation: To prevent naming conflicts, MCP tools are automatically named in the format server/tool.  
+    - AI-Native Support: AI assistants can now "see" and directly call these MCP tools to complete tasks without manual intervention.  
+  - Resource Access System (Resources)  
+    - Resource List: Added the mcp_resource_list tool to view all available resources.  
+    - Resource Reading: Added the mcp_resource_read tool to support reading the content of resource URIs.  
+  - Interactive Prompt System  
+    - Command: Added the /prompt interactive command.  
+    - Workflow: Implemented a 5-step fully automated workflow: Select Server → Select Prompt → Fill Input Parameters → Execute Prompt → Automatically Send Results to AI.  
+  - Added the /mcp Command
+- **Add todo management tools and command**
+  - Implement `todo_write` and `todo_read` tools for AI task management
+  - Add `/todo` command for users to view current task list
+  - Support status visualization (pending, in_progress, completed)
 ---
 ## [0.2.5] - 2025-12-02
 ### Added
