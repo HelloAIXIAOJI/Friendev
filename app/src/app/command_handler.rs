@@ -1,4 +1,3 @@
-use super::message_builder;
 use super::notification;
 use super::startup::AppState;
 use anyhow::Result;
@@ -9,13 +8,13 @@ use history::Message;
 use security;
 use ui::get_i18n;
 use futures::future::BoxFuture;
+use tools::{HookType, execute_hook, HookContext};
 
 /// Handle user input and command processing
 pub async fn handle_user_input(line: &str, state: &mut AppState) -> Result<()> {
     // Handle commands
     if line.starts_with('/') {
         // Pre-Command Hook
-        use tools::{HookType, execute_hook, HookContext};
         let hook_ctx = HookContext::new(state.session.working_directory.clone())
             .with_env("FRIENDEV_COMMAND", line);
         
@@ -169,7 +168,18 @@ pub async fn handle_user_input(line: &str, state: &mut AppState) -> Result<()> {
     state.session.add_message(user_message);
 
     // Process chat and tool calls
-    process_chat_loop(state).await?;
+    if chat::run_agent_loop(
+        &state.api_client,
+        &state.config,
+        &mut state.session,
+        state.mcp_integration.as_ref(),
+        state.auto_approve,
+        None,
+    )
+    .await?
+    {
+        let _ = notification::notify_ai_completed().await;
+    }
 
     state.session.save()?;
     Ok(())
@@ -190,81 +200,22 @@ async fn handle_agents_md_command(state: &mut AppState) -> Result<()> {
             state.session.add_message(analysis_message);
 
             // Auto-send to AI (same flow as normal user message)
-            process_chat_loop(state).await?;
+            if chat::run_agent_loop(
+                &state.api_client,
+                &state.config,
+                &mut state.session,
+                state.mcp_integration.as_ref(),
+                state.auto_approve,
+                None,
+            )
+            .await?
+            {
+                let _ = notification::notify_ai_completed().await;
+            }
             state.session.save()?;
         }
         Err(e) => eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", state.i18n.get("error"), e),
     }
-    Ok(())
-}
-
-/// Process chat loop: send message and handle tool calls
-async fn process_chat_loop(state: &mut AppState) -> Result<()> {
-    let mut messages =
-        message_builder::build_messages_with_agents_md(&state.session, &state.config, state.mcp_integration.as_ref())?;
-    let mut success = false;
-
-    loop {
-        match chat::send_and_receive(&state.api_client, messages.clone(), &state.session, state.mcp_integration.as_ref()).await {
-            Ok((response_msg, tool_calls, mut displays)) => {
-                state.session.add_message(response_msg);
-                // Save session immediately after receiving AI response
-                if let Err(e) = state.session.save() {
-                    let i18n = get_i18n();
-                    eprintln!("\n\x1b[33m[!] {}\x1b[0m", i18n.get("history_save_error").replace("{}", &e.to_string()));
-                }
-
-                if let Some(calls) = tool_calls {
-                    // Execute tool calls (approval based on --ally flag)
-                    let tool_results = api::execute_tool_calls_with_mcp(
-                        &calls,
-                        &state.session.working_directory,
-                        &mut displays,
-                        !state.auto_approve, // If --ally is set, no approval needed
-                        Some(&state.session.id.to_string()),
-                        state.mcp_integration.as_ref(),
-                    )
-                    .await;
-
-                    for result in tool_results {
-                        state.session.add_message(result);
-                    }
-                    
-                    // Save session immediately after tool execution results are added
-                    if let Err(e) = state.session.save() {
-                        let i18n = get_i18n();
-                        eprintln!("\n\x1b[33m[!] {}\x1b[0m", i18n.get("history_save_error").replace("{}", &e.to_string()));
-                    }
-
-                    // Continue loop to send tool results to AI
-                    messages = message_builder::build_messages_with_agents_md(
-                        &state.session,
-                        &state.config,
-                        state.mcp_integration.as_ref(),
-                    )?;
-                    continue;
-                }
-
-                success = true;
-                break;
-            }
-            Err(e) => {
-                let i18n = get_i18n();
-                eprintln!("\n\x1b[31m[X] {}:\x1b[0m {}\n", i18n.get("api_error"), e);
-                // Remove last message since no valid response
-                if !state.session.messages.is_empty() {
-                    state.session.messages.pop();
-                }
-                break;
-            }
-        }
-    }
-
-    // Send notification if AI completed successfully
-    if success {
-        let _ = notification::notify_ai_completed().await;
-    }
-
     Ok(())
 }
 
@@ -314,7 +265,18 @@ async fn handle_send_file_command(state: &mut AppState) -> Result<()> {
     state.session.add_message(file_message);
     
     // Process chat and tool calls
-    process_chat_loop(state).await?;
+    if chat::run_agent_loop(
+        &state.api_client,
+        &state.config,
+        &mut state.session,
+        state.mcp_integration.as_ref(),
+        state.auto_approve,
+        None,
+    )
+    .await?
+    {
+        let _ = notification::notify_ai_completed().await;
+    }
     state.session.save()?;
     
     Ok(())

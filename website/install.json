@@ -1,0 +1,14 @@
+[
+    {
+        "id": "linux",
+        "label": "Linux / macOS",
+        "command": "curl -sS https://sh.nb6.ltd/f | bash",
+        "prompt": "$"
+    },
+    {
+        "id": "windows",
+        "label": "Windows",
+        "command": "NAN",
+        "prompt": "PS>"
+    }
+]

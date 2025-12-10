@@ -459,6 +459,32 @@ pub fn get_builtin_tools() -> Vec<Tool> {
                 }),
             },
         },
+        Tool {
+            tool_type: "function".to_string(),
+            function: ToolFunction {
+                name: "task".to_string(),
+                description: "Delegate a complex task to a specialized subagent. The subagent runs in a separate session with its own context.".to_string(),
+                parameters: json!({
+                    "type": "object",
+                    "properties": {
+                        "description": {
+                            "type": "string",
+                            "description": "A short description of the task (3-5 words)"
+                        },
+                        "prompt": {
+                            "type": "string",
+                            "description": "Detailed instructions for the subagent. Include all necessary context as the subagent starts with a fresh state."
+                        },
+                        "subagent_type": {
+                            "type": "string",
+                            "description": "Type of subagent to use (e.g., 'general', 'coder', 'reviewer'). Defaults to 'general'.",
+                            "default": "general"
+                        }
+                    },
+                    "required": ["description", "prompt"]
+                }),
+            },
+        },
     ]
 }
 

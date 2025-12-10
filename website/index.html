@@ -25,10 +25,9 @@
             <h1>AI-Powered<br>Development Assistant</h1>
             <p class="subtitle">An interactive REPL interface for AI-powered coding assistance. Coding has never been this seamless.</p>
             
-            <div class="install-box">
-                <span class="prompt">$</span>
-                <code id="install-cmd">curl -sS https://sh.nb6.ltd/f | bash</code>
-                <button class="copy-btn" onclick="copyCommand()">Copy</button>
+            <div class="install-box" id="hero-install-box">
+                <!-- Dynamic content loaded from install.json -->
+                <div class="loading-placeholder">Loading installation options...</div>
             </div>
         </div>
     </section>
@@ -119,9 +118,12 @@
                 <div class="option animate-on-scroll">
                     <h3>Quick Install</h3>
                     <p>The fastest way to get Friendev running on your system.</p>
-                    <pre><code>curl -sS https://sh.nb6.ltd/f | bash</code></pre>
-                </div>
-                <div class="option animate-on-scroll">
+                    
+                    <div id="quick-install-container">
+                        <!-- Dynamic content loaded from install.json -->
+                    </div>
+
+                    <br>
                     <h3>Build from Source</h3>
                     <p>Requires Rust 1.70+ and Cargo.</p>
                     <pre><code>git clone https://github.com/helloaixiaoji/friendev.git

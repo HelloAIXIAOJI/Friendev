@@ -1,9 +1,13 @@
 use std::path::Path;
 
 use history::{Message, ToolCall};
-use tools;
+use tools::{self, ToolResult};
 use ui::get_i18n;
 use ui::ToolCallDisplay;
+use futures::future::BoxFuture;
+use anyhow::Result;
+
+pub type CustomToolHandler = Box<dyn Fn(&str, &str, &Path) -> BoxFuture<'static, Result<Option<ToolResult>>> + Send + Sync>;
 
 /// Execute tool calls and collect results
 pub async fn execute_tool_calls(
@@ -13,7 +17,7 @@ pub async fn execute_tool_calls(
     require_approval: bool,
     session_id: Option<&str>,
 ) -> Vec<Message> {
-    execute_tool_calls_with_mcp(tool_calls, working_dir, displays, require_approval, session_id, None).await
+    execute_tool_calls_with_mcp(tool_calls, working_dir, displays, require_approval, session_id, None, None).await
 }
 
 /// Execute tool calls with MCP integration
@@ -24,6 +28,7 @@ pub async fn execute_tool_calls_with_mcp(
     require_approval: bool,
     session_id: Option<&str>,
     mcp_integration: Option<&mcp::McpIntegration>,
+    custom_handler: Option<&CustomToolHandler>,
 ) -> Vec<Message> {
     let mut results = Vec::new();
 
@@ -53,21 +58,38 @@ pub async fn execute_tool_calls_with_mcp(
             continue;
         }
 
-        let tool_result = tools::execute_tool_with_mcp(
-            &tc.function.name,
-            &tc.function.arguments,
-            working_dir,
-            require_approval,
-            session_id,
-            mcp_integration,
-        )
-        .await
-        .unwrap_or_else(|e| {
-            let i18n = get_i18n();
-            let tmpl = i18n.get("api_tool_execution_error");
-            let msg = tmpl.replace("{}", &e.to_string());
-            tools::ToolResult::error(msg)
-        });
+        // Try custom handler first
+        let mut tool_result_opt = None;
+        if let Some(handler) = custom_handler {
+             match handler(&tc.function.name, &tc.function.arguments, working_dir).await {
+                 Ok(Some(res)) => tool_result_opt = Some(res),
+                 Ok(None) => {}, // Handler didn't handle it
+                 Err(e) => {
+                     // Handler failed
+                     tool_result_opt = Some(tools::ToolResult::error(format!("Custom tool handler error: {}", e)));
+                 }
+             }
+        }
+
+        let tool_result = if let Some(res) = tool_result_opt {
+            res
+        } else {
+            tools::execute_tool_with_mcp(
+                &tc.function.name,
+                &tc.function.arguments,
+                working_dir,
+                require_approval,
+                session_id,
+                mcp_integration,
+            )
+            .await
+            .unwrap_or_else(|e| {
+                let i18n = get_i18n();
+                let tmpl = i18n.get("api_tool_execution_error");
+                let msg = tmpl.replace("{}", &e.to_string());
+                tools::ToolResult::error(msg)
+            })
+        };
 
         // Update UI display
         if let Some(display) = displays.get_mut(&tc.id) {
