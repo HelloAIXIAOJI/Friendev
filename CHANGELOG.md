@@ -1,6 +1,39 @@
 # Changelog
 - all friendev update changelog on here.
 ---
+## [0.2.7] - 2025-12-10
+### New Features
+
+- Introduced sub-agent architecture, supporting task decomposition and delegation
+  - Added task delegation tool, enabling the main agent to invoke this tool to initiate sub-sessions for executing specific tasks
+  - Each sub-agent operates within an independent chat session, ensuring context isolation
+  - Sub-agents inherit the execution mode and working environment from the main session
+
+- Added historical command management functionality
+  - Added `/history` command, supporting visual selection of historical commands
+  - Added `/new` command as an alias for `/history new`
+
+### Improvements
+
+- Enhanced session data security
+  - Implemented real-time persistence of history records, saved to disk immediately at the following points:
+    - After user message reception
+    - After AI response generation
+    - After tool execution is completed and results are produced
+
+- Optimized MCP components
+  - Changed SSL handling to use rustls implementation
+
+- Improved command support
+  - Added multi-language support for the `/send.md` command
+
+- Optimized history display
+  - The `/history list` command now only displays history records within the current working directory
+
+### Fixes
+
+- Fixed an issue causing abnormal program termination due to inability to find the LSP service
+---
 ## [0.2.6] - 2025-12-09
 ### Change
 - **Welcome screen Change**: The original welcome screen, which prompted with '/model list', has been changed to '/model'.
