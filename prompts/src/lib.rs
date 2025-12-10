@@ -220,3 +220,22 @@ However, respect reasonable user requests and adapt when possible without violat
         model, tools_description, agents_context, language, language
     )
 }
+
+pub fn get_subagent_system_prompt(
+    language: &str,
+    model: &str,
+    working_dir: &Path,
+    mcp_integration: Option<&mcp::McpIntegration>,
+    subagent_type: &str
+) -> String {
+    let base_prompt = get_system_prompt(language, model, working_dir, mcp_integration);
+    
+    let specialized_instruction = match subagent_type {
+        "coder" => "\n\n# Subagent Role: Coder\nYou are a specialized coding subagent. Your task is to write high-quality, tested code. Focus on implementation details, error handling, and edge cases.",
+        "reviewer" => "\n\n# Subagent Role: Reviewer\nYou are a specialized code review subagent. Your task is to analyze code for bugs, security issues, and style violations. Be critical and thorough.",
+        "planner" => "\n\n# Subagent Role: Planner\nYou are a specialized planning subagent. Your task is to break down complex requirements into actionable steps. Use the `todo_write` tool to create detailed plans.",
+        _ => "\n\n# Subagent Role: General\nYou are a general-purpose subagent helping the main agent with a specific task.",
+    };
+    
+    format!("{}{}", base_prompt, specialized_instruction)
+}

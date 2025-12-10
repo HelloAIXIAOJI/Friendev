@@ -360,6 +360,7 @@ async fn send_prompt_result_to_ai(
                     true, // Require approval for MCP-generated tool calls
                     Some(&session.id.to_string()),
                     mcp_integration,
+                    None,
                 ).await;
 
                 // Add tool results to session

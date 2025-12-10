@@ -1,12 +1,31 @@
+// Tab switching
+function switchTab(id) {
+    // Update buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.querySelector(`.tab-btn[data-id="${id}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    // Update content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.style.display = 'none';
+        content.classList.remove('active');
+    });
+    
+    const activeContent = document.getElementById(`tab-${id}`);
+    if (activeContent) {
+        activeContent.style.display = 'flex';
+        activeContent.classList.add('active');
+    }
+}
+
 // Copy command function
-function copyCommand() {
-    const code = document.getElementById('install-cmd').innerText;
+function copyCommand(elementId, btnElement) {
+    const code = document.getElementById(elementId).innerText;
     navigator.clipboard.writeText(code).then(() => {
-        const btn = document.querySelector('.copy-btn');
-        const originalText = btn.innerText;
-        btn.innerText = 'Copied!';
+        const originalText = btnElement.innerText;
+        btnElement.innerText = 'Copied!';
         setTimeout(() => {
-            btn.innerText = originalText === 'Copied!' ? 'Copy' : originalText;
+            btnElement.innerText = originalText === 'Copied!' ? 'Copy' : originalText;
         }, 2000);
     });
 }
@@ -24,25 +43,87 @@ document.querySelectorAll('.feature-card').forEach(card => {
 
 // Scroll animations and other effects
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Typing Effect
-    const installCmd = document.getElementById('install-cmd');
-    const fullCommand = "curl -sS https://sh.nb6.ltd/f | bash";
-    
-    // Clear initial content and add cursor
-    installCmd.innerHTML = '<span class="cursor"></span>';
-    
-    let charIndex = 0;
-    function typeWriter() {
-        if (charIndex < fullCommand.length) {
-            const currentText = fullCommand.substring(0, charIndex + 1);
-            installCmd.innerHTML = currentText + '<span class="cursor"></span>';
-            charIndex++;
-            setTimeout(typeWriter, 50 + Math.random() * 50); // Random typing speed
-        }
-    }
-    
-    // Start typing after a short delay
-    setTimeout(typeWriter, 1000);
+    // Fetch install commands
+    fetch('install.json')
+        .then(response => response.json())
+        .then(config => {
+            // 1. Render Hero Section (Tabs + Content)
+            const heroBox = document.getElementById('hero-install-box');
+            if (heroBox && config.length > 0) {
+                heroBox.innerHTML = ''; // Clear placeholder
+
+                // Create Tabs Container
+                const tabsContainer = document.createElement('div');
+                tabsContainer.className = 'install-tabs';
+                
+                config.forEach((item, index) => {
+                    // Create Tab Button
+                    const btn = document.createElement('button');
+                    btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+                    btn.innerText = item.label;
+                    btn.setAttribute('data-id', item.id);
+                    btn.onclick = () => switchTab(item.id);
+                    tabsContainer.appendChild(btn);
+                });
+
+                heroBox.appendChild(tabsContainer);
+                
+                // Append content divs
+                config.forEach((item, index) => {
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = `tab-content ${index === 0 ? 'active' : ''}`;
+                    contentDiv.id = `tab-${item.id}`;
+                    contentDiv.style.display = index === 0 ? 'flex' : 'none';
+                    
+                    contentDiv.innerHTML = `
+                        <span class="prompt">${item.prompt}</span>
+                        <code id="install-cmd-${item.id}">${item.command}</code>
+                        <button class="copy-btn" onclick="copyCommand('install-cmd-${item.id}', this)">Copy</button>
+                    `;
+                    heroBox.appendChild(contentDiv);
+                });
+
+                // Typing Effect for the first item
+                const firstItem = config[0];
+                const installCmd = document.getElementById(`install-cmd-${firstItem.id}`);
+                if (installCmd) {
+                    const fullCommand = firstItem.command;
+                    installCmd.innerHTML = '<span class="cursor"></span>';
+                    
+                    let charIndex = 0;
+                    function typeWriter() {
+                        if (charIndex < fullCommand.length) {
+                            const currentText = fullCommand.substring(0, charIndex + 1);
+                            installCmd.innerHTML = currentText + '<span class="cursor"></span>';
+                            charIndex++;
+                            setTimeout(typeWriter, 50 + Math.random() * 50);
+                        }
+                    }
+                    setTimeout(typeWriter, 1000);
+                }
+            }
+
+            // 2. Render Quick Install Section
+            const quickInstallContainer = document.getElementById('quick-install-container');
+            if (quickInstallContainer && config.length > 0) {
+                quickInstallContainer.innerHTML = '';
+                
+                config.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'os-install';
+                    div.innerHTML = `
+                        <h4>${item.label}</h4>
+                        <pre><code id="quick-install-${item.id}">${item.command}</code></pre>
+                    `;
+                    quickInstallContainer.appendChild(div);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading install config:', error);
+            const heroBox = document.getElementById('hero-install-box');
+            if (heroBox) heroBox.innerHTML = '<div class="loading-placeholder">Error loading installation options.</div>';
+        });
 
     // 2. Number Counter Animation
     const statsObserver = new IntersectionObserver((entries) => {

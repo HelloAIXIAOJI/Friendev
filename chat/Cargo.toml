@@ -7,8 +7,12 @@ edition = "2021"
 anyhow = "1.0"
 futures = "0.3"
 crossterm = "0.27"
+serde_json = "1.0"
 
 api = { path = "../api" }
 history = { path = "../history" }
 ui = { path = "../ui" }
 mcp = { path = "../mcp" }
+config = { path = "../config" }
+prompts = { path = "../prompts" }
+tools = { path = "../tools" }

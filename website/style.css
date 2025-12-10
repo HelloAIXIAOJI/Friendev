@@ -120,15 +120,71 @@ nav a:hover {
 
 .install-box {
     display: inline-flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     background: var(--surface);
     border: 1px solid var(--surface-border);
-    padding: 1rem 1.5rem;
-    border-radius: 999px;
+    padding: 0;
+    border-radius: 1rem;
     font-family: var(--font-mono);
     transition: border-color 0.3s, box-shadow 0.3s;
     position: relative;
     overflow: hidden;
+    min-width: 400px;
+}
+
+.loading-placeholder {
+    padding: 2rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.install-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--surface-border);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.75rem;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.tab-btn.active {
+    color: var(--accent);
+    background: rgba(59, 130, 246, 0.05);
+    border-bottom-color: var(--accent);
+}
+
+.tab-content {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    justify-content: space-between;
+}
+
+.os-install {
+    margin-bottom: 1.5rem;
+}
+
+.os-install h4 {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
 }
 
 .install-box:hover {
@@ -142,10 +198,12 @@ nav a:hover {
     user-select: none;
 }
 
-#install-cmd {
+#install-cmd-linux, #install-cmd-windows {
     margin-right: 1.5rem;
     color: #fff;
     font-size: 0.95rem;
+    text-align: left;
+    flex: 1;
 }
 
 .copy-btn {

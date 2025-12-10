@@ -15,6 +15,7 @@ use std::collections::HashMap;
 use i18n::I18n;
 
 /// MCP Integration for Friendev
+#[derive(Clone)]
 pub struct McpIntegration {
     manager: ClientManager,
     config: McpConfig,
