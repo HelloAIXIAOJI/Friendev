@@ -1,27 +1,14 @@
-This file temporarily stores CHANGELOG entries.
-FRIENDEV CHANGELOG
----
-Feat todo
-- **Add todo management tools and command**
-  - Implement `todo_write` and `todo_read` tools for AI task management
-  - Add `/todo` command for users to view current task list
-  - Support status visualization (pending, in_progress, completed)
+### 子智能体架构 (Sub-agent Architecture)
+引入了全新的**子智能体 (Sub-agent)** 机制，允许主智能体将复杂任务拆解并委托给专门的子智能体在独立上下文中执行。
 
-Feat MCP
-Features:  
-- Deep MCP Tool Integration  
-  - Dynamic Tool Discovery: Friendev can now automatically discover and register all tools provided by connected MCP servers.  
-  - Namespace Isolation: To prevent naming conflicts, MCP tools are automatically named in the format server/tool.  
-  - AI-Native Support: AI assistants can now "see" and directly call these MCP tools to complete tasks without manual intervention.  
-- Resource Access System (Resources)  
-  - Resource List: Added the mcp_resource_list tool to view all available resources.  
-  - Resource Reading: Added the mcp_resource_read tool to support reading the content of resource URIs.  
-- Interactive Prompt System  
-  - Command: Added the /prompt interactive command.  
-  - Workflow: Implemented a 5-step fully automated workflow: Select Server → Select Prompt → Fill Input Parameters → Execute Prompt → Automatically Send Results to AI.  
-- Added the /mcp Command  
+- **任务委托工具 (`task` tool)**: 新增 `task` 工具，主智能体可调用此工具启动子会话。
+- **上下文隔离**: 每个子智能体在全新的 `ChatSession` 中运行，拥有干净的上下文，避免被主会话的历史信息干扰，同时共享相同的工作目录和工具集。
+- **模式沿用 (Mode Inheritance)**: 子智能体将沿用主会话的执行模式（如 'yolo' 模式、'Shorekeeper'模式或普通交互模式）。这意味着如果你在自动模式下，子智能体也会自动执行；如果需要确认，子智能体的操作也会请求确认。
 
-Improvements:  
-- API Execution Layer Refactoring  
-  - Implemented execute_tool_calls_with_mcp, bridging the complete pipeline from AI decision-making to MCP tool execution.  
-- MCP configuration files are now uniformly stored in Friendev's standard configuration directory instead of the MCPCS directory.
+改进 (Improvements)
+
+### 历史记录实时持久化 (Immediate History Persistence)
+大幅增强了会话数据的安全性。现在，系统会在以下时刻**立即保存**会话记录到磁盘：
+- 收到用户消息后
+- 收到 AI 响应后
+- 工具执行完毕并产生结果后

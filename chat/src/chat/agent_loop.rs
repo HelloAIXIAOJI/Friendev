@@ -59,8 +59,8 @@ pub fn run_agent_loop<'a>(
                 println!("\n\x1b[36m🤖 Starting subagent: {}\x1b[0m", subagent_type_str);
                 
                 // Run loop (recursive)
-                // Force auto_approve = true for subagents
-                let success = run_agent_loop(&client, &config, &mut sub_session, mcp.as_ref(), true, Some(subagent_type_str.to_string())).await?;
+                // Inherit auto_approve status from parent session
+                let success = run_agent_loop(&client, &config, &mut sub_session, mcp.as_ref(), auto_approve, Some(subagent_type_str.to_string())).await?;
                 
                 // Extract result
                 let result_content = if success {
