@@ -4,4 +4,8 @@ This is a **FRIENDEV**
 
 > **AI-Powered Development Assistant*
 
-Install: `curl -sS https://sh.nb6.ltd/f | bash`
+WEBSITE: [https://friendev.nb6.ltd/](https://friendev.nb6.ltd/)
+
+SH: `curl -sS https://sh.nb6.ltd/friendev/sh | bash`
+
+PS1: `irm https://sh.nb6.ltd/friendev/windows | iex`

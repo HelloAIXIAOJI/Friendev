@@ -2,13 +2,13 @@
     {
         "id": "linux",
         "label": "Linux / macOS",
-        "command": "curl -sS https://sh.nb6.ltd/f | bash",
+        "command": "curl -sS https://sh.nb6.ltd/friendev/sh | bash",
         "prompt": "$"
     },
     {
         "id": "windows",
         "label": "Windows",
-        "command": "NAN",
+        "command": "irm https://sh.nb6.ltd/friendev/windows | iex",
         "prompt": "PS>"
     }
 ]

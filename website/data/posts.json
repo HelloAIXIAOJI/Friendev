@@ -1,0 +1,24 @@
+[
+    {
+        "slug": "404",
+        "title": "404",
+        "date": "404",
+        "category": "404",
+        "author": "404",
+        "read_time": "404",
+        "image_url": "https://www.hostinger.com/tutorials/wp-content/uploads/sites/2/2018/06/how-to-fix-error-404-1.webp",
+        "image_placeholder_text": "404",
+        "content_file": "content/404.md"
+    },
+    {
+        "slug": "about-shorekeeper",
+        "title": "Friendev Shorekeeper: Intelligent Security Check for Your AI Programming Assistant",
+        "date": "2025 12 11",
+        "category": "Feature",
+        "author": "Yang Borui",
+        "read_time": "5 min read",
+        "image_url": "https://i.ibb.co/cKvpn8Gb/shorekeeper.png",
+        "image_placeholder_text": "about shorekeeper",
+        "content_file": "content/shorekeeper.md"
+    }
+]

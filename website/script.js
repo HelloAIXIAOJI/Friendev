@@ -1,3 +1,18 @@
+// Copy text function for new buttons
+function copyText(btn) {
+    const pre = btn.previousElementSibling;
+    const text = pre.innerText.replace('$', ''); // Remove prompt char
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = 'COPIED';
+        btn.style.color = '#4ade80';
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.style.color = '';
+        }, 2000);
+    });
+}
+
 // Tab switching
 function switchTab(id) {
     // Update buttons
@@ -113,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     div.className = 'os-install';
                     div.innerHTML = `
                         <h4>${item.label}</h4>
-                        <pre><code id="quick-install-${item.id}">${item.command}</code></pre>
+                        <pre><code><span class="cmd-prefix">$</span>${item.command}</code><button class="copy-btn-code" onclick="copyText(this)">COPY</button></pre>
                     `;
                     quickInstallContainer.appendChild(div);
                 });
@@ -125,11 +140,41 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heroBox) heroBox.innerHTML = '<div class="loading-placeholder">Error loading installation options.</div>';
         });
 
+    // 3. Fetch GitHub Stats
+    const repoOwner = 'helloaixiaoji';
+    const repoName = 'friendev';
+    
+    fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            // Update data-target attributes with real data
+            const starsEl = document.querySelector('.repo-stat:nth-child(1) .stat-value');
+            const forksEl = document.querySelector('.repo-stat:nth-child(2) .stat-value');
+            
+            if (starsEl) starsEl.setAttribute('data-target', data.stargazers_count);
+            if (forksEl) forksEl.setAttribute('data-target', data.forks_count);
+            
+            // Note: Contributors count requires a separate API call and pagination handling
+            // For simplicity, we'll keep the placeholder or fetch a rough count if needed
+            // fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=1&anon=true`)
+            //    .then(res => {
+            //        const link = res.headers.get('link');
+            //        // Parse link header to get total pages (approx contributors)
+            //    });
+        })
+        .catch(error => {
+            console.log('Using default stats due to API error:', error);
+            // Default values are already in HTML
+        });
+
     // 2. Number Counter Animation
     const statsObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const statNumber = entry.target.querySelector('.number');
+                const statNumber = entry.target.querySelector('.number, .dash-value, .stat-value');
                 if (statNumber && !statNumber.classList.contains('counted')) {
                     animateCounter(statNumber);
                     statNumber.classList.add('counted');
@@ -169,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(update);
     }
 
-    document.querySelectorAll('.stat').forEach(stat => {
+    document.querySelectorAll('.stat, .dash-card, .repo-stat').forEach(stat => {
         statsObserver.observe(stat);
     });
 
@@ -189,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, observerOptions);
 
-    const animatedElements = document.querySelectorAll('.animate-on-scroll, .feature-card, .step, .stat');
+    const animatedElements = document.querySelectorAll('.animate-on-scroll, .feature-card, .step, .stat, .dash-card, .repo-card');
     animatedElements.forEach(el => {
         el.classList.add('animate-hidden');
         observer.observe(el);
