@@ -76,6 +76,8 @@ pub fn get_messages() -> HashMap<String, String> {
         "available_models".to_string(),
         "Available Models".to_string(),
     );
+    m.insert("approval_choice_prompt".to_string(), "Please select".to_string());
+
     m.insert(
         "switched_model".to_string(),
         "Switched to model".to_string(),

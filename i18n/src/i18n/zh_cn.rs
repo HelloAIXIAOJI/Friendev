@@ -198,6 +198,7 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("approval_opt_always".to_string(), "总是批准 (本会话)".to_string());
     m.insert("approval_opt_details".to_string(), "查看详情 / 审查".to_string());
     m.insert("approval_opt_reject".to_string(), "拒绝".to_string());
+    m.insert("approval_choice_prompt".to_string(), "请选择操作".to_string());
 
     m.insert(
         "approval_review_unavailable".to_string(),
