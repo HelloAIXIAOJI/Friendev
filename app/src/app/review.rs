@@ -143,7 +143,7 @@ async fn run_jury_review(
 
     let (preview, truncated) = format_preview(request.preview.as_deref(), &i18n);
 
-    let system_prompt = "You are a member of Friendev's safety jury. Reply strictly as a minified JSON object with two keys: \"details\" (string describing the analysis in the same language as the user request) and \"approval\" (boolean, true if the action should proceed, false if it should be rejected). Do not output markdown, code fences, additional keys, or commentary. Never call tools.".to_string();
+    let system_prompt = include_str!("../../../prompts/src/jury_prompt.md").to_string();
 
     let user_prompt = format!(
         "Evaluate whether the pending action should proceed.\nAction Type: {}\nTarget: {}\nContext Preview{}:\n{}\n\nBase your decision solely on this information. Prioritize security, data-loss, compliance, and stability risks. If information is insufficient, explain the uncertainty in \"details\" and set \"approval\" to false.",
@@ -180,7 +180,8 @@ async fn run_jury_review(
         let msgs = vec![system_msg.clone(), message.clone()];
         
         futures.push(tokio::spawn(async move {
-            chat::send_and_receive(&client, msgs, &session, None).await
+            // Use JSON mode for reliable structured output
+            client.chat_complete_json(msgs).await
         }));
     }
 
@@ -192,7 +193,7 @@ async fn run_jury_review(
 
     for (idx, join_res) in results.into_iter().enumerate() {
         match join_res {
-            Ok(Ok((response, _, _))) => {
+            Ok(Ok(response)) => {
                 match parse_review_output(response.content.trim()) {
                     Ok(outcome) => {
                         if outcome.approval {
@@ -279,7 +280,7 @@ async fn run_review(
 
     let (preview, truncated) = format_preview(request.preview.as_deref(), &i18n);
 
-    let system_prompt = "You are Friendev's safety review assistant. Reply strictly as a minified JSON object with two keys: \"details\" (string describing the analysis in the same language as the user request) and \"approval\" (boolean, true if the action should proceed, false if it should be rejected). Do not output markdown, code fences, additional keys, or commentary. Never call tools.".to_string();
+    let system_prompt = include_str!("../../../prompts/src/review_prompt.md").to_string();
 
     let user_prompt = format!(
         "Evaluate whether the pending action should proceed.\nAction Type: {}\nTarget: {}\nContext Preview{}:\n{}\n\nBase your decision solely on this information. Prioritize security, data-loss, compliance, and stability risks. If information is insufficient, explain the uncertainty in \"details\" and set \"approval\" to false.",
@@ -305,11 +306,8 @@ async fn run_review(
         name: None,
     });
 
-    let (response, tool_calls, _) = chat::send_and_receive(client, messages, &session, None).await?;
-
-    if tool_calls.is_some() {
-        anyhow::bail!(i18n.get("approval_review_tool_error"));
-    }
+    // Use JSON mode for reliable structured output
+    let response = client.chat_complete_json(messages).await?;
 
     println!(
         "\r  {} {}                                                  ",

@@ -1,13 +1,18 @@
 use super::output_formatter;
 use anyhow::Result;
 use api::{StreamChunk, ToolCallAccumulator};
-use crossterm::event::{poll, read, Event, KeyCode};
+use crossterm::event::{poll, read, Event, KeyCode, KeyModifiers};
 use futures::StreamExt;
 use std::time::Duration;
 
 /// Process stream chunks and handle output with ESC key interruption support
+/// 
+/// # Parameters
+/// - `stream`: The stream of chunks to process
+/// - `print_prefix`: Whether to print the AI prefix (should be false for tool call loops)
 pub async fn handle_stream_chunks(
     stream: impl futures::Stream<Item = Result<StreamChunk>> + Unpin,
+    print_prefix: bool,
 ) -> Result<(String, ToolCallAccumulator, bool, bool)> {
     let mut stream = Box::pin(stream);
 
@@ -19,7 +24,9 @@ pub async fn handle_stream_chunks(
     let mut is_first_reasoning = true;
     let mut has_reasoning = false;
 
-    output_formatter::print_ai_prefix()?;
+    if print_prefix {
+        output_formatter::print_ai_prefix()?;
+    }
 
     while let Some(chunk_result) = stream.next().await {
         // Check for ESC key press (non-blocking)
@@ -75,11 +82,17 @@ pub async fn handle_stream_chunks(
 
 /// Check if ESC key is pressed (non-blocking)
 fn check_interrupt() -> Result<bool> {
-    // Poll with a very short timeout to avoid blocking
-    if poll(Duration::from_millis(1))? {
+    // Poll with a slightly longer timeout for better key detection
+    // 10ms is still fast enough to feel responsive but more reliable
+    if poll(Duration::from_millis(10))? {
         if let Event::Key(key_event) = read()? {
-            // Only check for ESC key
+            // Check for ESC key
             if key_event.code == KeyCode::Esc {
+                return Ok(true);
+            }
+            // Also check for Ctrl+C as alternative interrupt
+            if key_event.code == KeyCode::Char('c') 
+                && key_event.modifiers.contains(crossterm::event::KeyModifiers::CONTROL) {
                 return Ok(true);
             }
         }

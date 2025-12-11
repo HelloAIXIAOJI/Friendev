@@ -10,6 +10,10 @@ pub struct ToolCallDisplay {
     pub is_finished: bool,
     pub is_success: bool,
     pub result_brief: Option<String>,
+    /// 用于防止重复渲染的标志
+    pub has_rendered: bool,
+    /// 上次渲染的参数，用于检测变化
+    pub last_rendered_arg: Option<String>,
 }
 
 impl ToolCallDisplay {
@@ -20,6 +24,8 @@ impl ToolCallDisplay {
             is_finished: false,
             is_success: false,
             result_brief: None,
+            has_rendered: false,
+            last_rendered_arg: None,
         }
     }
 
@@ -36,15 +42,32 @@ impl ToolCallDisplay {
     }
 
     /// 渲染正在进行的状态（流式显示）- 使用 ToolProgress 实现
-    pub fn render_streaming(&self) {
+    /// 返回 true 表示进行了渲染，false 表示跳过了渲染
+    pub fn render_streaming(&mut self) -> bool {
         // 已完成的不再显示
         if self.is_finished {
-            return;
+            return false;
+        }
+        
+        // 检查是否需要渲染：
+        // 1. 如果从未渲染过，需要渲染
+        // 2. 如果参数发生了变化，需要更新渲染
+        let should_render = !self.has_rendered || 
+                           (self.key_argument != self.last_rendered_arg);
+        
+        if !should_render {
+            return false;
         }
         
         // 创建 ToolProgress 并启动
         let mut progress = ToolProgress::new(self.name.clone(), self.key_argument.clone());
         let _ = progress.start();
+        
+        // 更新渲染状态
+        self.has_rendered = true;
+        self.last_rendered_arg = self.key_argument.clone();
+        
+        true
     }
 
     /// 渲染最终状态

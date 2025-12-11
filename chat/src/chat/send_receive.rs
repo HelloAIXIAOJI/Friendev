@@ -7,11 +7,15 @@ use std::collections::HashMap;
 use ui::ToolCallDisplay;
 
 /// Send messages to AI and receive response
+/// 
+/// # Parameters
+/// - `is_first_turn`: Whether this is the first turn (not a tool call loop iteration)
 pub async fn send_and_receive(
     client: &ApiClient,
     messages: Vec<Message>,
     _session: &ChatSession,
     mcp_integration: Option<&mcp::McpIntegration>,
+    is_first_turn: bool,
 ) -> Result<(
     Message,
     Option<Vec<history::ToolCall>>,
@@ -21,8 +25,9 @@ pub async fn send_and_receive(
     let stream = client.chat_stream_with_retry(messages, mcp_integration).await?;
 
     // Handle stream chunks (with ESC interruption support)
+    // Only print AI prefix on first turn to avoid repetition
     let (content, tool_accumulator, has_tool_calls, interrupted) =
-        stream_handler::handle_stream_chunks(stream).await?;
+        stream_handler::handle_stream_chunks(stream, is_first_turn).await?;
     
     // If interrupted, return empty response
     if interrupted {

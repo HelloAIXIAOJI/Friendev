@@ -70,7 +70,8 @@ impl ToolCallAccumulator {
                 if let Some(arg) = ui::extract_key_argument(tool_name, &entry.1) {
                     display.update_argument(arg);
                 }
-                display.render_streaming();
+                // 只在需要时渲染（避免重复打印）
+                let _ = display.render_streaming();
             }
         }
     }

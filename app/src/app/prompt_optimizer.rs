@@ -74,11 +74,14 @@ fn load_agents_context(working_dir: &std::path::Path) -> String {
 
 /// Create system prompt for optimization
 fn create_optimization_system_prompt(agents_context: &str) -> String {
+    // Load the optimizer prompt template
+    let template = include_str!("../../../prompts/src/optimizer_prompt.md");
+    
+    // Format agents context section
     let agents_section = if !agents_context.is_empty() {
         format!(
             r#"
-
-# Project Context (from AGENTS.md)
+## Available Project Context
 
 You have access to the project's AGENTS.md file, which contains:
 - Project structure and architecture
@@ -87,13 +90,13 @@ You have access to the project's AGENTS.md file, which contains:
 - Code style conventions
 - Dependencies and tools used
 
-Use this context to:
+**Use this context to**:
 - Suggest appropriate programming languages and frameworks already in use
 - Reference existing project structure when relevant
 - Align with established code conventions
 - Propose solutions that fit the project's architecture
 
-Key Project Information:
+**Key Project Information**:
 ```
 {}
 ```
@@ -101,58 +104,11 @@ Key Project Information:
             agents_context.chars().take(2000).collect::<String>()
         )
     } else {
-        String::new()
+        String::from("\n## Available Project Context\n\nNo AGENTS.md found. Optimize based on general best practices.\n")
     };
-
-    format!(
-        r#"You are an expert prompt engineer specializing in transforming brief or vague user requests into clear, detailed, and well-structured prompts that elicit better AI responses.{}"#,
-        agents_section
-    ) + r#"
-
-# Core Optimization Principles
-
-1. **Preserve Intent**: Maintain the user's original meaning and goals without changing their fundamental request
-2. **Add Specificity**: Include relevant technical details, constraints, and requirements that make the request actionable
-3. **Structure Clearly**: Organize information using bullet points, numbered lists, or sections for easy comprehension
-4. **Contextualize**: Reference previous conversation when relevant to maintain continuity
-5. **Balance Length**: Expand to 2-5x the original length - detailed enough to be clear, concise enough to stay focused
-
-# Optimization Strategies
-
-- Break down complex requests into sub-requirements
-- Specify programming languages, frameworks, or tools when technical context exists
-- Add success criteria or expected outcomes
-- Include code structure hints (function signatures, class names, etc.) for programming tasks
-- Suggest best practices or common patterns when appropriate
-- Clarify ambiguous terms (e.g., "optimize" → specify what metric: speed, memory, readability)
-
-# Output Format
-
-- Output ONLY the optimized prompt
-- NO meta-commentary like "Here's the optimized version:" or explanations
-- NO quotation marks wrapping the output
-- Write in the same language as the user's input
-- Start directly with the improved prompt content
-
-# Example Transformations
-
-Input: "write sorting code"
-Output: "Please implement a sorting algorithm with the following requirements:
-1. Algorithm: QuickSort (in-place implementation)
-2. Language: Rust
-3. Type signature: Generic function that works with any type implementing Ord trait
-4. Include: Proper error handling, unit tests, and documentation comments
-5. Code style: Follow Rust best practices and idioms"
-
-Input: "add authentication"
-Output: "Add JWT-based authentication to the existing web API with these requirements:
-1. Authentication flow:
-   - POST /auth/login endpoint accepting username/password, returns JWT token
-   - Token expiry: 1 hour, with refresh token support
-2. Protected routes: Add middleware to verify JWT on secured endpoints
-3. Security: Use bcrypt for password hashing (cost factor 12)
-4. Error handling: Return appropriate HTTP status codes (401, 403)
-5. Integration: Work with existing [mention framework from context if available]"#
+    
+    // Replace the {agents_context} placeholder
+    template.replace("{agents_context}", &agents_section)
 }
 
 /// Create optimization request with context

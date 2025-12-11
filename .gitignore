@@ -19,3 +19,4 @@ Thumbs.db
 .friendev-test/
 
 !.friendev/**/*.json
+syst*

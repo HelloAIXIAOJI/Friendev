@@ -78,9 +78,12 @@ pub fn run_agent_loop<'a>(
             })
         });
 
+        let mut is_first_turn = true;
         loop {
-            match send_receive::send_and_receive(api_client, messages.clone(), session, mcp_integration).await {
+            match send_receive::send_and_receive(api_client, messages.clone(), session, mcp_integration, is_first_turn).await {
                 Ok((response_msg, tool_calls, mut displays)) => {
+                    // After first turn, subsequent turns are tool call loops
+                    is_first_turn = false;
                     session.add_message(response_msg);
                     
                     // Save session immediately after receiving AI response

@@ -2,6 +2,16 @@ use serde::{Deserialize, Serialize};
 
 use tools;
 
+/// Response format for chat requests
+#[derive(Debug, Serialize, Clone)]
+#[serde(tag = "type")]
+pub enum ResponseFormat {
+    #[serde(rename = "text")]
+    Text,
+    #[serde(rename = "json_object")]
+    JsonObject,
+}
+
 /// Chat request to be sent to the API
 #[derive(Debug, Serialize)]
 pub struct ChatRequest {
@@ -12,6 +22,8 @@ pub struct ChatRequest {
     pub stream: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_tokens: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub response_format: Option<ResponseFormat>,
 }
 
 /// Chat API response

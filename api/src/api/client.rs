@@ -144,6 +144,7 @@ impl ApiClient {
             tools: tools::get_available_tools_with_mcp(mcp_integration),
             stream: true,
             max_tokens: None,
+            response_format: None,
         };
 
         let response = self
@@ -184,6 +185,52 @@ impl ApiClient {
             tools: tools::get_available_tools_with_mcp(mcp_integration),
             stream: false,
             max_tokens: Some(1000),  // Limit tokens for optimization
+            response_format: None,
+        };
+        
+        let response = self
+            .client
+            .post(&url)
+            .header("Authorization", format!("Bearer {}", self.config.api_key))
+            .header("Content-Type", "application/json")
+            .json(&request)
+            .send()
+            .await?;
+        
+        if !response.status().is_success() {
+            let status = response.status();
+            let text = response.text().await?;
+            anyhow::bail!("API error {}: {}", status, text);
+        }
+        
+        // Parse response
+        let response_json: serde_json::Value = response.json().await?;
+        
+        let content = response_json["choices"][0]["message"]["content"]
+            .as_str()
+            .unwrap_or("")
+            .to_string();
+        
+        Ok(Message {
+            role: "assistant".to_string(),
+            content,
+            tool_calls: None,
+            tool_call_id: None,
+            name: None,
+        })
+    }
+
+    /// Non-streaming chat completion with JSON mode (for structured outputs like safety reviews)
+    pub async fn chat_complete_json(&self, messages: Vec<Message>) -> Result<Message> {
+        let url = format!("{}/chat/completions", self.config.api_url);
+        
+        let request = ChatRequest {
+            model: self.config.current_model.clone(),
+            messages,
+            tools: vec![],  // No tools for JSON mode
+            stream: false,
+            max_tokens: Some(500),  // Limit tokens for safety reviews
+            response_format: Some(super::types::ResponseFormat::JsonObject),
         };
         
         let response = self
