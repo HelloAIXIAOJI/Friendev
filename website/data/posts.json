@@ -11,14 +11,36 @@
         "content_file": "content/404.md"
     },
     {
+        "slug": "0-2-7-subagent",
+        "title": "Friendev 0.2.7: Introducing SubAgent Architecture",
+        "date": "2025 12 10",
+        "category": "Feature",
+        "author": "Friendev Team",
+        "read_time": "5 min read",
+        "image_url": "https://free.picui.cn/free/2025/12/11/693ab00c135a9.jpg",
+        "image_placeholder_text": "v0.2.7 subagent",
+        "content_file": "content/v0.2.7-subagent.md"
+    },
+    {
         "slug": "about-shorekeeper",
         "title": "Friendev Shorekeeper: Intelligent Security Check for Your AI Programming Assistant",
         "date": "2025 12 11",
         "category": "Feature",
         "author": "Yang Borui",
         "read_time": "5 min read",
-        "image_url": "https://i.ibb.co/cKvpn8Gb/shorekeeper.png",
+        "image_url": "https://free.picui.cn/free/2025/12/11/6939b9ae5946b.png",
         "image_placeholder_text": "about shorekeeper",
         "content_file": "content/shorekeeper.md"
+    },
+    {
+        "slug": "about-jury",
+        "title": "Friendev Jury Mode: The \"Separation of Powers\" in Code Security",
+        "date": "2025 12 11",
+        "category": "Feature",
+        "author": "Yang Borui",
+        "read_time": "4 min read",
+        "image_url": "https://free.picui.cn/free/2025/12/11/693a57ebb42b7.png",
+        "image_placeholder_text": "about jury",
+        "content_file": "content/jury.md"
     }
 ]
