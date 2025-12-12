@@ -23,6 +23,7 @@ pub async fn handle_stream_chunks(
 
     let mut is_first_reasoning = true;
     let mut has_reasoning = false;
+    let mut reasoning_buffer = String::new();
 
     if print_prefix {
         output_formatter::print_ai_prefix()?;
@@ -45,6 +46,7 @@ pub async fn handle_stream_chunks(
                     &text,
                     &mut is_first_reasoning,
                     &mut has_reasoning,
+                    &mut reasoning_buffer,
                 )?;
             }
             StreamChunk::ToolCall {

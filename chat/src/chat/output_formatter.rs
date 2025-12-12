@@ -1,6 +1,9 @@
 use std::io::{self, Write};
 use ui::{enhanced_output, get_i18n};
 
+/// Reasoning buffer threshold - only print THINK if we have at least this many chars
+const REASONING_BUFFER_THRESHOLD: usize = 5;
+
 /// Handle content output
 pub fn print_content(text: &str, has_reasoning: &mut bool) -> std::io::Result<()> {
     // If there was reasoning before, reset and add spacing
@@ -12,18 +15,32 @@ pub fn print_content(text: &str, has_reasoning: &mut bool) -> std::io::Result<()
     enhanced_output::print_content(text)
 }
 
-/// Handle reasoning output
+/// Handle reasoning output with buffering
+/// Only prints THINK prefix when buffer reaches threshold
 pub fn print_reasoning(
     text: &str,
     is_first_reasoning: &mut bool,
     has_reasoning: &mut bool,
+    reasoning_buffer: &mut String,
 ) -> std::io::Result<()> {
+    // If we haven't printed THINK yet, buffer the content
     if *is_first_reasoning {
-        enhanced_output::print_reasoning_prefix()?;
-        *is_first_reasoning = false;
+        reasoning_buffer.push_str(text);
+        
+        // Check if buffer reached threshold
+        if reasoning_buffer.chars().count() >= REASONING_BUFFER_THRESHOLD {
+            // Now print THINK prefix and buffered content
+            enhanced_output::print_reasoning_prefix()?;
+            enhanced_output::print_reasoning_text(reasoning_buffer)?;
+            reasoning_buffer.clear();
+            *is_first_reasoning = false;
+            *has_reasoning = true;
+        }
+    } else {
+        // Already printed THINK, just stream normally
+        enhanced_output::print_reasoning_text(text)?;
+        *has_reasoning = true;
     }
-    enhanced_output::print_reasoning_text(text)?;
-    *has_reasoning = true;
     Ok(())
 }
 
