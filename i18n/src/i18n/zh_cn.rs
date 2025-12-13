@@ -93,7 +93,6 @@ pub fn get_messages() -> HashMap<String, String> {
 
     // 工具消息
     m.insert("tool_call".to_string(), "工具".to_string());
-    m.insert("thinking".to_string(), "思考".to_string());
     m.insert("tools_header".to_string(), "使用工具".to_string());
 
     // 提示消息
@@ -552,7 +551,6 @@ pub fn get_messages() -> HashMap<String, String> {
     m.insert("history_new_chat_summary".to_string(), "新聊天".to_string());
 
     // Chat output labels
-    m.insert("chat_think_label".to_string(), "思考".to_string());
     m.insert("chat_ai_label".to_string(), "AI".to_string());
     m.insert(
         "chat_tool_parse_error".to_string(),
