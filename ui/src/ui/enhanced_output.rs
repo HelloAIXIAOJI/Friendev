@@ -109,6 +109,27 @@ pub fn print_ai_prefix() -> io::Result<()> {
     )
 }
 
+/// Print reasoning block with dim styling
+pub fn print_reasoning_prefix() -> io::Result<()> {
+    let i18n = get_i18n();
+    execute!(
+        io::stdout(),
+        SetForegroundColor(Color::DarkGrey),
+        Print(format!("\n  {} ", i18n.get("chat_think_label"))),
+        ResetColor
+    )
+}
+
+/// Print reasoning text (dim gray)
+pub fn print_reasoning_text(text: &str) -> io::Result<()> {
+    execute!(
+        io::stdout(),
+        SetForegroundColor(Color::DarkGrey),
+        Print(text),
+        ResetColor
+    )
+}
+
 /// Print normal content
 pub fn print_content(text: &str) -> io::Result<()> {
     execute!(io::stdout(), Print(text))

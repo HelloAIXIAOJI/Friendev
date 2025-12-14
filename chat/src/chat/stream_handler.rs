@@ -21,6 +21,10 @@ pub async fn handle_stream_chunks(
     let mut has_tool_calls = false;
     let mut interrupted = false;
 
+    let mut is_first_reasoning = true;
+    let mut has_reasoning = false;
+    let mut reasoning_buffer = String::new();
+
     if print_prefix {
         output_formatter::print_ai_prefix()?;
     }
@@ -34,14 +38,27 @@ pub async fn handle_stream_chunks(
         }
         match chunk_result? {
             StreamChunk::Content(text) => {
-                output_formatter::print_content(&text)?;
+                output_formatter::print_content(&text, &mut has_reasoning)?;
                 content.push_str(&text);
+            }
+            StreamChunk::Reasoning(text) => {
+                output_formatter::print_reasoning(
+                    &text,
+                    &mut is_first_reasoning,
+                    &mut has_reasoning,
+                    &mut reasoning_buffer,
+                )?;
             }
             StreamChunk::ToolCall {
                 id,
                 name,
                 arguments,
             } => {
+                // If there was reasoning before, reset color and newline
+                if has_reasoning {
+                    print!("\x1b[0m\n\n");
+                    has_reasoning = false;
+                }
                 if !has_tool_calls {
                     output_formatter::print_tool_call_separator()?;
                     has_tool_calls = true;
@@ -59,7 +76,7 @@ pub async fn handle_stream_chunks(
 
     // Ensure color is reset at the end and newline
     if !interrupted {
-        output_formatter::finalize_output(content.is_empty())?;
+        output_formatter::finalize_output(has_reasoning, content.is_empty())?;
     }
 
     Ok((content, tool_accumulator, has_tool_calls, interrupted))

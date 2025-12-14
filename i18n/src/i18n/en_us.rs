@@ -122,6 +122,7 @@ pub fn get_messages() -> HashMap<String, String> {
 
     // Tool messages
     m.insert("tool_call".to_string(), "TOOL".to_string());
+    m.insert("thinking".to_string(), "THINK".to_string());
     m.insert("tools_header".to_string(), "Using Tools".to_string());
 
     // Hint messages
@@ -623,6 +624,7 @@ pub fn get_messages() -> HashMap<String, String> {
     );
 
     // Chat output labels
+    m.insert("chat_think_label".to_string(), "THINK".to_string());
     m.insert("chat_ai_label".to_string(), "AI".to_string());
     m.insert(
         "chat_tool_parse_error".to_string(),

@@ -2,6 +2,7 @@ mod accumulator;
 mod client;
 mod executor;
 mod parser;
+mod stream;
 mod types;
 
 pub use accumulator::ToolCallAccumulator;
