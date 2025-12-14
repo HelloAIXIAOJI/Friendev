@@ -13,6 +13,8 @@ serde_json = "1.0"
 bytes = "1"
 chrono = { version = "0.4", features = ["serde"] }
 tokio = { version = "1", features = ["time"] }
+# Enhanced dependencies for better reliability
+fastrand = "2.0"
 
 config = { path = "../config" }
 history = { path = "../history" }

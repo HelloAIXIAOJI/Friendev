@@ -4,6 +4,7 @@ use anyhow::Result;
 use api::ApiClient;
 use history::{ChatSession, Message};
 use std::collections::HashMap;
+use std::io::Write;
 use ui::ToolCallDisplay;
 
 /// Send messages to AI and receive response
@@ -11,7 +12,7 @@ use ui::ToolCallDisplay;
 /// # Parameters
 /// - `is_first_turn`: Whether this is the first turn (not a tool call loop iteration)
 pub async fn send_and_receive(
-    client: &ApiClient,
+    client: &api::ApiClient,
     messages: Vec<Message>,
     _session: &ChatSession,
     mcp_integration: Option<&mcp::McpIntegration>,
@@ -21,36 +22,32 @@ pub async fn send_and_receive(
     Option<Vec<history::ToolCall>>,
     HashMap<String, ToolCallDisplay>,
 )> {
-    // Use streaming request with retry
-    let stream = client.chat_stream_with_retry(messages, mcp_integration).await?;
+    // Use non-streaming request with retry and animation
+    let response = client.chat_with_retry(messages, mcp_integration).await?;
 
-    // Handle stream chunks (with ESC interruption support)
-    // Only print AI prefix on first turn to avoid repetition
-    let (content, tool_accumulator, has_tool_calls, interrupted) =
-        stream_handler::handle_stream_chunks(stream, is_first_turn).await?;
-    
-    // If interrupted, return empty response
-    if interrupted {
-        let message = Message {
-            role: "assistant".to_string(),
-            content: content + "\n[生成已中断]",
-            tool_calls: None,
-            tool_call_id: None,
-            name: None,
-        };
-        return Ok((message, None, HashMap::new()));
+    // Print AI prefix on first turn
+    if is_first_turn {
+        output_formatter::print_ai_prefix();
     }
-
-    // Get tool calls and UI display components
-    let displays = tool_accumulator.get_displays().clone();
-    let tool_calls = if has_tool_calls {
-        let calls = tool_accumulator.into_tool_calls();
+    
+    // Print the response content
+    if !response.content.is_empty() {
+        println!("{}", response.content);
+        // Immediately flush to ensure prompt appears quickly
+        std::io::Write::flush(&mut std::io::stdout()).ok();
+    }
+    
+    // Get tool calls from response
+    let tool_calls = response.tool_calls;
+    let displays = HashMap::new(); // No streaming displays for non-streaming
+    
+    let tool_calls = if let Some(ref calls) = tool_calls {
         if calls.is_empty() {
             // Detected tool_call marker but all calls failed to parse
             output_formatter::print_tool_parse_error();
             None
         } else {
-            Some(calls)
+            Some(calls.clone())
         }
     } else {
         None
@@ -58,7 +55,7 @@ pub async fn send_and_receive(
 
     let message = Message {
         role: "assistant".to_string(),
-        content,
+        content: response.content,
         tool_calls: tool_calls.clone(),
         tool_call_id: None,
         name: None,

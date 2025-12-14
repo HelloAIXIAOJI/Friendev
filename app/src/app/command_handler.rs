@@ -178,7 +178,10 @@ pub async fn handle_user_input(line: &str, state: &mut AppState) -> Result<()> {
     )
     .await?
     {
-        let _ = notification::notify_ai_completed().await;
+        // Send notification asynchronously without blocking
+        tokio::spawn(async move {
+            let _ = notification::notify_ai_completed().await;
+        });
     }
 
     state.session.save()?;
@@ -210,7 +213,10 @@ async fn handle_agents_md_command(state: &mut AppState) -> Result<()> {
             )
             .await?
             {
-                let _ = notification::notify_ai_completed().await;
+                // Send notification asynchronously without blocking
+                tokio::spawn(async move {
+                    let _ = notification::notify_ai_completed().await;
+                });
             }
             state.session.save()?;
         }
@@ -275,9 +281,16 @@ async fn handle_send_file_command(state: &mut AppState) -> Result<()> {
     )
     .await?
     {
-        let _ = notification::notify_ai_completed().await;
+        // Send notification asynchronously without blocking
+        tokio::spawn(async move {
+            let _ = notification::notify_ai_completed().await;
+        });
     }
     state.session.save()?;
+    
+    // Ensure prompt appears immediately
+    use std::io::Write;
+    std::io::Write::flush(&mut std::io::stdout()).ok();
     
     Ok(())
 }

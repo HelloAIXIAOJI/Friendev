@@ -2,6 +2,7 @@ use anyhow::Result;
 use futures::StreamExt;
 use reqwest::Client;
 use tokio_stream::Stream;
+use std::io::Write;
 
 use config::Config;
 use history::Message;
@@ -128,6 +129,55 @@ impl ApiClient {
 
         let i18n = get_i18n();
         Err(anyhow::anyhow!(i18n.get("api_retries_failed")))
+    }
+
+    /// Non-streaming chat with retry and animation
+    pub async fn chat_with_retry(
+        &self,
+        messages: Vec<Message>,
+        mcp_integration: Option<&mcp::McpIntegration>,
+    ) -> Result<Message> {
+        let cleaned_messages = Self::clean_messages(&messages);
+        
+        // Show streaming animation
+        let spinner = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+        let start_time = std::time::Instant::now();
+        
+        let (tx, mut rx) = tokio::sync::mpsc::channel::<()>(1);
+        
+        // Spawn spinner task
+        let spinner_handle = tokio::spawn(async move {
+            let mut i = 0;
+            loop {
+                tokio::select! {
+                    _ = tokio::time::sleep(std::time::Duration::from_millis(100)) => {
+                        let elapsed = start_time.elapsed().as_secs();
+                        print!("\r\x1b[36m[Streaming {} [{}s]\x1b[0m", spinner[i % spinner.len()], elapsed);
+                        std::io::Write::flush(&mut std::io::stdout()).ok();
+                        i += 1;
+                    }
+                    _ = rx.recv() => {
+                        // Clear the line immediately
+                        print!("\r\x1b[K");
+                        std::io::Write::flush(&mut std::io::stdout()).ok();
+                        break;
+                    }
+                }
+            }
+        });
+        
+        let result = self.chat_complete(cleaned_messages, mcp_integration).await;
+        
+        // Stop spinner immediately
+        let _ = tx.send(()).await;
+        
+        // Abort spinner task if it's still running (non-blocking)
+        spinner_handle.abort();
+        
+        // Ensure final flush
+        std::io::Write::flush(&mut std::io::stdout()).ok();
+        
+        result
     }
 
     /// Stream chat completions

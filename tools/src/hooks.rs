@@ -103,16 +103,13 @@ pub async fn execute_hook(
 ) -> Result<()> {
     let hook_config_path = context.working_dir.join(".friendev").join("hooks.json");
     
+    // Early return if file doesn't exist
     if !hook_config_path.exists() {
         return Ok(());
     }
 
-    let config_content = fs::read_to_string(hook_config_path)?;
-    // Use serde_json::from_str but map to our new flexible structure
-    // Note: HashMap<HookType, ...> deserialization might fail if JSON root keys aren't directly hook types.
-    // Let's assume the user config has a "hooks" key like before or we check the root?
-    // The previous version expected: { "hooks": { "startup": [...] } }
-    // Let's keep the root "hooks" key for compatibility.
+    // Read and parse config
+    let config_content = fs::read_to_string(&hook_config_path)?;
     #[derive(Deserialize)]
     struct RootConfig {
         hooks: HashMap<HookType, HookDefinition>,
@@ -121,20 +118,29 @@ pub async fn execute_hook(
     let config: RootConfig = match serde_json::from_str(&config_content) {
         Ok(c) => c,
         Err(e) => {
-            // Fallback or better error reporting
-            eprintln!("{}", format!("Warning: Failed to parse hooks.json: {}", e).yellow());
+            // Silently ignore parse errors for PreCommand/PostCommand to avoid spam
+            if !matches!(hook_type, HookType::PreCommand | HookType::PostCommand) {
+                eprintln!("{}", format!("Warning: Failed to parse hooks.json: {}", e).yellow());
+            }
             return Ok(());
         }
     };
 
+    // Check if hooks exist for this type
     if let Some(definition) = config.hooks.get(&hook_type) {
         let steps = definition.steps();
         if !steps.is_empty() {
-            println!("{}", format!("Running {:?} hooks...", hook_type).bright_black());
+            // Only print for hooks that actually have steps
+            if matches!(hook_type, HookType::Startup | HookType::SessionStart | HookType::SessionEnd) {
+                println!("{}", format!("Running {:?} hooks...", hook_type).bright_black());
+            }
             
             for (idx, step) in steps.iter().enumerate() {
                 if let Err(e) = execute_step(step, context, idx, command_runner).await {
-                    eprintln!("{}", format!("Hook step failed: {}", e).red());
+                    // Only show errors for non-PreCommand/PostCommand to avoid spam
+                    if !matches!(hook_type, HookType::PreCommand | HookType::PostCommand) {
+                        eprintln!("{}", format!("Hook step failed: {}", e).red());
+                    }
                 }
             }
         }
