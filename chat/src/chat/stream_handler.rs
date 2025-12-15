@@ -1,7 +1,7 @@
 use super::output_formatter;
 use anyhow::Result;
 use api::{StreamChunk, ToolCallAccumulator};
-use crossterm::event::{poll, read, Event, KeyCode, KeyModifiers};
+use crossterm::event::{poll, read, Event, KeyCode};
 use futures::StreamExt;
 use std::time::Duration;
 

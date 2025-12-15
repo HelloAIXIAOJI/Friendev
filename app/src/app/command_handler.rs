@@ -175,6 +175,7 @@ pub async fn handle_user_input(line: &str, state: &mut AppState) -> Result<()> {
         state.mcp_integration.as_ref(),
         state.auto_approve,
         None,
+        false,
     )
     .await?
     {
@@ -210,6 +211,7 @@ async fn handle_agents_md_command(state: &mut AppState) -> Result<()> {
                 state.mcp_integration.as_ref(),
                 state.auto_approve,
                 None,
+                false,
             )
             .await?
             {
@@ -278,6 +280,7 @@ async fn handle_send_file_command(state: &mut AppState) -> Result<()> {
         state.mcp_integration.as_ref(),
         state.auto_approve,
         None,
+        false,
     )
     .await?
     {

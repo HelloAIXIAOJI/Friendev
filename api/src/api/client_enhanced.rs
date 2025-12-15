@@ -1,10 +1,9 @@
 use anyhow::Result;
 use futures::StreamExt;
 use tokio_stream::Stream;
-use std::io::Write;
 
 use config::Config;
-use history::{Message, ToolCall, FunctionCall};
+use history::Message;
 use tools;
 use ui::get_i18n;
 
@@ -164,7 +163,7 @@ impl ApiClient {
             let mut i = 0;
             while rx.recv().await.is_none() {
                 let elapsed = start_time.elapsed().as_secs();
-                print!("\r\x1b[36m[Streaming {} [{}s]\x1b[0m", spinner[i % spinner.len()], elapsed);
+                print!("\r\x1b[36mStreaming {} [{}s]\x1b[0m", spinner[i % spinner.len()], elapsed);
                 std::io::Write::flush(&mut std::io::stdout()).ok();
                 i += 1;
                 tokio::time::sleep(std::time::Duration::from_millis(100)).await;

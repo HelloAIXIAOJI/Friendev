@@ -16,6 +16,7 @@ pub fn run_agent_loop<'a>(
     mcp_integration: Option<&'a McpIntegration>,
     auto_approve: bool,
     subagent_type: Option<String>,
+    force_no_animation: bool,
 ) -> futures::future::BoxFuture<'a, Result<bool>> {
     Box::pin(async move {
         let mut messages = message_builder::build_messages_with_agents_md(session, config, mcp_integration, subagent_type.as_deref())?;
@@ -60,7 +61,8 @@ pub fn run_agent_loop<'a>(
                 
                 // Run loop (recursive)
                 // Inherit auto_approve status from parent session
-                let success = run_agent_loop(&client, &config, &mut sub_session, mcp.as_ref(), auto_approve, Some(subagent_type_str.to_string())).await?;
+                // Force no animation during tool execution
+                let success = run_agent_loop(&client, &config, &mut sub_session, mcp.as_ref(), auto_approve, Some(subagent_type_str.to_string()), true).await?;
                 
                 // Extract result
                 let result_content = if success {
@@ -79,8 +81,9 @@ pub fn run_agent_loop<'a>(
         });
 
         let mut is_first_turn = true;
+        let effective_force_no_animation = force_no_animation;
         loop {
-            match send_receive::send_and_receive(api_client, messages.clone(), session, mcp_integration, is_first_turn).await {
+            match send_receive::send_and_receive(api_client, messages.clone(), session, mcp_integration, is_first_turn, effective_force_no_animation).await {
                 Ok((response_msg, tool_calls, mut displays)) => {
                     // After first turn, subsequent turns are tool call loops
                     is_first_turn = false;

@@ -13,6 +13,9 @@ use super::parser::parse_sse_line;
 use super::stream::SseLineStream;
 use super::types::{ChatRequest, ModelsResponse, StreamChunk};
 
+use crossterm::event::{poll, read, Event, KeyCode, KeyModifiers};
+use std::time::Duration;
+
 #[derive(Clone)]
 pub struct ApiClient {
     client: Client,
@@ -138,46 +141,182 @@ impl ApiClient {
         mcp_integration: Option<&mcp::McpIntegration>,
     ) -> Result<Message> {
         let cleaned_messages = Self::clean_messages(&messages);
+
+        let max_retries = self.config.max_retries;
+        let base_delay = self.config.retry_delay_ms;
+
+        for attempt in 0..=max_retries {
+            // Check for interrupt before each attempt
+            if Self::check_interrupt()? {
+                let i18n = get_i18n();
+                return Err(anyhow::anyhow!("{}", i18n.get("hint_esc")));
+            }
+
+            if attempt > 0 {
+                let delay = base_delay * (1 << (attempt - 1)); // exponential backoff
+                let i18n = get_i18n();
+                println!(
+                    "\n\x1b[33m[!] {} {}/{}...{} {}ms\x1b[0m",
+                    i18n.get("api_retry_label"),
+                    attempt,
+                    max_retries,
+                    i18n.get("api_retry_waiting"),
+                    delay
+                );
+                
+                // Check for interrupt during retry delay
+                for _ in 0..(delay / 100) {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                    if Self::check_interrupt()? {
+                        let i18n = get_i18n();
+                        return Err(anyhow::anyhow!("{}", i18n.get("hint_esc")));
+                    }
+                }
+            }
+
+            match self.chat_complete(cleaned_messages.clone(), mcp_integration).await {
+                Ok(response) => return Ok(response),
+                Err(e) => {
+                    if attempt == max_retries {
+                        let i18n = get_i18n();
+                        eprintln!("\n\x1b[31m[X] {}\x1b[0m", i18n.get("api_retries_failed"));
+                        return Err(e);
+                    }
+                    let i18n = get_i18n();
+                    eprintln!(
+                        "\n\x1b[33m[!] {}: {}\x1b[0m",
+                        i18n.get("api_request_failed"),
+                        e
+                    );
+                }
+            }
+        }
+
+        let i18n = get_i18n();
+        Err(anyhow::anyhow!(i18n.get("api_retries_failed")))
+    }
+
+    /// Non-streaming chat with retry and animation (for initial AI requests)
+    pub async fn chat_with_retry_with_animation(
+        &self,
+        messages: Vec<Message>,
+        mcp_integration: Option<&mcp::McpIntegration>,
+    ) -> Result<Message> {
+        let cleaned_messages = Self::clean_messages(&messages);
         
-        // Show streaming animation
+        // Show streaming animation for AI requests
         let spinner = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
         let start_time = std::time::Instant::now();
         
         let (tx, mut rx) = tokio::sync::mpsc::channel::<()>(1);
         
-        // Spawn spinner task
+        // Spawn spinner task - show at the bottom
         let spinner_handle = tokio::spawn(async move {
             let mut i = 0;
             loop {
                 tokio::select! {
                     _ = tokio::time::sleep(std::time::Duration::from_millis(100)) => {
                         let elapsed = start_time.elapsed().as_secs();
-                        print!("\r\x1b[36m[Streaming {} [{}s]\x1b[0m", spinner[i % spinner.len()], elapsed);
-                        std::io::Write::flush(&mut std::io::stdout()).ok();
+                        // Show at the bottom of output
+                        println!("\r\x1b[36m[Streaming {} [{}s]\x1b[0m", spinner[i % spinner.len()], elapsed);
                         i += 1;
                     }
                     _ = rx.recv() => {
-                        // Clear the line immediately
-                        print!("\r\x1b[K");
-                        std::io::Write::flush(&mut std::io::stdout()).ok();
                         break;
                     }
                 }
             }
         });
-        
-        let result = self.chat_complete(cleaned_messages, mcp_integration).await;
-        
-        // Stop spinner immediately
-        let _ = tx.send(()).await;
-        
-        // Abort spinner task if it's still running (non-blocking)
-        spinner_handle.abort();
-        
-        // Ensure final flush
-        std::io::Write::flush(&mut std::io::stdout()).ok();
-        
-        result
+
+        let max_retries = self.config.max_retries;
+        let base_delay = self.config.retry_delay_ms;
+
+        for attempt in 0..=max_retries {
+            // Check for interrupt before each attempt
+            if Self::check_interrupt()? {
+                let _ = tx.send(()).await; // Stop spinner
+                spinner_handle.abort(); // Abort spinner task
+                let i18n = get_i18n();
+                return Err(anyhow::anyhow!("{}", i18n.get("hint_esc")));
+            }
+
+            if attempt > 0 {
+                let delay = base_delay * (1 << (attempt - 1)); // exponential backoff
+                let i18n = get_i18n();
+                println!(
+                    "\n\x1b[33m[!] {} {}/{}...{} {}ms\x1b[0m",
+                    i18n.get("api_retry_label"),
+                    attempt,
+                    max_retries,
+                    i18n.get("api_retry_waiting"),
+                    delay
+                );
+                
+                // Check for interrupt during retry delay
+                for _ in 0..(delay / 100) {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                    if Self::check_interrupt()? {
+                        let _ = tx.send(()).await; // Stop spinner
+                        spinner_handle.abort(); // Abort spinner task
+                        let i18n = get_i18n();
+                        return Err(anyhow::anyhow!("{}", i18n.get("hint_esc")));
+                    }
+                }
+            }
+
+            match self.chat_complete(cleaned_messages.clone(), mcp_integration).await {
+                Ok(response) => {
+                    // Stop spinner and clear the line AFTER AI response is processed
+                    let _ = tx.send(()).await;
+                    spinner_handle.abort(); // Abort spinner task
+                    
+                    // Clear the streaming line and move to next line
+                    println!("\r\x1b[K"); // Clear current line
+                    
+                    return Ok(response);
+                }
+                Err(e) => {
+                    if attempt == max_retries {
+                        let _ = tx.send(()).await; // Stop spinner
+                        spinner_handle.abort(); // Abort spinner task
+                        let i18n = get_i18n();
+                        eprintln!("\n\x1b[31m[X] {}\x1b[0m", i18n.get("api_retries_failed"));
+                        return Err(e);
+                    }
+                    let i18n = get_i18n();
+                    eprintln!(
+                        "\n\x1b[33m[!] {}: {}\x1b[0m",
+                        i18n.get("api_request_failed"),
+                        e
+                    );
+                }
+            }
+        }
+
+        let _ = tx.send(()).await; // Stop spinner
+        spinner_handle.abort(); // Abort spinner task
+        let i18n = get_i18n();
+        Err(anyhow::anyhow!(i18n.get("api_retries_failed")))
+    }
+
+    /// Check if ESC key is pressed (non-blocking)
+    fn check_interrupt() -> Result<bool> {
+        // Poll with a slightly longer timeout for better key detection
+        // 10ms is still fast enough to feel responsive but more reliable
+        if poll(Duration::from_millis(10))? {
+            if let Event::Key(key_event) = read()? {
+                // Check for ESC key
+                if key_event.code == KeyCode::Esc {
+                    return Ok(true);
+                }
+                // Also check for Ctrl+C as alternative interrupt
+                if key_event.code == KeyCode::Char('c') 
+                    && key_event.modifiers.contains(crossterm::event::KeyModifiers::CONTROL) {
+                    return Ok(true);
+                }
+            }
+        }
+        Ok(false)
     }
 
     /// Stream chat completions
@@ -228,16 +367,16 @@ impl ApiClient {
     /// Non-streaming chat completion (for simple requests like prompt optimization)
     pub async fn chat_complete(&self, messages: Vec<Message>, mcp_integration: Option<&mcp::McpIntegration>) -> Result<Message> {
         let url = format!("{}/chat/completions", self.config.api_url);
-        
+
         let request = ChatRequest {
             model: self.config.current_model.clone(),
             messages,
             tools: tools::get_available_tools_with_mcp(mcp_integration),
             stream: false,
-            max_tokens: Some(1000),  // Limit tokens for optimization
+            max_tokens: None,  // Remove token limit for chat completion
             response_format: None,
         };
-        
+
         let response = self
             .client
             .post(&url)
@@ -246,25 +385,44 @@ impl ApiClient {
             .json(&request)
             .send()
             .await?;
-        
+
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await?;
             anyhow::bail!("API error {}: {}", status, text);
         }
-        
+
         // Parse response
         let response_json: serde_json::Value = response.json().await?;
-        
+
         let content = response_json["choices"][0]["message"]["content"]
             .as_str()
             .unwrap_or("")
             .to_string();
-        
+
+        // Parse tool calls from response
+        let tool_calls = response_json["choices"][0]["message"]["tool_calls"]
+            .as_array()
+            .and_then(|calls| {
+                let mut parsed_calls = Vec::new();
+                for call in calls {
+                    let tool_call = history::ToolCall {
+                        id: call["id"].as_str().unwrap_or("").to_string(),
+                        tool_type: call["type"].as_str().unwrap_or("function").to_string(),
+                        function: history::FunctionCall {
+                            name: call["function"]["name"].as_str().unwrap_or("").to_string(),
+                            arguments: call["function"]["arguments"].as_str().unwrap_or("").to_string(),
+                        },
+                    };
+                    parsed_calls.push(tool_call);
+                }
+                Some(parsed_calls)
+            });
+
         Ok(Message {
             role: "assistant".to_string(),
             content,
-            tool_calls: None,
+            tool_calls,
             tool_call_id: None,
             name: None,
         })

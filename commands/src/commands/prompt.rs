@@ -343,7 +343,7 @@ async fn send_prompt_result_to_ai(
     let messages = session.messages.clone();
 
     // Send to AI and get response (AI response will be displayed by normal chat flow)
-    match chat::send_and_receive(api_client, messages, session, mcp_integration, true).await {
+    match chat::send_and_receive(api_client, messages, session, mcp_integration, true, false).await {
         Ok((response_msg, tool_calls, mut displays)) => {
             // Add AI response to session (response already displayed by chat system)
             session.add_message(response_msg);

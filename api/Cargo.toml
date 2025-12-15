@@ -15,6 +15,8 @@ chrono = { version = "0.4", features = ["serde"] }
 tokio = { version = "1", features = ["time"] }
 # Enhanced dependencies for better reliability
 fastrand = "2.0"
+# For ESC interrupt detection
+crossterm = "0.27"
 
 config = { path = "../config" }
 history = { path = "../history" }
