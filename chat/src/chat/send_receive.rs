@@ -45,7 +45,8 @@ pub async fn send_and_receive(
     
     // Print AI prefix on first turn
     if is_first_turn {
-        output_formatter::print_ai_prefix();
+        output_formatter::print_ai_prefix()?; // Print AI prefix
+        println!(); // Add newline so animation appears on line below AI prefix
     }
     
     // Spawn streaming spinner if enabled
@@ -57,7 +58,7 @@ pub async fn send_and_receive(
                 tokio::select! {
                     _ = tokio::time::sleep(std::time::Duration::from_millis(200)) => {
                         let elapsed = start_time.elapsed().as_secs();
-                        // Update the animation line in place
+                        // Update animation in place using \r to return to line start
                         print!("\r\x1b[36m[Streaming {} [{}s]\x1b[0m", spinner[i % spinner.len()], elapsed);
                         std::io::Write::flush(&mut std::io::stdout()).ok();
                         i += 1;
@@ -79,17 +80,16 @@ pub async fn send_and_receive(
     // Make API request
     let response = client.chat_with_retry(messages, mcp_integration).await?;
     
-    // Stop streaming animation
+    // Stop streaming animation and ensure clean output
     if let Some(tx) = tx {
-        // Clear the animation line first
-        print!("\r\x1b[K");
-        std::io::Write::flush(&mut std::io::stdout()).ok();
-        
-        // Send stop signal
+        // Send stop signal first
         let _ = tx.send(()).await;
         
-        // Small delay to ensure animation task can respond
-        tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+        // Small delay to ensure animation task can respond and clear line
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        
+        // Animation task will clear its own line, we just ensure output is clean
+        println!(); // Add a newline after animation to ensure AI content starts on new line
     }
     
     // Handle content and reasoning like the streaming version
@@ -108,6 +108,9 @@ pub async fn send_and_receive(
     // Process tool calls through the accumulator like the streaming version
     if let Some(ref calls) = tool_calls {
         if !calls.is_empty() {
+            // Ensure proper spacing before tool calls
+            println!();
+            
             // Print tool call separator like streaming version
             output_formatter::print_tool_call_separator()?;
             

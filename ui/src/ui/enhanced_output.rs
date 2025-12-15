@@ -101,7 +101,6 @@ pub fn print_ai_prefix() -> io::Result<()> {
     let i18n = get_i18n();
     execute!(
         io::stdout(),
-        Print("\n"),
         SetForegroundColor(Color::Cyan),
         Print("▍"),
         Print(format!(" {} ", i18n.get("chat_ai_label"))),
