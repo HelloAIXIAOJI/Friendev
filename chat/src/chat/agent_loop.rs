@@ -82,8 +82,9 @@ pub fn run_agent_loop<'a>(
 
         let mut is_first_turn = true;
         loop {
-            // Force no animation for tool calls (not first turn), keep animation for first turn
-            let current_force_no_animation = !is_first_turn || force_no_animation;
+            // Only force no animation if explicitly requested (e.g., subagent calls)
+            // Show Streaming for both user input and tool calls
+            let current_force_no_animation = force_no_animation;
             match send_receive::send_and_receive(api_client, messages.clone(), session, mcp_integration, is_first_turn, current_force_no_animation).await {
                 Ok((response_msg, tool_calls, mut displays)) => {
                     // After first turn, subsequent turns are tool call loops

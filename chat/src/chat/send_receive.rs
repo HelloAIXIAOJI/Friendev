@@ -43,14 +43,14 @@ pub async fn send_and_receive(
     let spinner = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
     let start_time = std::time::Instant::now();
     
-    // Print AI prefix on first turn
+    // Print AI prefix only on first turn
     if is_first_turn {
         output_formatter::print_ai_prefix()?; // Print AI prefix
         println!(); // Add newline so animation appears on line below AI prefix
     }
     
-    // Spawn streaming spinner if enabled
-    let tx = if is_first_turn && !force_no_animation {
+    // Spawn streaming spinner if enabled (show for all AI requests, not just first turn)
+    let tx = if !force_no_animation {
         let (tx, mut rx) = tokio::sync::mpsc::channel::<()>(1);
         let _spinner_handle = tokio::spawn(async move {
             let mut i = 0;
